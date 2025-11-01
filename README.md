@@ -43,5 +43,3 @@ No server or build process is required.
 [Watch the full demo video here](https://www.youtube.com/watch?v=2pIBe05NXAE)
 
 Here is a short video walkthrough of the TribeUp application, demonstrating its key features, user flow, and responsive design.
-
-[Watch the full demo video here](YOUR_VIDEO_LINK_HERE)
