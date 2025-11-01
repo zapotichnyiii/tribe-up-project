@@ -20,25 +20,6 @@ This project is built entirely as a front-end application and uses the browser's
 * **Light & Dark Mode:** A toggleable theme to switch between light and dark modes.
 * **Fully Responsive:** Designed to work smoothly on desktop, tablet, and mobile devices.
 
-## 🛠️ Tech Stack
-
-* **HTML5:** Semantic markup for structure.
-* **CSS3:** Heavily styled with modern CSS, including Flexbox, Grid, Custom Properties, and animations for a responsive and beautiful UI.
-* **JavaScript (ES6+):** Handles all application logic, DOM manipulation, state management, and user interactions.
-* **LocalStorage:** Used as the client-side "database" to store all persistent data (users, events, chats).https://www.youtube.com/watch?v=2pIBe05NXAE
-* **External Libraries:**
-    * [Leaflet.js](https://leafletjs.com/) for interactive maps.
-    * [Font Awesome](https://fontawesome.com/) for icons.
-    * [Google Fonts](https://fonts.google.com/) (Montserrat & Playfair Display) for typography.
-
-## 🏁 How to Run
-
-No server or build process is required.
-
-1.  Clone this repository.
-2.  Open the `index.html` file in your web browser.
-3.  (Optional) For the best experience, use a local server extension like **Live Server** in VS Code.
-
 ## 🎬 Application Demo
 [Watch the full demo video here](https://www.youtube.com/watch?v=2pIBe05NXAE)
 
