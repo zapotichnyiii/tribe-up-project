@@ -1,0 +1,96 @@
+.card {
+    background-color: var(--main-card-background);
+    border-radius: var(--border-radius-large);
+    box-shadow: var(--soft-shadow);
+    padding: 1rem;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid transparent;
+    transform-style: preserve-3d;
+}
+
+.card:hover {
+    transform: translateY(-4px) rotateX(1deg) rotateY(1deg);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+    border-color: var(--auth-accent-color);
+}
+
+.card-meta {
+    font-size: 0.8rem;
+    color: var(--main-secondary-color);
+    margin-bottom: 1rem;
+}
+
+.card-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+    padding-top: 0.7rem;
+    border-top: 1px solid #e2e8f0;
+}
+
+body.dark-theme .card-actions {
+    border-top: 1px solid #475569;
+}
+
+.interests {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    margin-bottom: 0.7rem;
+    padding-top: 3px;
+}
+
+.interest-tag {
+    display: inline-block;
+    padding: 0.3rem 0.6rem;
+    background-color: #e2e8f0;
+    border-radius: 16px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: var(--transition);
+    color: var(--main-dark-color);
+    border: 1px solid #d1d5db;
+    user-select: none;
+}
+
+.interest-tag.selected {
+    background-color: var(--auth-accent-color);
+    color: white;
+    border-color: var(--auth-accent-color);
+}
+
+.interest-tag:hover {
+    transform: scale(1.05);
+}
+
+.people-card-header {
+display: flex;
+align-items: center;
+gap: 12px;
+margin-bottom: 10px;
+overflow: hidden; 
+}
+
+.people-card-header img {
+width: 56px;
+height: 56px;
+border-radius: 50%;
+object-fit: cover;
+border: 2px solid #ddd;
+flex-shrink: 0;
+box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.people-card {
+padding: 14px;
+border-radius: 12px;
+background: var(--card-bg, #fff);
+box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.people-card:hover {
+transform: translateY(-2px);
+box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}

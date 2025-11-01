@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="TribeUp — знаходь друзів за інтересами, створюй події, проводь час круто!">
+    <meta name="keywords" content="TribeUp, події, інтереси, друзі, спільнота">
+    <meta name="author" content="TribeUp Team">
+    <title>TribeUp — Знайди своїх людей</title>
+    <link rel="stylesheet" href="/styles/adaptive.css">
+    <link rel="stylesheet" href="/styles/auth_screen.css">
+    <link rel="stylesheet" href="/styles/buttons.css">
+    <link rel="stylesheet" href="/styles/cards_and_tags.css">
+    <link rel="stylesheet" href="/styles/dark_theme.css">
+    <link rel="stylesheet" href="/styles/events.css">
+    <link rel="stylesheet" href="/styles/footer.css">
+    <link rel="stylesheet" href="/styles/forms_and_filters.css">
+    <link rel="stylesheet" href="/styles/general_styles.css">
+    <link rel="stylesheet" href="/styles/header.css">
+    <link rel="stylesheet" href="/styles/hero.css">
+    <link rel="stylesheet" href="/styles/how_it_works.css">
+    <link rel="stylesheet" href="/styles/modals.css">
+    <link rel="stylesheet" href="/styles/people.css">
+    <link rel="stylesheet" href="/styles/toast.css">
+    <link rel="stylesheet" href="/styles/typografic.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+</head>
+<body>
+
+    <div id="authScreen" class="auth-screen modern-auth-screen">
+    <div class="auth-container modern-auth-container">
+        <div class="auth-form-section">
+            <div class="form-header">
+                <h1 class="logo modern-auth-logo">TribeUp</h1>
+                <div class="welcome-text">
+                    <h2>Ласкаво просимо!</h2>
+                    <p>Приєднуйся до спільноти та знаходь нових друзів</p>
+                </div>
+            </div>
+
+            <div class="auth-form-container modern-form-wrapper">
+                <div class="form-tabs">
+                    <button class="tab-btn active" data-tab="login">Увійти</button>
+                    <button class="tab-btn" data-tab="register">Реєстрація</button>
+                </div>
+
+                <div class="tab-content active" id="loginTab">
+                    <form id="loginFormInitial" class="modern-form" aria-label="Форма входу">
+                        <div class="form-group">
+                            <div class="input-with-icon">
+                                <i class="fas fa-envelope"></i>
+                                <input type="email" class="form-control" id="loginEmailInitial" placeholder=" " required autocomplete="email" aria-required="true">
+                                <label class="form-label">Електронна пошта</label>
+                            </div>
+                            <span class="error-message" id="loginEmailError"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="input-with-icon">
+                                <i class="fas fa-lock"></i>
+                                <input type="password" class="form-control" id="loginPasswordInitial" placeholder=" " required autocomplete="current-password" aria-required="true">
+                                <label class="form-label">Пароль</label>
+                            </div>
+                            <span class="error-message" id="loginPasswordError"></span>
+                        </div>
+
+                        <button type="submit" class="btn btn-accent auth-submit-btn">
+                            <i class="fas fa-sign-in-alt"></i>
+                            Увійти
+                        </button>
+
+                        <div class="auth-links">
+                            <a href="#" class="auth-link">Забули пароль?</a>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="tab-content" id="registerTab">
+                    <form id="registerForm" class="modern-form" aria-label="Форма реєстрації">
+                        <div class="form-grid compact-grid">
+                            <div class="form-group">
+                                <div class="input-with-icon">
+                                    <i class="fas fa-user"></i>
+                                    <input type="text" class="form-control" id="registerName" placeholder=" " required aria-required="true">
+                                    <label class="form-label">Ім'я</label>
+                                </div>
+                                <span class="error-message" id="registerNameError"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="input-with-icon">
+                                    <i class="fas fa-at"></i>
+                                    <input type="text" class="form-control" id="registerUsername" placeholder=" " required aria-required="true">
+                                    <label class="form-label">Нікнейм</label>
+                                </div>
+                                <span class="error-message" id="registerUsernameError"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="input-with-icon">
+                                    <i class="fas fa-envelope"></i>
+                                    <input type="email" class="form-control" id="registerEmail" placeholder=" " required aria-required="true">
+                                    <label class="form-label">Пошта</label>
+                                </div>
+                                <span class="error-message" id="registerEmailError"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="input-with-icon">
+                                    <i class="fas fa-birthday-cake"></i>
+                                    <input type="number" class="form-control" id="registerAge" min="16" max="100" placeholder=" " required aria-required="true">
+                                    <label class="form-label">Вік</label>
+                                </div>
+                                <span class="error-message" id="registerAgeError"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="input-with-icon">
+                                    <i class="fas fa-lock"></i>
+                                    <input type="password" class="form-control" id="registerPassword" placeholder=" " required aria-required="true">
+                                    <label class="form-label">Пароль</label>
+                                </div>
+                                <span class="error-message" id="registerPasswordError"></span>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="input-with-icon">
+                                    <i class="fas fa-city"></i>
+                                    <input type="text" class="form-control" id="registerLocation" placeholder=" " required aria-required="true">
+                                    <label class="form-label">Місто</label>
+                                </div>
+                                <span class="error-message" id="registerLocationError"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <label class="section-title">
+                                <i class="fas fa-heart"></i>
+                                Оберіть ваші інтереси
+                            </label>
+                            <div class="interests-grid" id="registerInterestsContainer"></div>
+                            <span class="error-message" id="registerInterestsError"></span>
+                        </div>
+
+                        <div class="form-section">
+                            <label class="section-title">
+                                <i class="fas fa-plus-circle"></i>
+                                Додати свій інтерес
+                            </label>
+                            <div class="add-interest-group">
+                                <div class="input-with-icon">
+                                    <i class="fas fa-tag"></i>
+                                    <input type="text" class="form-control" id="customInterestInput" placeholder=" " aria-label="Додати власний інтерес">
+                                    <label class="form-label">Назва інтересу</label>
+                                </div>
+                                <button type="button" class="btn" id="addCustomInterestBtn">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="form-group consent-group">
+                            <input type="checkbox" id="registerConsent" required aria-required="true" name="consent">
+                            <label for="registerConsent">
+                                Я підтверджую, що мені виповнилося 16 років, і я погоджуюся на 
+                                <a href="#" class="auth-link" target="_blank">обробку моїх особистих даних</a>.
+                            </label>
+                            <span class="error-message" id="registerConsentError"></span>
+                        </div>
+
+                        <button type="submit" class="btn btn-accent auth-submit-btn">
+                            <i class="fas fa-rocket"></i>
+                            Створити акаунт
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="auth-hero-section">
+            <div class="auth-hero-content">
+                <div class="auth-image-container">
+                    <img src="/images/depositphotos_649141792-stock-photo-vertical-photo-group-happy-friends.jpg" alt="TribeUp Community" class="auth-hero-image" loading="lazy">
+                    <div class="image-overlay">
+                        <div class="overlay-content">
+                            <h3>Знайди своїх людей!</h3>
+                            <p>TribeUp — це місце, де ти можеш знайти друзів за інтересами, приєднатися до крутих подій або створити власні.</p>
+                            <div class="features-list">
+                                <div class="feature">
+                                    <i class="fas fa-users"></i>
+                                    <span>Нові знайомства</span>
+                                </div>
+                                <div class="feature">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <span>Цікаві події</span>
+                                </div>
+                                <div class="feature">
+                                    <i class="fas fa-share-alt"></i>
+                                    <span>Спільні інтереси</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <div id="mainApp" style="display: none;">
+        <header>
+            <div class="container">
+                <nav class="navbar" role="navigation" aria-label="Основна навігація">
+                    <a href="#" class="logo main-logo" aria-label="TribeUp логотип">TribeUp</a>
+                    <button class="menu-toggle" aria-label="Відкрити меню" aria-expanded="false">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <ul class="nav-links">
+                        <li><a href="#events" onclick="scrollToSection('events')" aria-label="Перейти до подій">Події</a></li>
+                        <li><a href="#people" onclick="scrollToSection('people')" aria-label="Перейти до людей">Люди</a></li>
+                        <li><a href="#about" onclick="scrollToSection('about')" aria-label="Перейти до інформації про нас">Про нас</a></li>
+                        <li><a href="#contact" onclick="scrollToSection('contact')" aria-label="Перейти до контактів">Контакти</a></li>
+                    </ul>
+                    <div class="navbar-right">
+                        <button class="chat-list-btn" aria-label="Відкрити особисті чати">
+                            <i class="fas fa-comments"></i>
+                        </button>
+                        <div class="profile-area" id="profileArea">
+                            <div class="profile-display" id="profileDisplay" style="display: none; align-items: center; gap: 8px;">
+                                <img id="profileAvatar" src="" alt="Аватар користувача" class="profile-avatar-rect" loading="lazy">
+                                <span id="profileUsername" class="profile-name"></span>
+                            </div>
+                        </div>
+                        <button class="theme-toggle" aria-label="Переключити тему"><i class="fas fa-moon"></i></button>
+                    </div>
+                </nav>
+            </div>
+        </header>
+
+        <section class="hero modern-hero" data-parallax>
+    <div class="container">
+        <div class="hero-content">
+            <div class="hero-text">
+                <h1 class="hero-title">Знайди своїх людей за інтересами!</h1>
+                <p class="hero-description">TribeUp — це про друзів, хобі, спільні справи та круті події. Створюй, шукай, приєднуйся!</p>
+                
+                <div class="hero-stats">
+                    <div class="stat">
+                        <div class="stat-number">1000+</div>
+                        <div class="stat-label">активних користувачів</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number">500+</div>
+                        <div class="stat-label">подій щомісяця</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-number">50+</div>
+                        <div class="stat-label">міст України</div>
+                    </div>
+                </div>
+
+                <div class="hero-buttons">
+                    <button class="btn btn-accent" id="createEventBtn">
+                        <i class="fas fa-plus-circle"></i>
+                        Створи подію
+                    </button>
+                    <button class="btn btn-outline" id="searchEventsBtn">
+                        <i class="fas fa-search"></i>
+                        Знайти події
+                    </button>
+                </div>
+            </div>
+            
+            <div class="hero-visual">
+                <div class="floating-cards">
+                    <div class="floating-card card-1">
+                        <i class="fas fa-users"></i>
+                        <span>Нові знайомства</span>
+                    </div>
+                    <div class="floating-card card-2">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>Цікаві події</span>
+                    </div>
+                    <div class="floating-card card-3">
+                        <i class="fas fa-heart"></i>
+                        <span>Спільні інтереси</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+    <section id="how-it-works" class="modern-how-it-works">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title modern-section-title">Як це працює?</h2>
+            <p class="section-subtitle">Знайомства за інтересами у 3 прості кроки</p>
+        </div>
+        
+        <div class="process-steps">
+            <div class="process-step">
+                <div class="step-icon">
+                    <div class="icon-circle">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <div class="step-number">01</div>
+                </div>
+                <div class="step-content">
+                    <h3>Обери інтерес</h3>
+                    <p>Спорт, музика, ігри, їжа — обирай те, що тобі до душі</p>
+                </div>
+                <div class="step-arrow">
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+            </div>
+            
+            <div class="process-step">
+                <div class="step-icon">
+                    <div class="icon-circle">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                    <div class="step-number">02</div>
+                </div>
+                <div class="step-content">
+                    <h3>Знайди подію</h3>
+                    <p>Шукай заходи поруч або людей зі схожими хобі</p>
+                </div>
+                <div class="step-arrow">
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+            </div>
+            
+            <div class="process-step">
+                <div class="step-icon">
+                    <div class="icon-circle">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="step-number">03</div>
+                </div>
+                <div class="step-content">
+                    <h3>Приєднуйся!</h3>
+                    <p>Стань частиною події або створи свою власну</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+        <section id="search">
+            <div class="container">
+                <div class="filters">
+                    <h3>Знайди ідеальну подію</h3>
+                    <div class="filter-row">
+                        <div class="filter-group">
+                            <label class="form-label" for="searchQueryInput">Пошук за назвою/описом</label>
+                            <input type="text" class="form-control" id="searchQueryInput" placeholder="Пошук за назвою/описом" aria-label="Пошук за назвою або описом">
+                        </div>
+                        <div class="filter-group">
+                            <label class="form-label" for="locationInput">Місце</label>
+                            <input type="text" class="form-control" id="locationInput" placeholder="Місце" aria-label="Місце проведення події">
+                        </div>
+                    </div>
+                    <div class="filter-row">
+                        <div class="filter-group">
+                            <label class="form-label" for="categorySelect">Категорія</label>
+                            <select class="form-select" id="categorySelect" aria-label="Категорія події">
+                                <option value="">Всі категорії</option>
+                                <option value="sports">Спорт</option>
+                                <option value="games">Ігри</option>
+                                <option value="arts">Мистецтво</option>
+                                <option value="food">Їжа та напої</option>
+                                <option value="outdoors">На природі</option>
+                                <option value="learning">Навчання</option>
+                                <option value="social">Соціальні</option>
+                                <option value="music">Музика</option>
+                                <option value="photo">Фотографія</option>
+                                <option value="dance">Танці</option>
+                                <option value="cinema">Кіно</option>
+                                <option value="travel">Подорожі</option>
+                                <option value="yoga">Йога</option>
+                                <option value="boardgames">Настільні ігри</option>
+                                <option value="coding">Програмування</option>
+                                <option value="fest">Фестивалі</option>
+                                <option value="quest">Квести</option>
+                                <option value="volunteer">Волонтерство</option>
+                                <option value="fashion">Мода</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label class="form-label" for="dateInput">Дата</label>
+                            <input type="date" class="form-control" id="dateInput" aria-label="Дата події">
+                        </div>
+                    </div>
+                    <div class="filter-row">
+                        <div class="filter-group">
+                            <label class="form-label" for="peopleSelect">Люди</label>
+                            <select class="form-select" id="peopleSelect" aria-label="Кількість учасників">
+                                <option value="">Кількість людей</option>
+                                <option value="1-5">1-5</option>
+                                <option value="5-10">5-10</option>
+                                <option value="10+">10+</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label class="form-label" for="distanceInput">Відстань (км)</label>
+                            <input type="number" class="form-control" id="distanceInput" min="0" max="100" placeholder="Відстань (км)" aria-label="Відстань у кілометрах">
+                        </div>
+                    </div>
+                    <div class="filter-row">
+                        <div class="filter-group">
+                            <label class="form-label" for="sortSelect">Сортування</label>
+                            <select class="form-select" id="sortSelect" aria-label="Сортування подій">
+                                <option value="date-asc">Найближчі</option>
+                                <option value="date-desc">Найдавніші</option>
+                                <option value="participants-asc">Менше учасників</option>
+                                <option value="participants-desc">Більше учасників</option>
+                                <option value="title">За назвою</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label class="form-label" for="statusSelect">Статус</label>
+                            <select class="form-select" id="statusSelect" aria-label="Статус події">
+                                <option value="">Всі статуси</option>
+                                <option value="open">Відкриті</option>
+                                <option value="full">Повні</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="filter-row">
+                        <div class="filter-group">
+                            <label class="form-label" for="interestSearchInput">Пошук за інтересами</label>
+                            <input type="text" class="form-control" id="interestSearchInput" placeholder="Пошук за інтересами" aria-label="Пошук за інтересами">
+                        </div>
+                    </div>
+                    <div class="filter-row">
+                        <button class="btn btn-accent" id="searchBtn" aria-label="Шукати події">Шукати</button>
+                        <button class="btn btn-outline" id="clearFiltersBtn" style="margin-left: 10px;" aria-label="Очистити фільтри">Очистити</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="events">
+            <div class="section-header-controls">
+                <h2 class="section-title-modern">
+                    Популярні події зараз
+                    <span id="eventCount" class="event-count-badge"></span>
+                </h2>
+                <div class="carousel-nav">
+                    <button class="scroll-btn left" id="scrollLeftBtn" aria-label="Прокрутити вліво">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <button class="scroll-btn right" id="scrollRightBtn" aria-label="Прокрутити вправо">
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="events-horizontal">
+                <div id="eventsHorizontalTrack" class="events-track" role="region" aria-label="Список подій"></div>
+            </div>
+        </section>
+
+        <section id="people">
+            <div class="container">
+                <h2 class="section-title">Люди з твого міста</h2>
+
+                <div class="people-filter">
+                    <p class="filter-label">Фільтр за інтересами:</p>
+                    <div id="peopleInterestFilter" class="interest-tags"></div>
+                </div>
+
+                <div class="grid" id="peopleGrid" role="region" aria-label="Список користувачів"></div>
+            </div>
+        </section>
+
+        <section id="about" style="padding: 40px 0;">
+            <div class="container">
+                <h2 class="section-title">Про TribeUp</h2>
+                <div class="grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                    <div class="card" style="border-radius: 8px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); text-align: center;">
+                        <i class="fas fa-users" style="font-size: 2.5em; color: #1a2b44; margin-bottom: 16px;"></i>
+                        <h3 style="font-size: 1.5em; margin-bottom: 12px; color: #1a2b44;">Наша місія</h3>
+                        <p style="font-size: 1em; color: #64748b; line-height: 1.5;">
+                            TribeUp — це платформа, яка об’єднує людей за їхніми інтересами. Ми віримо, що спільні хобі, події та пристрасті створюють міцні зв’язки. Знаходьте друзів, створюйте незабутні моменти та живіть яскраво!
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="contact">
+            <div class="container">
+                <h2 class="section-title">Зв’яжіться з нами</h2>
+                <div class="grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                    <div class="card" style="border-radius: 8px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <h3 style="font-size: 1.5em; margin-bottom: 16px; color: #1a2b44;">Наші контакти</h3>
+                        <ul style="list-style: none; padding: 0; font-size: 1em; color: #64748b;">
+                            <li style="margin-bottom: 12px;">
+                                <i class="fas fa-envelope" style="color: #1a2b44; margin-right: 8px;"></i>
+                                <a href="mailto:tribeupcontact@gmail.com" aria-label="Написати на пошту">tribeupcontact@gmail.com</a>
+                            </li>
+                            <li style="margin-bottom: 12px;">
+                                <i class="fas fa-phone" style="color: #1a2b44; margin-right: 8px;"></i>
+                                <a href="tel:+380686971357" aria-label="Зателефонувати">+380 68 697 1357</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card" style="border-radius: 8px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <h3 style="font-size: 1.5em; margin-bottom: 16px; color: #1a2b44;">Напишіть нам</h3>
+                        <form id="contactForm" style="display: flex; flex-direction: column; gap: 12px;" aria-label="Форма зворотного зв’язку">
+                            <div class="form-group">
+                                <label class="form-label" for="contactName">Ваше ім’я</label>
+                                <input type="text" class="form-control" id="contactName" placeholder="Ваше ім’я" required aria-required="true">
+                                <span class="error-message" id="contactNameError"></span>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="contactEmail">Електронна пошта</label>
+                                <input type="email" class="form-control" id="contactEmail" placeholder="Електронна пошта" required aria-required="true">
+                                <span class="error-message" id="contactEmailError"></span>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="contactMessage">Повідомлення</label>
+                                <textarea class="form-control" id="contactMessage" rows="4" placeholder="Ваше повідомлення..." required aria-required="true"></textarea>
+                                <span class="error-message" id="contactMessageError"></span>
+                            </div>
+                            <button type="submit" class="btn btn-accent" aria-label="Надіслати повідомлення">Надіслати</button>
+                        </form>
+                    </div>
+                    <div class="card" style="border-radius: 8px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        <h3 style="font-size: 1.5em; margin-bottom: 16px; color: #1a2b44;">Де ми?</h3>
+                    <p>
+                    Ми — команда ентузіастів зі <strong>Львова</strong>, міста кави, левів і неймовірної атмосфери. 
+                    Наша платформа народилася з бажання об'єднати людей, які люблять життя, події та нові знайомства. 
+                    Тут кожен може знайти подію за смаком — від прогулянок історичними вуличками до сучасних техно-вечірок.
+                    </p>
+                    <p>
+                    <strong>Львів — це не просто місце на карті, це стан душі.</strong> 
+                    І ми допомагаємо тобі знайти тих, хто поділяє твої інтереси саме тут, у серці Галичини.
+                    </p>
+    <p class="highlight">
+        <i class="fas fa-map-marker-alt"></i> Львів, Україна · Засновано у 2025
+    </p>
+                        <div id="contactMap" style="height: 200px; border-radius: 8px;"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <div class="container">
+                <div class="footer-content">
+                    <div class="footer-column">
+                        <h3 class="logo">TribeUp</h3>
+                        <p>Платформа для знайомств за інтересами та спільних подій.</p>
+                    </div>
+                    <div class="footer-column">
+                        <h3>Навігація</h3>
+                        <ul class="footer-links">
+                            <li><a href="#events" aria-label="Перейти до подій">Події</a></li>
+                            <li><a href="#people" aria-label="Перейти до людей">Люди</a></li>
+                            <li><a href="#about" aria-label="Перейти до інформації про нас">Про нас</a></li>
+                            <li><a href="#contact" aria-label="Перейти до контактів">Контакти</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-column">
+                        <h3>Допомога</h3>
+                        <ul class="footer-links">
+                            <li><a href="#" aria-label="Переглянути FAQ">FAQ</a></li>
+                            <li><a href="#" aria-label="Інформація про безпеку">Безпека</a></li>
+                            <li><a href="#" aria-label="Умови використання">Умови</a></li>
+                            <li><a href="#" aria-label="Політика приватності">Приватність</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-column">
+                        <h3>Зв'язок</h3>
+                        <ul class="footer-links">
+                            <li><a href="mailto:tribeupcontact@gmail.com" aria-label="Написати на пошту">tribeupcontact@gmail.com</a></li>
+                            <li><a href="tel:+380686971357" aria-label="Зателефонувати">+380 68 697 1357</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="footer-bottom">
+                    <p>© 2025 TribeUp. Всі права захищені.</p>
+                </div>
+            </div>
+        </footer>
+
+        <button class="back-to-top" aria-label="Повернутися до верху">
+            <i class="fas fa-chevron-up"></i>
+        </button>
+    </div>
+
+<div class="modal" id="createEventModal" role="dialog" aria-labelledby="createEventTitle">
+        <div class="modal-content" style="max-width: 620px;"> <button class="modal-close" id="closeEventModal" aria-label="Закрити модалку">×</button>
+            
+            <div class="step-indicator" id="eventStepIndicator">Крок 1 з 3</div>
+            
+            <h2 id="createEventTitle" class="modal-step-title">Основна інформація</h2>
+            
+            <form id="createEventForm" aria-label="Форма створення події">
+                
+                <div class="modal-step active" id="eventStep1">
+                    <div class="form-group">
+                        <label class="form-label" for="eventTitle">Назва події</label>
+                        <input type="text" class="form-control" id="eventTitle" placeholder="Наприклад: Велопрогулянка парком" required aria-required="true">
+                        <span class="error-message" id="eventTitleError"></span>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="eventDescription">Опис</label>
+                        <textarea class="form-control" id="eventDescription" rows="4" placeholder="Коротко опишіть, що планується" required aria-required="true"></textarea>
+                        <span class="error-message" id="eventDescriptionError"></span>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="eventCategory">Категорія</label>
+                        <select class="form-select" id="eventCategory" required aria-required="true">
+                            <option value="">Оберіть категорію</option>
+                            <option value="sports">Спорт</option>
+                            <option value="games">Ігри</option>
+                            <option value="arts">Мистецтво</option>
+                            <option value="food">Їжа та напої</option>
+                            <option value="outdoors">На природі</option>
+                            <option value="learning">Навчання</option>
+                            <option value="social">Соціальні</option>
+                            <option value="music">Музика</option>
+                            <option value="photo">Фотографія</option>
+                            <option value="dance">Танці</option>
+                            <option value="cinema">Кіно</option>
+                            <option value="travel">Подорожі</option>
+                            <option value="yoga">Йога</option>
+                            <option value="boardgames">Настільні ігри</option>
+                            <option value="coding">Програмування</option>
+                            <option value="fest">Фестивалі</option>
+                            <option value="quest">Квести</option>
+                            <option value="volunteer">Волонтерство</option>
+                            <option value="fashion">Мода</option>
+                        </select>
+                        <span class="error-message" id="eventCategoryError"></span>
+                    </div>
+                    <div class="step-nav">
+                        <button type="button" class="btn btn-accent" id="eventStepNext1">Далі <i class="fas fa-arrow-right"></i></button>
+                    </div>
+                </div>
+
+                <div class="modal-step" id="eventStep2">
+                    <div class="form-group">
+                        <label class="form-label" for="eventLocation">Місце</label>
+                        <input type="text" class="form-control" id="eventLocation" placeholder="Адреса або назва місця" required aria-required="true">
+                        <span class="error-message" id="eventLocationError"></span>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="eventDate">Дата та час</label>
+                        <input type="datetime-local" class="form-control" id="eventDate" required aria-required="true">
+                        <span class="error-message" id="eventDateError"></span>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="eventParticipants">Макс. учасників</label>
+                        <input type="number" class="form-control" id="eventParticipants" min="2" max="100" placeholder="Наприклад: 10" required aria-required="true">
+                        <span class="error-message" id="eventParticipantsError"></span>
+                    </div>
+                    <div class="step-nav">
+                        <button type="button" class="btn btn-outline" id="eventStepBack2"><i class="fas fa-arrow-left"></i> Назад</button>
+                        <button type="button" class="btn btn-accent" id="eventStepNext2">Далі <i class="fas fa-arrow-right"></i></button>
+                    </div>
+                </div>
+
+                <div class="modal-step" id="eventStep3">
+                    <div class="form-group">
+                        <label class="form-label">Оберіть інтереси, що пасують події</label>
+                        <div class="interests" id="eventInterestsContainer" role="listbox" aria-label="Список інтересів" style="max-height: 200px; overflow-y: auto; padding: 10px; background: #f8fafc; border-radius: 8px;">
+                            </div>
+                        <span class="error-message" id="eventInterestsError"></span>
+                    </div>
+                    <div class="form-group custom-interest-group">
+                        <label class="form-label" for="eventCustomInterestInput">Додати свій інтерес</label>
+                        <div class="custom-input-group">
+                            <input type="text" class="form-control" id="eventCustomInterestInput" placeholder="Наприклад: Ролики" aria-label="Додати власний інтерес">
+                            <button type="button" class="btn" id="addEventCustomInterestBtn" aria-label="Додати інтерес">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="step-nav">
+                        <button type="button" class="btn btn-outline" id="eventStepBack3"><i class="fas fa-arrow-left"></i> Назад</button>
+                        <button type="submit" class="btn btn-accent" aria-label="Створити подію"><i class="fas fa-check"></i> Створити подію</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal" id="editEventModal" role="dialog" aria-labelledby="editEventTitle">
+        <div class="modal-content">
+            <button class="modal-close" id="closeEditEventModal" aria-label="Закрити модалку">×</button>
+            <h2 id="editEventTitle">Редагувати подію</h2>
+            <form id="editEventForm" aria-label="Форма редагування події">
+                <div class="form-group">
+                    <label class="form-label" for="editEventTitle">Назва події</label>
+                    <input type="text" class="form-control" id="editEventTitle" placeholder="Назва події" required aria-required="true">
+                    <span class="error-message" id="editEventTitleError"></span>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="editEventDescription">Опис</label>
+                    <textarea class="form-control" id="editEventDescription" rows="4" placeholder="Опис" required aria-required="true"></textarea>
+                    <span class="error-message" id="editEventDescriptionError"></span>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="editEventCategory">Категорія</label>
+                    <select class="form-select" id="editEventCategory" required aria-required="true">
+                        <option value="">Оберіть категорію</option>
+                        <option value="sports">Спорт</option>
+                        <option value="games">Ігри</option>
+                        <option value="arts">Мистецтво</option>
+                        <option value="food">Їжа та напої</option>
+                        <option value="outdoors">На природі</option>
+                        <option value="learning">Навчання</option>
+                        <option value="social">Соціальні</option>
+                        <option value="music">Музика</option>
+                        <option value="photo">Фотографія</option>
+                        <option value="dance">Танці</option>
+                        <option value="cinema">Кіно</option>
+                        <option value="travel">Подорожі</option>
+                        <option value="yoga">Йога</option>
+                        <option value="boardgames">Настільні ігри</option>
+                        <option value="coding">Програмування</option>
+                        <option value="fest">Фестивалі</option>
+                        <option value="quest">Квести</option>
+                        <option value="volunteer">Волонтерство</option>
+                        <option value="fashion">Мода</option>
+                    </select>
+                    <span class="error-message" id="editEventCategoryError"></span>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="editEventLocation">Місце</label>
+                    <input type="text" class="form-control" id="editEventLocation" placeholder="Місце" required aria-required="true">
+                    <span class="error-message" id="editEventLocationError"></span>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="editEventDate">Дата та час</label>
+                    <input type="datetime-local" class="form-control" id="editEventDate" required aria-required="true">
+                    <span class="error-message" id="editEventDateError"></span>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="editEventParticipants">Макс. учасників</label>
+                    <input type="number" class="form-control" id="editEventParticipants" min="2" max="100" placeholder="Макс. учасників" required aria-required="true">
+                    <span class="error-message" id="editEventParticipantsError"></span>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Інтереси</label>
+                    <div class="interests" id="editEventInterestsContainer" role="listbox" aria-label="Список інтересів">
+                        <span class="interest-tag" role="option">Спорт</span>
+                        <span class="interest-tag" role="option">Музика</span>
+                        <span class="interest-tag" role="option">Танці</span>
+                        <span class="interest-tag" role="option">Їжа</span>
+                        <span class="interest-tag" role="option">Кіно</span>
+                        <span class="interest-tag" role="option">Подорожі</span>
+                        <span class="interest-tag" role="option">Ігри</span>
+                        <span class="interest-tag" role="option">Фотографія</span>
+                        <span class="interest-tag" role="option">Йога</span>
+                        <span class="interest-tag" role="option">Мода</span>
+                    </div>
+                    <span class="error-message" id="editEventInterestsError"></span>
+                </div>
+                <div class="form-group custom-interest-group">
+                    <label class="form-label" for="editEventCustomInterestInput">Додати інтерес</label>
+                    <div class="custom-input-group">
+                        <input type="text" class="form-control" id="editEventCustomInterestInput" placeholder="Наприклад: Ролики" aria-label="Додати власний інтерес">
+                        <button type="button" class="btn btn-outline" id="addEditEventCustomInterestBtn" aria-label="Додати інтерес">Додати</button>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-accent" aria-label="Зберегти зміни">Зберегти</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal" id="eventDetailModal" role="dialog" aria-labelledby="eventDetailTitle">
+        <div class="modal-content" style="max-width: 500px; padding: 15px;">
+            <button class="modal-close" id="closeEventDetailModal" aria-label="Закрити модалку">×</button>
+            <div id="eventDetailContent">
+                <h2 id="eventDetailTitle" style="margin: 0 0 10px; font-size: 1.3em;"></h2>
+                <p id="eventDetailMeta" class="card-meta" style="margin: 0 0 12px; font-size: 0.9em;"></p>
+                <p id="eventDetailDescription" style="line-height: 1.4; margin-bottom: 12px;"></p>
+                <div class="interests" id="eventDetailInterests" style="margin-bottom: 12px;"></div>
+                <div id="eventMap"></div>
+                <p id="eventDetailParticipantsCount" style="margin: 10px 0; font-weight: 600; text-align: center; color: #0f172a;">
+                    0/0 учасників
+                </p>
+                <div id="eventDetailActions" style="margin: 12px 0; text-align: center;"></div>
+                <h3 style="margin: 15px 0 10px; font-size: 1em;">Учасники:</h3>
+                <div id="eventDetailParticipants" style="display: grid; gap: 10px; max-height: 180px; overflow-y: auto;"></div>
+                <h3 style="margin: 15px 0 10px; font-size: 1em;">Чат події</h3>
+                <div id="eventChatContainer" style="border: 1px solid #e2e8f0; border-radius: 8px; height: 250px; overflow-y: auto; padding: 8px; margin-bottom: 8px; background: #f8fafc; position: relative;">
+                    <div id="eventChatMessages"></div>
+                    <span id="newMessageIndicator" style="display: none; position: absolute; top: 8px; right: 8px; background: #1a2b44; color: white; padding: 4px 8px; border-radius: 10px; font-size: 0.75em;">Нове повідомлення</span>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" id="contactInput" placeholder="Напишіть повідомлення..." style="flex: 1; padding: 6px; border: 1px solid #e2e8f0; border-radius: 4px;" aria-label="Поле для повідомлення">
+                    <button id="sendChatMessage" class="btn btn-sm" style="padding: 6px 10px;" aria-label="Надіслати повідомлення">Надіслати</button>
+                </div>
+                <button id="editEventBtn" class="btn btn-outline btn-sm" style="display: none; margin-top: 8px; color: #0f172a; border-color: #0f172a;" aria-label="Редагувати подію">Редагувати</button>
+                <button id="deleteEventBtn" class="btn btn-outline btn-sm" style="display: none; margin-top: 8px; color: #dc3545; border-color: #dc3545;" aria-label="Видалити подію">Видалити</button>
+            </div>
+            <button id="joinEventBtn" class="btn btn-accent btn-sm" style="display: none;" aria-label="Приєднатися до події">Приєднатися</button>
+            <button id="leaveEventBtn" class="btn btn-outline btn-sm" style="display: none;" aria-label="Покинути подію">Покинути</button>
+        </div>
+    </div>
+
+    <div class="modal" id="profileModal" role="dialog" aria-labelledby="profileModalName">
+        <div class="modal-content" style="max-width: 300px; padding: 15px; text-align: center;">
+            <button class="modal-close" id="closeProfileModal" aria-label="Закрити модалку">×</button>
+            <div style="display: flex; flex-direction: column; gap: 10px; align-items: center;">
+                <img id="profileModalAvatar" src="" alt="Аватар користувача" style="width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 2px solid #1a2b44;" loading="lazy">
+                <h3 id="profileModalName" style="margin: 0; font-size: 1.2em;"></h3>
+                <div id="profileModalUsername" style="font-weight: 600; color: #1a2b44; font-size: 0.9em;"></div>
+                <div id="profileModalMeta" style="color: #64748b; font-size: 0.8em;"></div>
+                <div id="profileModalInterests" style="display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; margin: 6px 0;"></div>
+                <div id="userEvents" style="width: 100%; text-align: left;">
+                    <h3 style="font-size: 1em; margin: 10px 0;">Ваші події</h3>
+                    <div id="userEventsList" style="display: grid; gap: 8px;"></div>
+                </div>
+                <button id="editProfileBtn" class="btn btn-sm" style="width: 100%; margin-top: 6px;" aria-label="Редагувати профіль">Редагувати</button>
+                <button id="profileLogoutBtn" class="btn btn-outline btn-sm" style="width: 100%;" aria-label="Вийти">Вийти</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="editProfileModal" role="dialog" aria-labelledby="editProfileTitle">
+        <div class="modal-content" style="max-width: 300px; padding: 15px;">
+            <button class="modal-close" id="closeEditProfileModal" aria-label="Закрити модалку">×</button>
+            <h2 id="editProfileTitle" style="margin: 0 0 12px; font-size: 1.1em; text-align: center;">Редагувати профіль</h2>
+            <form id="editProfileForm" style="display: flex; flex-direction: column; gap: 8px;" aria-label="Форма редагування профілю">
+                <div style="text-align: center;">
+                    <img id="editProfileAvatarPreview" src="" alt="Попередній перегляд аватара" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid #1a2b44; margin-bottom: 6px;" loading="lazy">
+                    <input type="file" id="editProfilePhoto" accept="image/*" style="font-size: 0.75em; width: 100%;" aria-label="Завантажити нове фото">
+                </div>
+                <div>
+                    <label style="font-size: 0.8em; font-weight: 600;">Ім'я</label>
+                    <input type="text" id="editProfileName" required style="width: 100%; padding: 5px; border: 1px solid #e2e8f0; border-radius: 4px; font-size: 0.85em;" aria-required="true">
+                    <span class="error-message" id="editProfileNameError"></span>
+                </div>
+                <div>
+                    <label style="font-size: 0.8em; font-weight: 600;">Нікнейм</label>
+                    <input type="text" id="editProfileUsername" required style="width: 100%; padding: 5px; border: 1px solid #e2e8f0; border-radius: 4px; font-size: 0.85em;" aria-required="true">
+                    <span class="error-message" id="editProfileUsernameError"></span>
+                    <small style="color: #64748b; font-size: 0.7rem;">Лише латинські літери, цифри, _, .</small>
+                </div>
+                <div>
+                    <label style="font-size: 0.8em; font-weight: 600;">Вік</label>
+                    <input type="number" id="editProfileAge" min="16" max="100" required style="width: 100%; padding: 5px; border: 1px solid #e2e8f0; border-radius: 4px; font-size: 0.85em;" aria-required="true">
+                    <span class="error-message" id="editProfileAgeError"></span>
+                </div>
+                <div>
+                    <label style="font-size: 0.8em; font-weight: 600;">Місто</label>
+                    <input type="text" id="editProfileLocation" required style="width: 100%; padding: 5px; border: 1px solid #e2e8f0; border-radius: 4px; font-size: 0.85em;" aria-required="true">
+                    <span class="error-message" id="editProfileLocationError"></span>
+                </div>
+                <div>
+                    <label style="font-size: 0.8em; font-weight: 600;">Інтереси</label>
+                    <div id="editProfileInterestsContainer" style="display: flex; flex-wrap: wrap; gap: 3px; margin: 3px 0; min-height: 24px; padding: 3px; border: 1px solid #e2e8f0; border-radius: 4px; background: #f8fafc; font-size: 0.75em;" role="listbox" aria-label="Список інтересів"></div>
+                    <span class="error-message" id="editProfileInterestsError"></span>
+                    <div style="display: flex; gap: 3px; margin-top: 3px;">
+                        <input type="text" id="editCustomInterestInput" placeholder="Додати..." style="flex: 1; padding: 3px; font-size: 0.75em; border: 1px solid #e2e8f0; border-radius: 3px;" aria-label="Додати власний інтерес">
+                        <button type="button" id="addEditCustomInterestBtn" style="padding: 3px 6px; font-size: 0.7em;" class="btn btn-sm" aria-label="Додати інтерес">Додати</button>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-accent" style="margin-top: 3px; padding: 6px; font-weight: 600; font-size: 0.9em;" aria-label="Зберегти зміни">Зберегти</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal" id="chatListModal" role="dialog" aria-labelledby="chatListTitle">
+        <div class="modal-content">
+            <button class="modal-close" id="closeChatListModal" aria-label="Закрити модалку">×</button>
+            <h2 id="chatListTitle">Особисті чати</h2>
+            <div id="chatList" style="margin-top: 16px;"></div>
+        </div>
+    </div>
+
+    <div class="modal" id="otherUserProfileModal" role="dialog" aria-labelledby="otherUserProfileName">
+        <div class="modal-content">
+            <button class="modal-close" id="closeOtherUserProfileModal" aria-label="Закрити модалку">×</button>
+            <img id="otherUserProfileAvatar" src="https://via.placeholder.com/100?text=@" alt="Аватар" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin: 0 auto 12px; display: block;">
+            <h2 id="otherUserProfileName" style="text-align: center; font-size: 1.5rem;"></h2>
+            <p id="otherUserProfileUsername" style="text-align: center; font-size: 1rem; color: var(--main-secondary-color);"></p>
+            <p id="otherUserProfileMeta" style="text-align: center; font-size: 0.9rem; color: var(--main-secondary-color); margin-bottom: 12px;"></p>
+            <div id="otherUserProfileInterests" class="interests" style="justify-content: center;"></div>
+            <div id="otherUserProfileEvents" style="margin-top: 16px;"></div>
+            <div style="text-align: center; margin-top: 16px;">
+                <button class="btn btn-accent" id="otherUserMessageBtn" aria-label="Написати користувачу">Написати</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="privateChatModal" role="dialog" aria-labelledby="privateChatTitle">
+        <div class="modal-content">
+            <button class="modal-close" id="closePrivateChatModal" aria-label="Закрити модалку">×</button>
+            <h2 id="privateChatTitle" style="margin-bottom: 16px;"></h2>
+            <div id="privateChatMessages" style="max-height: 400px; overflow-y: auto; margin-bottom: 12px;"></div>
+            <div id="privateChatContainer" class="custom-input-group">
+                <input type="text" id="privateChatInput" class="form-control" placeholder="Напишіть повідомлення..." aria-label="Поле для повідомлення">
+                <button class="btn btn-accent btn-sm" id="sendPrivateMessage" aria-label="Надіслати повідомлення">Надіслати</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="interestSearchModal" role="dialog" aria-labelledby="interestModalTitle">
+        <div class="modal-content" style="max-width: 700px;"> <button class="modal-close" id="closeInterestSearchModal" aria-label="Закрити модалку">×</button>
+            <h2 id="interestModalTitle" class="modal-step-title" style="text-align: left; margin-bottom: 1.5rem;">Результати для...</h2>
+            
+            <div class="interest-modal-layout">
+                <div class="interest-modal-column">
+                    <h3><i class="fas fa-calendar-alt"></i> Події з цим інтересом</h3>
+                    <div class="interest-modal-grid" id="interestModalEventsGrid">
+                        </div>
+                </div>
+                
+                <div class="interest-modal-column">
+                    <h3><i class="fas fa-users"></i> Люди з цим інтересом</h3>
+                    <div class="interest-modal-grid" id="interestModalPeopleGrid">
+                        </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="/scripts/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+h1, h2, h3, h4 {
+    margin-bottom: 0.7rem;
+    color: var(--main-dark-color);
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+body.dark-theme h1,
+body.dark-theme h2,
+body.dark-theme h3,
+body.dark-theme h4 {
+    color: var(--dark-text-color);
+}
+
+.logo {
+    font-size: 1.8rem;
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    text-decoration: none;
+    letter-spacing: -0.3px;
+    background: var(--gradient-auth-primary);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    transition: transform 0.3s ease;
+}
+
+.logo:hover {
+    transform: scale(1.05);
+}

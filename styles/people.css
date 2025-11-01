@@ -1,0 +1,65 @@
+.people-card {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px;
+}
+
+.people-card .card-title {
+    font-size: 1em;
+    margin: 0;
+}
+
+.people-card .card-meta {
+    font-size: 0.85em;
+    color: var(--main-secondary-color);
+}
+
+.people-card .interests {
+    margin: 8px 0;
+}
+
+.people-filter {
+margin-bottom: 20px;
+padding: 12px 16px;
+background: var(--main-card-background);
+border-radius: var(--border-radius-small);
+box-shadow: var(--soft-shadow);
+}
+
+.people-filter .filter-label {
+font-size: 0.9rem;
+font-weight: 600;
+color: var(--main-secondary-color);
+margin-bottom: 8px;
+display: block;
+}
+
+#peopleInterestFilter {
+display: flex;
+flex-wrap: wrap;
+gap: 8px;
+}
+
+#peopleInterestFilter .interest-tag {
+font-size: 0.8rem;
+padding: 6px 12px;
+background: #f1f5f9;
+color: #475569;
+border: 1px solid #e2e8f0;
+border-radius: 20px;
+cursor: pointer;
+transition: all 0.2s ease;
+user-select: none;
+}
+
+#peopleInterestFilter .interest-tag:hover {
+background: #e2e8f0;
+border-color: var(--main-accent-color);
+}
+
+#peopleInterestFilter .interest-tag.selected {
+background: var(--main-accent-color);
+color: white;
+border-color: var(--main-accent-color);
+}

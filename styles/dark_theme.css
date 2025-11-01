@@ -1,0 +1,394 @@
+body.dark-theme {
+    background-color: var(--dark-bg);
+    color: var(--dark-text-primary);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+body.dark-theme .card,
+body.dark-theme .modal-content,
+body.dark-theme .filters,
+body.dark-theme .event-card-horizontal,
+body.dark-theme #eventChatContainer,
+body.dark-theme #chatList,
+body.dark-theme #privateChatMessages,
+body.dark-theme .people-filter,
+body.dark-theme .toast-notification,
+body.dark-theme .contact-card,
+body.dark-theme .form-card,
+body.dark-theme .location-card,
+body.dark-theme .footer,
+body.dark-theme .back-to-top,
+body.dark-theme section {
+    background-color: var(--dark-card-bg);
+    border-color: var(--dark-border);
+}
+
+body.dark-theme h1, body.dark-theme h2, body.dark-theme h3,
+body.dark-theme h4, body.dark-theme h5, body.dark-theme h6,
+body.dark-theme p, body.dark-theme span, body.dark-theme a,
+body.dark-theme .section-title, body.dark-theme .card-title,
+body.dark-theme #eventDetailTitle, body.dark-theme .profile-name,
+body.dark-theme .chat-item .username, body.dark-theme .chat-message .sender,
+body.dark-theme .chat-message .text,
+body.dark-theme .participants-count, body.dark-theme #eventDetailParticipantsCount,
+body.dark-theme #eventDetailDescription, body.dark-theme .modal-close,
+body.dark-theme .logo, body.dark-theme .auth-form-container h2,
+body.dark-theme .form-label:not(.auth-form-section .form-label),
+body.dark-theme .nav-links a,
+body.dark-theme .footer-column h3, body.dark-theme .footer-links a,
+body.dark-theme .people-filter .filter-label,
+body.dark-theme .contact-card h3, body.dark-theme .form-card h3,
+body.dark-theme .location-card h3,
+body.dark-theme label:not(.auth-form-section .form-label) {
+    color: var(--dark-text-primary);
+}
+
+body.dark-theme .card-meta,
+body.dark-theme .auth-forgot-password,
+body.dark-theme .auth-switch-text,
+body.dark-theme .chat-item .last-message,
+body.dark-theme .chat-message .time,
+body.dark-theme .participants-count,
+body.dark-theme .people-filter .filter-label,
+body.dark-theme .footer-links a,
+body.dark-theme .footer-bottom,
+body.dark-theme .contact-card a,
+body.dark-theme .contact-card p,
+body.dark-theme .form-card label,
+body.dark-theme .form-control::placeholder,
+body.dark-theme .hero .btn-outline,
+body.dark-theme #eventDetailParticipantsCount,
+body.dark-theme #eventDetailDescription,
+body.dark-theme .dark-secondary-color {
+    color: var(--dark-text-secondary);
+}
+
+body.dark-theme input,
+body.dark-theme textarea,
+body.dark-theme select,
+body.dark-theme .form-control,
+body.dark-theme .form-select,
+body.dark-theme #contactInput,
+body.dark-theme #privateChatInput {
+    background-color: var(--dark-input-bg);
+    border: 2px solid var(--dark-border);
+    color: var(--dark-text-primary);
+    border-radius: 12px;
+    padding: 16px;
+    font-size: 1rem;
+    appearance: none;
+    transition: all 0.3s ease;
+}
+body.dark-theme .auth-form-section .input-with-icon .form-control {
+    padding-left: 48px;
+}
+body.dark-theme input:focus,
+body.dark-theme textarea:focus,
+body.dark-theme .form-control:focus,
+body.dark-theme .form-select:focus {
+    border-color: var(--dark-accent);
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.25);
+    outline: none;
+}
+body.dark-theme input::placeholder,
+body.dark-theme textarea::placeholder,
+body.dark-theme .form-control::placeholder {
+    color: var(--dark-text-secondary);
+    opacity: 0.7;
+}
+body.dark-theme .auth-form-section .input-with-icon i {
+    color: var(--dark-text-secondary);
+}
+body.dark-theme .auth-form-section .form-label {
+    color: var(--dark-text-secondary);
+}
+body.dark-theme .auth-form-section .form-control:focus + .form-label,
+body.dark-theme .auth-form-section .form-control:not(:placeholder-shown) + .form-label {
+    color: var(--dark-accent);
+    background-color: var(--dark-input-bg);
+}
+
+body.dark-theme .btn,
+body.dark-theme button:not(.card-action-button) { 
+    background-color: var(--dark-btn-bg);
+    color: var(--dark-text-primary);
+    border: 1px solid var(--dark-border);
+    border-radius: 12px;
+    padding: 14px 28px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+body.dark-theme .scroll-btn {
+    background: var(--dark-btn-bg);
+    border-color: var(--dark-border);
+    color: var(--dark-text-primary);
+    padding: 14px;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+body.dark-theme .scroll-btn:hover:not(:disabled) {
+    background-color: var(--dark-accent);
+    border-color: var(--dark-accent);
+    color: white;
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.2);
+}
+
+body.dark-theme .add-interest-group .btn {
+    padding: 16px;
+    border-width: 2px;
+    border-color: var(--dark-accent);
+    background: var(--dark-input-bg);
+    color: var(--dark-accent);
+}
+body.dark-theme .add-interest-group .btn:hover {
+    background: var(--dark-accent);
+    color: white;
+}
+body.dark-theme .btn-accent {
+    background: linear-gradient(135deg, var(--dark-accent), #5b21b6);
+    color: white;
+    border: none;
+}
+body.dark-theme .btn-outline {
+    background-color: transparent;
+    border: 2px solid var(--dark-border);
+    color: var(--dark-text-secondary);
+}
+body.dark-theme .btn-outline:hover:not(:disabled) {
+    background-color: var(--dark-btn-hover);
+    border-color: var(--dark-accent);
+    color: var(--dark-text-primary);
+}
+body.dark-theme .btn:hover:not(:disabled),
+body.dark-theme button:hover:not(:disabled):not(.add-interest-group .btn):not(.card-action-button) {
+    background-color: var(--dark-btn-hover);
+    border-color: var(--dark-accent);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.2);
+}
+body.dark-theme .btn-accent:hover:not(:disabled) {
+    background: linear-gradient(135deg, #6d28d9, #4c1d95);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(124, 58, 237, 0.4);
+}
+
+body.dark-theme .modern-hero {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+}
+body.dark-theme .modern-hero::before {
+    background:
+        radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.2) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.2) 0%, transparent 50%);
+}
+
+body.dark-theme .interest-tag,
+body.dark-theme #peopleInterestFilter .interest-tag,
+body.dark-theme #eventDetailInterests .interest-tag,
+body.dark-theme #editProfileInterestsContainer .interest-tag,
+body.dark-theme #eventInterestsContainer .interest-tag,
+body.dark-theme #editEventInterestsContainer .interest-tag,
+body.dark-theme #otherUserProfileInterests .interest-tag,
+body.dark-theme .interests-grid .interest-tag {
+    background: var(--dark-input-bg);
+    color: var(--dark-text-secondary);
+    border: 2px solid var(--dark-border);
+    border-radius: 25px;
+    padding: 10px 18px;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+body.dark-theme .interest-tag.selected,
+body.dark-theme #peopleInterestFilter .interest-tag.selected,
+body.dark-theme #eventDetailInterests .interest-tag.selected,
+body.dark-theme #editProfileInterestsContainer .interest-tag.selected,
+body.dark-theme #eventInterestsContainer .interest-tag.selected,
+body.dark-theme #editEventInterestsContainer .interest-tag.selected,
+body.dark-theme #otherUserProfileInterests .interest-tag.selected,
+body.dark-theme .interests-grid .interest-tag.selected,
+body.dark-theme .card-interests-v4 .interest-tag.selected { 
+    background: var(--dark-accent);
+    color: white;
+    border-color: var(--dark-accent);
+}
+
+body.dark-theme #privateChatMessages .chat-message.received {
+    background: var(--dark-btn-bg);
+    color: var(--dark-text-primary);
+}
+body.dark-theme #privateChatMessages .chat-message.sent {
+    background: var(--dark-accent);
+    color: white;
+}
+body.dark-theme .chat-message {
+    background: var(--dark-btn-bg);
+    color: var(--dark-text-primary);
+}
+body.dark-theme .chat-message .time {
+    color: var(--dark-text-secondary);
+}
+
+body.dark-theme .toast-notification {
+    color: white;
+    border-radius: 8px;
+    padding: 12px 16px;
+    background-color: var(--dark-card-bg);
+}
+body.dark-theme .toast-notification.toast-success { background-color: #238636; }
+body.dark-theme .toast-notification.toast-error   { background-color: #da3633; }
+body.dark-theme .toast-notification.toast-info    { background-color: #1f6feb; }
+
+body.dark-theme #eventMap,
+body.dark-theme #contactMap {
+    background-color: #0d1117;
+}
+
+body.dark-theme .back-to-top {
+    background-color: var(--dark-accent);
+    color: white;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    box-shadow: 0 6px 16px rgba(124, 58, 237, 0.4);
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+body.dark-theme footer {
+    background-color: #0a0a0a;
+}
+body.dark-theme .footer-links a:hover {
+    color: var(--dark-accent);
+    text-decoration: underline;
+}
+
+body.dark-theme .logo {
+    background: linear-gradient(135deg, var(--dark-accent), #a855f7);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+body.dark-theme .modern-auth-container { background: var(--dark-card-bg); }
+body.dark-theme .auth-form-section { background: var(--dark-card-bg); }
+body.dark-theme .welcome-text h2 { color: var(--dark-text-primary); }
+body.dark-theme .welcome-text p { color: var(--dark-text-secondary); }
+body.dark-theme .form-tabs { background: var(--dark-input-bg); }
+body.dark-theme .tab-btn { color: var(--dark-text-secondary); }
+body.dark-theme .tab-btn.active { background: var(--dark-bg); color: var(--dark-accent); }
+body.dark-theme .form-section { background: var(--dark-input-bg); border-left-color: var(--dark-accent); }
+
+body.dark-theme .modern-how-it-works { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); }
+body.dark-theme .process-step { background: var(--dark-card-bg); border: 1px solid var(--dark-border); }
+body.dark-theme .step-content h3 { color: var(--dark-text-primary); }
+body.dark-theme .step-content p { color: var(--dark-text-secondary); }
+body.dark-theme .step-arrow { background: var(--dark-card-bg); border: 1px solid var(--dark-border); }
+body.dark-theme .step-arrow i { color: var(--dark-accent); }
+
+body.dark-theme header { background: rgba(13, 17, 23, 0.1); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+body.dark-theme header.scrolled { background: rgba(22, 27, 34, 0.95); border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+body.dark-theme header .nav-links a { color: rgba(240, 246, 252, 0.9); }
+body.dark-theme header .nav-links a:hover { color: white; background: rgba(255, 255, 255, 0.1); }
+body.dark-theme header.scrolled .nav-links a { color: var(--dark-text-primary); }
+body.dark-theme header.scrolled .nav-links a:hover { color: var(--dark-accent); background: rgba(124, 58, 237, 0.2); }
+body.dark-theme header .chat-list-btn,
+body.dark-theme header .theme-toggle { background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); color: rgba(240, 246, 252, 0.9); }
+body.dark-theme header .chat-list-btn:hover,
+body.dark-theme header .theme-toggle:hover { background: rgba(255, 255, 255, 0.2); color: white; }
+body.dark-theme header.scrolled .chat-list-btn,
+body.dark-theme header.scrolled .theme-toggle { background: rgba(48, 54, 61, 0.8); border-color: var(--dark-border); color: var(--dark-text-primary); }
+body.dark-theme header.scrolled .chat-list-btn:hover,
+body.dark-theme header.scrolled .theme-toggle:hover { background: var(--dark-accent); border-color: var(--dark-accent); color: white; }
+body.dark-theme header .profile-area { background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); }
+body.dark-theme header .profile-area:hover { background: rgba(255, 255, 255, 0.2); }
+body.dark-theme header .profile-name { color: rgba(240, 246, 252, 0.9); }
+body.dark-theme header.scrolled .profile-area { background: rgba(48, 54, 61, 0.8); border-color: var(--dark-border); }
+body.dark-theme header.scrolled .profile-name { color: var(--dark-text-primary); }
+body.dark-theme header.scrolled .profile-area:hover { background: var(--dark-accent); border-color: var(--dark-accent); }
+body.dark-theme header.scrolled .profile-area:hover .profile-name { color: white; }
+
+
+body.dark-theme .section-title-modern {
+    color: var(--dark-text-primary);
+}
+body.dark-theme .event-count-badge {
+    color: var(--dark-text-secondary);
+}
+body.dark-theme .card-title-v4 {
+    color: var(--dark-text-primary);
+}
+body.dark-theme .meta-item-v4 {
+    color: var(--dark-text-secondary);
+}
+body.dark-theme .meta-item-v4 i {
+    color: var(--dark-accent); 
+}
+body.dark-theme .card-footer-v4 {
+    border-top-color: var(--dark-border);
+}
+body.dark-theme .creator-info-v4 {
+    color: var(--dark-text-secondary);
+}
+body.dark-theme .creator-info-v4 strong {
+    color: var(--dark-text-primary);
+}
+body.dark-theme .card-participants-v4 {
+    color: var(--dark-text-primary);
+}
+body.dark-theme .card-participants-v4 i {
+    color: var(--dark-text-secondary);
+}
+
+body.dark-theme .card-action-button {
+    background: linear-gradient(135deg, var(--dark-accent), #5b21b6);
+    box-shadow: 0 8px 25px rgba(124, 58, 237, 0.4);
+}
+body.dark-theme .card-action-button:hover:not(:disabled) {
+    background: linear-gradient(135deg, #6d28d9, #4c1d95);
+    box-shadow: 0 8px 30px rgba(124, 58, 237, 0.5);
+}
+body.dark-theme .card-action-button:disabled {
+    background: var(--dark-btn-bg);
+    color: var(--dark-text-secondary);
+    box-shadow: none;
+}
+body.dark-theme .card-action-organizer {
+    background: var(--dark-input-bg);
+    color: var(--dark-accent);
+}
+body.dark-theme .card-action-organizer:hover {
+    background: var(--dark-btn-bg);
+}
+
+body.dark-theme .interest-modal-column h3 {
+    color: var(--dark-text-primary);
+    border-bottom-color: var(--dark-border);
+}
+
+body.dark-theme .interest-modal-event-item,
+body.dark-theme .interest-modal-person-item {
+    background: var(--dark-input-bg);
+    border-color: var(--dark-border);
+}
+
+body.dark-theme .interest-modal-event-item:hover,
+body.dark-theme .interest-modal-person-item:hover {
+    border-color: var(--dark-accent);
+    background: var(--dark-btn-bg);
+}
+
+body.dark-theme .interest-modal-event-item .item-title,
+body.dark-theme .interest-modal-person-item .item-title {
+    color: var(--dark-text-primary);
+}
+
+body.dark-theme .interest-modal-event-item .item-meta,
+body.dark-theme .interest-modal-person-item .item-meta {
+    color: var(--dark-text-secondary);
+}

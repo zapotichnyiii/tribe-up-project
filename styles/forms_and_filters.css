@@ -1,0 +1,120 @@
+section {
+    padding: 3.5rem 0;
+}
+
+.section-title {
+    text-align: center;
+    margin-bottom: 2.8rem; 
+    color: var(--main-dark-color);
+    position: relative;
+    font-size: 2em; 
+    font-weight: 700;
+}
+
+body.dark-theme .section-title {
+    color: var(--dark-text-color);
+}
+
+.section-title::after {
+content: '';
+    width: 60px; 
+    height: 4px; 
+    background: var(--auth-accent-color);
+    position: absolute;
+    bottom: -15px; 
+    left: 50%;
+    transform: translateX(-50%); 
+    border-radius: 2px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1.2rem;
+}
+
+.filters {
+    background-color: var(--main-card-background);
+    padding: 1.2rem;
+    border-radius: var(--border-radius-large);
+    box-shadow: var(--soft-shadow);
+    margin-top: -50px;
+    position: relative;
+    z-index: 10;
+}
+
+.filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.filter-group {
+    flex: 1;
+    min-width: 160px;
+    position: relative; 
+}
+
+.form-label {
+    font-weight: 600;
+    color: var(--main-dark-color);
+    display: block;
+    margin-bottom: 3px;
+}
+
+.form-control,
+.form-select {
+    width: 100%;
+    padding: 16px;  
+    border: 2px solid #e2e8f0;  
+    border-radius: 12px;    
+    font-size: 1rem; 
+    background: var(--auth-input-background);
+    color: var(--main-dark-color);
+    transition: all 0.3s ease;
+    appearance: none; 
+}
+
+textarea.form-control {
+    padding-top: 24px; 
+    min-height: 100px;
+}
+
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--auth-accent-color);
+    box-shadow: 0 0 0 3px rgba(107, 33, 168, 0.1);
+    outline: none;
+}
+
+.input-with-icon .form-control,
+.input-with-icon .form-select {
+padding-left: 48px;
+}
+
+.form-control.invalid,
+.form-select.invalid {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+}
+
+.error-message {
+    color: #dc3545;
+    font-size: 0.7rem;
+    margin-top: 3px;
+    display: none;
+}
+
+.file-input {
+    padding-top: 10px;
+    padding-bottom: 10px;
+    background-color: white;
+}
+
+.filters .btn {
+    width: 100%;
+    margin-top: 0.7rem;
+    padding: 16px; 
+}

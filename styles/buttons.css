@@ -1,0 +1,165 @@
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 28px;
+    border: none;
+    border-radius: 12px; /* Змінено */
+    cursor: pointer;
+    font-size: 1rem; /* Змінено */
+    font-weight: 600;
+    text-decoration: none;
+    transition: var(--transition);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* Змінено */
+    z-index: 10;
+    gap: 8px; /* Додано */
+}
+
+.btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12); /* Змінено */
+}
+
+.btn:focus {
+    outline: 3px solid rgba(107, 33, 168, 0.2); /* Змінено */
+    outline-offset: 2px;
+}
+
+.btn:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* Змінено */
+}
+
+/* Стандартна кнопка (колишня .btn-modern-secondary) */
+.btn {
+    background: #f8fafc;
+    border: 2px solid #e2e8f0;
+    color: var(--main-dark-color);
+}
+
+.btn:hover:not(:disabled) {
+    background: #ffffff;
+    border-color: var(--auth-accent-color);
+    color: var(--auth-accent-color);
+}
+
+/* Акцентна кнопка (колишня .btn-modern-primary) */
+.btn-accent {
+    background: linear-gradient(135deg, var(--main-primary-color), var(--auth-accent-color));
+    color: white;
+    border: none;
+    box-shadow: 0 8px 20px rgba(107, 33, 168, 0.3); /* Змінено */
+}
+
+.btn-accent:hover:not(:disabled) {
+    background: linear-gradient(135deg, #15213a, #5b1891);
+    box-shadow: 0 8px 25px rgba(107, 33, 168, 0.4); /* Змінено */
+    transform: translateY(-3px);
+}
+
+/* Контурна кнопка (колишня .btn-modern-outline) */
+.btn-outline {
+    background-color: transparent;
+    border: 2px solid var(--main-primary-color);
+    color: var(--main-primary-color);
+    box-shadow: none;
+}
+
+.btn-outline:hover:not(:disabled) {
+    background-color: var(--main-primary-color);
+    color: white;
+    transform: none;
+}
+
+/* Маленька кнопка */
+.btn-sm {
+    padding: 8px 14px; /* Змінено */
+    font-size: 0.85rem;
+    border-radius: 8px; /* Змінено */
+}
+
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background-color: #e2e8f0;
+    color: #94a3b8;
+    box-shadow: none;
+    transform: none;
+    border: none;
+}
+
+.chat-list-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px; 
+    height: 44px; 
+    background: var(--main-card-background);
+    border: 1px solid #e2e8f0; 
+    border-radius: 50%; 
+    color: var(--main-dark-color);
+    font-size: 1.1rem;          
+    cursor: pointer;
+    transition: var(--transition);
+    box-shadow: var(--soft-shadow);
+}
+
+.chat-list-btn:hover {
+    background: var(--auth-accent-color);
+    color: white;
+    border-color: var(--auth-accent-color);
+    transform: translateY(-2px);
+}
+
+body.dark-theme .chat-list-btn {
+    background: var(--dark-card-bg);
+    border-color: var(--dark-border);
+    color: var(--dark-text-color);
+}
+
+body.dark-theme .chat-list-btn:hover {
+    background: var(--dark-accent);
+    color: white;
+    border-color: var(--dark-accent);
+}
+
+.chat-list-btn:focus {
+    outline: 2px solid var(--auth-accent-color);
+    outline-offset: 2px;
+}
+
+.back-to-top {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 44px; 
+    height: 44px; 
+    background: var(--auth-accent-color);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0;
+    pointer-events: none;
+    transition: var(--transition);
+    box-shadow: 0 4px 12px rgba(107, 33, 168, 0.3); 
+    z-index: 100;
+}
+
+.back-to-top.visible {
+    opacity: 0.9;
+    pointer-events: auto;
+}
+
+.back-to-top:hover {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+.back-to-top:focus {
+    outline: 2px solid var(--main-primary-color);
+    outline-offset: 2px;
+}

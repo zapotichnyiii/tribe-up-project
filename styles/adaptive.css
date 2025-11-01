@@ -1,0 +1,157 @@
+@media (max-width: 768px) {
+    .auth-container {
+        flex-direction: column;
+    }
+
+    .auth-hero {
+        padding: 20px;
+        text-align: center;
+    }
+
+    .auth-logo {
+        font-size: 2rem;
+    }
+
+    .hero-title {
+        font-size: 1.5rem;
+    }
+
+    .hero-description {
+        font-size: 1rem;
+    }
+
+    .auth-form-container {
+        padding: 20px;
+    }
+
+    .navbar {
+        flex-wrap: wrap;
+    }
+
+    .navbar-right {
+        gap: 8px;
+    }
+
+    .nav-links {
+        display: none;
+        width: 100%;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 1rem;
+    }
+
+    .nav-links.active {
+        display: flex;
+    }
+
+    .nav-links li {
+        margin: 0.5rem 0;
+    }
+
+    .menu-toggle {
+        display: block;
+    }
+
+    .profile-area {
+        gap: 6px;
+    }
+
+    .profile-avatar-rect {
+        width: 30px;
+        height: 30px;
+    }
+
+    .profile-name {
+        font-size: 0.8rem;
+        max-width: 90px;
+    }
+
+    .theme-toggle,
+    .chat-list-btn {
+        width: 28px;
+        height: 28px;
+        font-size: 0.9rem;
+    }
+
+    .hero h1 {
+        font-size: 2rem;
+    }
+
+    .hero p {
+        font-size: 0.9rem;
+    }
+
+    .modal-content {
+        width: 95%;
+        padding: 1.2rem;
+    }
+
+    .event-card-horizontal {
+        flex: 0 0 260px;
+        min-height: 280px;
+    }
+
+    .filters {
+        padding: 1rem;
+    }
+
+    .filter-group {
+        min-width: 100%;
+    }
+
+    #chatList .chat-item .chat-info .last-message {
+        max-width: 150px;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero {
+        padding: 50px 10px 30px;
+    }
+
+    .hero h1 {
+        font-size: 1.6rem;
+    }
+
+    .hero p {
+        font-size: 0.85rem;
+    }
+
+    .hero-buttons .btn {
+        width: 100%;
+    }
+
+    .section-title {
+        font-size: 1.3rem;
+    }
+
+    .event-card-horizontal {
+        flex: 0 0 240px;
+        min-height: 260px;
+    }
+
+    .event-card-horizontal .card-title {
+        font-size: 1em;
+    }
+
+    .event-card-horizontal p {
+        font-size: 0.8em;
+    }
+
+    .btn {
+        font-size: 0.8rem;
+        padding: 6px 12px;
+    }
+
+    .modal-content {
+        padding: 1rem;
+    }
+
+    #chatList .chat-item .chat-info .last-message {
+        max-width: 100px;
+    }
+
+    #privateChatMessages .chat-message {
+        max-width: 85%;
+    }
+}

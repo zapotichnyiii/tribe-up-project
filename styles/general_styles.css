@@ -1,0 +1,59 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Montserrat', sans-serif;
+}
+
+:root {
+    --main-primary-color: #1a2b44;
+    --main-secondary-color: #64748b;
+    --main-accent-color: #6b21a8;
+    --main-background-color: #f8fafc;
+    --main-card-background: #ffffff;
+    --main-header-background: #ffffff;
+    --main-dark-color: #0f172a;
+
+    --dark-bg:               #0d1117;   
+    --dark-card-bg:          #161b22;   
+    --dark-header-bg:        #161b22;  
+    --dark-text-primary:     #f0f6fc;   
+    --dark-text-secondary:   #8b949e;   
+    --dark-border:           #30363d;   
+    --dark-input-bg:         #0d1117;  
+    --dark-input-border:     #30363d;
+    --dark-btn-bg:           #21262d;  
+    --dark-btn-hover:        #30363d;
+    --dark-accent:           #7c3aed;   
+
+    --auth-page-background: #f8fafc;
+    --auth-card-background: #ffffff;
+    --auth-primary-color: #1a2b44;
+    --auth-accent-color: #6b21a8;
+    --auth-text-color: #0f172a;
+    --auth-input-background: #f8fafc;
+
+    --border-radius-large: 8px;
+    --border-radius-small: 5px;
+    --soft-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    --gradient-auth-primary: linear-gradient(135deg, #1a2b44, #6b21a8);
+    --gradient-main-hero: linear-gradient(135deg, #1a2b44, #6b21a8);
+}
+
+body {
+    background-color: var(--main-background-color);
+    color: var(--main-dark-color);
+    line-height: 1.5;
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.container {
+    width: 95%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 10px;
+}
