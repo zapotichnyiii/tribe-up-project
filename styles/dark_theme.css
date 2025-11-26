@@ -73,15 +73,10 @@ body.dark-theme #privateChatInput {
     background-color: var(--dark-input-bg);
     border: 2px solid var(--dark-border);
     color: var(--dark-text-primary);
-    border-radius: 12px;
-    padding: 16px;
-    font-size: 1rem;
     appearance: none;
     transition: all 0.3s ease;
 }
-body.dark-theme .auth-form-section .input-with-icon .form-control {
-    padding-left: 48px;
-}
+
 body.dark-theme input:focus,
 body.dark-theme textarea:focus,
 body.dark-theme .form-control:focus,
@@ -113,9 +108,6 @@ body.dark-theme button:not(.card-action-button) {
     background-color: var(--dark-btn-bg);
     color: var(--dark-text-primary);
     border: 1px solid var(--dark-border);
-    border-radius: 12px;
-    padding: 14px 28px;
-    font-weight: 600;
     transition: all 0.3s ease;
     cursor: pointer;
 }
@@ -124,8 +116,6 @@ body.dark-theme .scroll-btn {
     background: var(--dark-btn-bg);
     border-color: var(--dark-border);
     color: var(--dark-text-primary);
-    padding: 14px;
-    border-radius: 50%;
     transition: all 0.3s ease;
     cursor: pointer;
 }
@@ -138,8 +128,6 @@ body.dark-theme .scroll-btn:hover:not(:disabled) {
 }
 
 body.dark-theme .add-interest-group .btn {
-    padding: 16px;
-    border-width: 2px;
     border-color: var(--dark-accent);
     background: var(--dark-input-bg);
     color: var(--dark-accent);
@@ -197,10 +185,6 @@ body.dark-theme .interests-grid .interest-tag {
     background: var(--dark-input-bg);
     color: var(--dark-text-secondary);
     border: 2px solid var(--dark-border);
-    border-radius: 25px;
-    padding: 10px 18px;
-    font-size: 0.9rem;
-    font-weight: 500;
 }
 body.dark-theme .interest-tag.selected,
 body.dark-theme #peopleInterestFilter .interest-tag.selected,
@@ -234,8 +218,6 @@ body.dark-theme .chat-message .time {
 
 body.dark-theme .toast-notification {
     color: white;
-    border-radius: 8px;
-    padding: 12px 16px;
     background-color: var(--dark-card-bg);
 }
 body.dark-theme .toast-notification.toast-success { background-color: #238636; }
@@ -250,11 +232,7 @@ body.dark-theme #contactMap {
 body.dark-theme .back-to-top {
     background-color: var(--dark-accent);
     color: white;
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
     box-shadow: 0 6px 16px rgba(124, 58, 237, 0.4);
-    font-size: 1.2rem;
     display: flex;
     align-items: center;
     justify-content: center;
