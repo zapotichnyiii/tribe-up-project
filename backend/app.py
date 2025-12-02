@@ -9,6 +9,8 @@ from functools import wraps
 from flask_socketio import SocketIO, emit, join_room, leave_room
 from flask_mail import Mail, Message
 import random
+import threading
+import time
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'super_secret_key_for_tribeup_123'
@@ -102,6 +104,53 @@ def save_new_interests(cur, interests_list):
     if not interests_list: return
     for interest in interests_list:
         cur.execute("INSERT INTO interests (name) VALUES (%s) ON CONFLICT (name) DO NOTHING", (interest,))
+
+# === ФУНКЦІЇ ДЛЯ СПОВІЩЕНЬ ===
+def create_notification(user_id, type, message, related_id=None):
+    conn = get_db()
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    try:
+        cur.execute("""
+            INSERT INTO notifications (user_id, type, message, related_id)
+            VALUES (%s, %s, %s, %s) RETURNING *
+        """, (user_id, type, message, related_id))
+        new_notif = cur.fetchone()
+        conn.commit()
+        # Відправка через Socket.IO
+        socketio.emit('new_notification', map_message(new_notif) if 'text' in new_notif else new_notif, room=f"user_{user_id}")
+    except Exception as e:
+        print(f"Notification Error: {e}")
+    finally:
+        conn.close()
+
+def check_upcoming_events():
+    while True:
+        try:
+            conn = get_db()
+            cur = conn.cursor(cursor_factory=RealDictCursor)
+            # Шукаємо події через 60 хв (проста логіка)
+            now = datetime.now()
+            start = now + timedelta(minutes=60)
+            end = now + timedelta(minutes=61)
+            
+            cur.execute("""
+                SELECT e.id, e.title, ep.user_id 
+                FROM events e JOIN event_participants ep ON e.id = ep.event_id
+                WHERE e.event_date::timestamp >= %s AND e.event_date::timestamp < %s
+            """, (start, end))
+            
+            for row in cur.fetchall():
+                create_notification(row['user_id'], 'reminder', f"Нагадування: '{row['title']}' через годину!", row['id'])
+            conn.close()
+        except Exception as e: print(f"Scheduler: {e}")
+        time.sleep(60)
+
+# Запуск фонового потоку
+threading.Thread(target=check_upcoming_events, daemon=True).start()
+
+@socketio.on('join_notifications')
+def on_join_notifications(data):
+    if data.get('userId'): join_room(f"user_{data['userId']}")
 
 # --- SOCKET.IO ПОДІЇ (REAL-TIME) ---
 
@@ -519,6 +568,68 @@ def search_users():
         return jsonify({'error': str(e)}), 500
     finally:
         conn.close()
+
+@app.route('/api/users/<int:user_id>/follow', methods=['POST'])
+@token_required
+def follow_user(user_id):
+    follower_id = request.json.get('followerId')
+    if follower_id == user_id: return jsonify({'error': 'Error'}), 400
+    conn = get_db()
+    try:
+        cur = conn.cursor()
+        cur.execute("INSERT INTO followers (follower_id, followed_id) VALUES (%s, %s) ON CONFLICT DO NOTHING", (follower_id, user_id))
+        conn.commit()
+        
+        cur.execute("SELECT username FROM users WHERE id = %s", (follower_id,))
+        name = cur.fetchone()[0]
+        create_notification(user_id, 'follow', f"@{name} підписався на вас!", follower_id)
+        return jsonify({'status': 'success'})
+    finally: conn.close()
+
+@app.route('/api/users/<int:user_id>/unfollow', methods=['POST'])
+@token_required
+def unfollow_user(user_id):
+    conn = get_db()
+    try:
+        conn.cursor().execute("DELETE FROM followers WHERE follower_id = %s AND followed_id = %s", (request.json.get('followerId'), user_id))
+        conn.commit()
+        return jsonify({'status': 'success'})
+    finally: conn.close()
+
+@app.route('/api/users/<int:user_id>/social', methods=['GET'])
+def get_user_social(user_id):
+    conn = get_db()
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    try:
+        cur.execute("SELECT u.id, u.username, u.name, u.avatar_base64 FROM users u JOIN followers f ON u.id = f.follower_id WHERE f.followed_id = %s", (user_id,))
+        followers = [dict(row) for row in cur.fetchall()]
+        cur.execute("SELECT u.id, u.username, u.name, u.avatar_base64 FROM users u JOIN followers f ON u.id = f.followed_id WHERE f.follower_id = %s", (user_id,))
+        following = [dict(row) for row in cur.fetchall()]
+        return jsonify({'followers': followers, 'following': following})
+    finally: conn.close()
+
+@app.route('/api/notifications/<int:user_id>', methods=['GET'])
+@token_required
+def get_notifications(user_id):
+    conn = get_db()
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    try:
+        cur.execute("SELECT * FROM notifications WHERE user_id = %s ORDER BY created_at DESC LIMIT 20", (user_id,))
+        return jsonify([dict(row) for row in cur.fetchall()])
+    finally: conn.close()
+
+@app.route('/api/notifications/read', methods=['POST'])
+@token_required
+def read_notifications():
+    conn = get_db()
+    try:
+        if request.json.get('id'):
+            conn.cursor().execute("UPDATE notifications SET is_read = TRUE WHERE id = %s", (request.json['id'],))
+        elif request.json.get('userId'):
+            conn.cursor().execute("UPDATE notifications SET is_read = TRUE WHERE user_id = %s", (request.json['userId'],))
+        conn.commit()
+        return jsonify({'status': 'success'})
+    finally: conn.close()
 
 if __name__ == '__main__':
     socketio.run(app, debug=True, port=5000)
