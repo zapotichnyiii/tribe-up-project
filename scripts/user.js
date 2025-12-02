@@ -1,57 +1,86 @@
 import * as dom from './dom.js';
 import * as utils from './utils.js';
-import { openEventDetail } from './events.js';
-import { loadPrivateChat } from './chat.js';    
 import { renderInterests } from './ui.js';   
+
+const getAuthHeaders = () => ({
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${localStorage.getItem('token')}`
+});
+
 export let selectedPeopleInterests = [];
 
-export function renderPeopleInterestFilter() {
-    const users = utils.getUsers();
+export async function renderPeopleInterestFilter() {
+    const users = await utils.getUsers();
     const currentUser = utils.getCurrentUser();
     if (!currentUser) return;
-
-    const sameCityUsers = users.filter(u => 
-        u.location.toLowerCase() === currentUser.location.toLowerCase() && u.id !== currentUser.id
-    );
-
-    const allInterests = [...new Set(sameCityUsers.flatMap(u => u.interests))].sort();
-    const container = dom.peopleInterestFilter;
-
-    if (!container) return;
-
-    container.innerHTML = allInterests.map(interest => `
-        <span class="interest-tag ${selectedPeopleInterests.includes(interest) ? 'selected' : ''}" 
-        data-interest="${interest}">${interest}</span>
-    `).join('');
+    
+    const otherUsers = users.filter(u => u.id !== currentUser.id);
+    const allInterests = [...new Set(otherUsers.flatMap(u => u.interests))].sort();
+    
+    if (dom.peopleInterestFilter) {
+        dom.peopleInterestFilter.innerHTML = allInterests.map(interest => `
+            <span class="interest-tag ${selectedPeopleInterests.includes(interest) ? 'selected' : ''}" data-interest="${interest}">${interest}</span>
+        `).join('');
+    }
 }
 
-export function renderPeople() {
+// 👇 ОБРОБКА КЛІКУ ПО ТЕГУ
+export function handlePeopleInterestClick(e) {
+    const tag = e.target.closest('.interest-tag');
+    if (!tag) return;
+
+    const interest = tag.dataset.interest;
+    const idx = selectedPeopleInterests.indexOf(interest);
+
+    if (idx === -1) {
+        selectedPeopleInterests.push(interest);
+        tag.classList.add('selected');
+    } else {
+        selectedPeopleInterests.splice(idx, 1);
+        tag.classList.remove('selected');
+    }
+    renderPeople();
+}
+
+// 👇 ВИПРАВЛЕНА ФУНКЦІЯ РЕНДЕРУ (ПРИБРАНО ДУБЛІ)
+export async function renderPeople(customUsersList = null) {
     if (!dom.peopleGrid) return;
-
-    dom.peopleGrid.innerHTML = '';
-    const users = utils.getUsers();
+    
+    // ВАЖЛИВО: Не очищаємо тут! Чекаємо дані.
+    
     const currentUser = utils.getCurrentUser();
-
     if (!currentUser) {
-        dom.peopleGrid.innerHTML = '<p>Увійдіть, щоб бачити людей з вашого міста.</p>';
+        dom.peopleGrid.innerHTML = '<p>Увійдіть, щоб бачити людей.</p>';
         return;
     }
 
-    let filtered = users.filter(u => 
-        u.location.toLowerCase() === currentUser.location.toLowerCase() && u.id !== currentUser.id
-    );
+    let usersToRender = [];
 
-    if (selectedPeopleInterests.length > 0) {
-        filtered = filtered.filter(u => 
-            u.interests.some(i => selectedPeopleInterests.includes(i))
-        );
+    if (customUsersList) {
+        usersToRender = customUsersList;
+    } else {
+        // Ось тут була затримка, через яку виникали дублі
+        const users = await utils.getUsers();
+        usersToRender = users;
     }
 
+    // Фільтрація
+    let filtered = usersToRender.filter(u => u.id !== currentUser.id);
+
+    const cityQuery = dom.cityFilterInput?.value.toLowerCase().trim();
+    if (cityQuery) {
+        filtered = filtered.filter(u => u.location.toLowerCase().includes(cityQuery));
+    }
+
+    if (selectedPeopleInterests.length > 0) {
+        filtered = filtered.filter(u => u.interests.some(i => selectedPeopleInterests.includes(i)));
+    }
+
+    // 👇 ОЧИЩАЄМО ТУТ (коли дані вже готові і відфільтровані)
+    dom.peopleGrid.innerHTML = '';
+
     if (filtered.length === 0) {
-        const msg = selectedPeopleInterests.length > 0
-            ? 'Нікого не знайдено за вибраними інтересами.'
-            : 'У вашому місті ще немає інших користувачів.';
-        dom.peopleGrid.innerHTML = `<p>${msg}</p>`;
+        dom.peopleGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #888;">Нікого не знайдено.</p>';
         return;
     }
 
@@ -59,194 +88,170 @@ export function renderPeople() {
         const card = document.createElement('div');
         card.className = 'card people-card';
         card.dataset.userId = person.id;
-
-        const interestsHtml = person.interests
-            .map(i => `<span class="interest-tag selected">${i}</span>`)
-            .join('');
-
+        
+        const interestsHtml = person.interests.map(i => `<span class="interest-tag selected">${i}</span>`).join('');
+        
         card.innerHTML = `
             <div class="people-card-header">
-                <img src="${person.avatarBase64 || 'https://via.placeholder.com/60?text=' + person.username[0]}"
-                    alt="${person.name}" loading="lazy">
+                <img src="${person.avatarBase64 || 'https://via.placeholder.com/60'}" alt="${person.name}">
                 <div>
                     <h3>@${person.username}</h3>
-                    <p>${person.age} років</p>
+                    <p style="font-size: 0.8em; color: #666;">${person.name}, ${person.age} років</p>
+                    <p style="font-size: 0.8em; color: #666;">${person.location}</p>
                 </div>
             </div>
             <div class="interests">${interestsHtml}</div>
-            <div class="card-actions">
-                <button class="btn btn-outline btn-sm message-btn">Написати</button>
-            </div>
+            <button class="btn btn-outline btn-sm message-btn">Написати</button>
         `;
-
         dom.peopleGrid.appendChild(card);
     });
 }
 
-export function renderUserEvents(user) {
-    if (!dom.userEventsList) return;
-    dom.userEventsList.innerHTML = '';
+// Пошук
+let searchTimeout;
+export function handleUserSearch(e) {
+    const query = e.target.value.trim();
+    clearTimeout(searchTimeout);
 
-    const events = utils.getEvents();
-    const joinedEvents = utils.getJoinedEvents();
-    const userEvents = events.filter(e => e.creatorId === user.id || (joinedEvents[user.id] || []).includes(e.eventId));
-
-    if (userEvents.length === 0) {
-        dom.userEventsList.innerHTML = '<p style="color: #888; font-style: italic;">Ви ще не приєдналися до подій.</p>';
+    if (query.length === 0) {
+        renderPeople(null);
         return;
     }
 
-    userEvents.forEach(event => {
-        const eventItem = document.createElement('div');
-        eventItem.className = 'event-item';
-        eventItem.dataset.eventId = event.eventId;
-        eventItem.style.padding = '8px';
-        eventItem.style.borderBottom = '1px solid #e0e0e0';
-        eventItem.style.cursor = 'pointer';
-        eventItem.innerHTML = `
-            <div style="font-weight: 600; font-size: 0.9em;">${event.title}</div>
-            <div style="font-size: 0.75em; color: #666;">${utils.formatEventDate(event.date)}</div>
-        `;
-        dom.userEventsList.appendChild(eventItem);
-    });
+    searchTimeout = setTimeout(async () => {
+        try {
+            const res = await fetch(`http://localhost:5000/api/users/search?q=${encodeURIComponent(query)}`);
+            if (res.ok) {
+                const users = await res.json();
+                renderPeople(users);
+            }
+        } catch (e) { console.error(e); }
+    }, 300);
 }
 
-export function openOtherUserProfile(userId) {
-    const user = utils.getCurrentUser();
-    const otherUser = utils.getUsers().find(u => u.id === userId);
-    if (!otherUser) {
-        utils.showToast('Користувача не знайдено', 'error');
-        return;
-    }
+// Профіль іншого юзера
+export async function openOtherUserProfile(userId) {
+    const users = await utils.getUsers();
+    const user = users.find(u => u.id === userId);
+    if (!user) return;
 
-    if (dom.otherUserProfileAvatar) dom.otherUserProfileAvatar.src = otherUser.avatarBase64 || 'https://via.placeholder.com/100?text=@';
-    if (dom.otherUserProfileName) dom.otherUserProfileName.textContent = otherUser.name;
-    if (dom.otherUserProfileUsername) dom.otherUserProfileUsername.textContent = `@${otherUser.username}`;
-    if (dom.otherUserProfileMeta) dom.otherUserProfileMeta.textContent = `${otherUser.location} · ${otherUser.age} років`;
-    if (dom.otherUserProfileInterests) dom.otherUserProfileInterests.innerHTML = otherUser.interests.map(i => `<span class="interest-tag selected">${i}</span>`).join('');
-
-    if (dom.otherUserProfileEvents) {
-        const events = utils.getEvents();
-        const joinedEvents = utils.getJoinedEvents();
-        const userEvents = events.filter(e => e.creatorId === otherUser.id || (joinedEvents[otherUser.id] || []).includes(e.eventId));
-
-        dom.otherUserProfileEvents.innerHTML = userEvents.length === 0
-            ? '<p style="color: #888; font-style: italic;">Користувач ще не приєднався до подій.</p>'
-            : userEvents.map(event => `
-                <div class="event-item" data-event-id="${event.eventId}" style="padding: 8px; border-bottom: 1px solid #e0e0e0; cursor: pointer;">
-                    <div style="font-weight: 600; font-size: 0.9em;">${event.title}</div>
-                    <div style="font-size: 0.75em; color: #666;">${utils.formatEventDate(event.date)}</div>
-                </div>
-            `).join('');
-    }
-
+    if (dom.otherUserProfileAvatar) dom.otherUserProfileAvatar.src = user.avatarBase64 || 'https://via.placeholder.com/100';
+    if (dom.otherUserProfileName) dom.otherUserProfileName.textContent = user.name;
+    if (dom.otherUserProfileUsername) dom.otherUserProfileUsername.textContent = '@' + user.username;
+    if (dom.otherUserProfileInterests) dom.otherUserProfileInterests.innerHTML = user.interests.map(i => `<span class="interest-tag selected">${i}</span>`).join('');
+    
+    const currentUser = utils.getCurrentUser();
     if (dom.otherUserMessageBtn) {
-        dom.otherUserMessageBtn.disabled = user && user.id === otherUser.id;
-        dom.otherUserMessageBtn.textContent = user && user.id === otherUser.id ? 'Це ви' : 'Написати';
-        dom.otherUserMessageBtn.dataset.userId = otherUser.id; // Збережемо ID для обробника
+        dom.otherUserMessageBtn.dataset.userId = user.id;
+        if (currentUser && currentUser.id === user.id) {
+            dom.otherUserMessageBtn.disabled = true;
+            dom.otherUserMessageBtn.textContent = 'Це ви';
+        } else {
+            dom.otherUserMessageBtn.disabled = false;
+            dom.otherUserMessageBtn.textContent = 'Написати';
+        }
+    }
+
+    const allEvents = await utils.getEvents();
+    const userEvents = allEvents.filter(e => e.creatorId === userId);
+    
+    if (dom.otherUserProfileEvents) {
+        dom.otherUserProfileEvents.innerHTML = userEvents.length ? '' : '<p>Немає подій</p>';
+        userEvents.forEach(e => {
+            const div = document.createElement('div');
+            div.className = 'event-item';
+            div.textContent = `${e.title} (${utils.formatEventDate(e.date)})`;
+            dom.otherUserProfileEvents.appendChild(div);
+        });
     }
 
     utils.openModal(dom.otherUserProfileModal);
 }
 
-export function openUserProfile() {
-    const user = utils.getCurrentUser();
-    if (!user) return;
-    dom.profileModalAvatar.src = user.avatarBase64 || 'https://via.placeholder.com/100?text=@';
-    dom.profileModalName.textContent = user.name;
-    dom.profileModalUsername.textContent = `@${user.username}`;
-    dom.profileModalMeta.textContent = `${user.location} · ${user.age} років`;
-    dom.profileModalInterests.innerHTML = user.interests.map(i => `<span class="interest-tag selected">${i}</span>`).join('');
-    renderUserEvents(user);
-    utils.openModal(dom.profileModal);
+// Власний профіль
+export async function openUserProfile() {
+    const currentUser = utils.getCurrentUser();
+    if (!currentUser) return;
+    
+    try {
+        const users = await utils.getUsers();
+        const freshUser = users.find(u => u.id === currentUser.id);
+        if (!freshUser) return utils.showToast('Не вдалося завантажити профіль', 'error');
+
+        if(dom.profileModalAvatar) dom.profileModalAvatar.src = freshUser.avatarBase64 || 'https://via.placeholder.com/100';
+        if(dom.profileModalName) dom.profileModalName.textContent = freshUser.name;
+        if(dom.profileModalUsername) dom.profileModalUsername.textContent = `@${freshUser.username}`;
+        if(dom.profileModalInterests) dom.profileModalInterests.innerHTML = freshUser.interests.map(i => `<span class="interest-tag selected">${i}</span>`).join('');
+
+        const allEvents = await utils.getEvents('active');
+        const myEvents = allEvents.filter(e => e.creatorId === freshUser.id);
+        if (dom.userEventsList) {
+            dom.userEventsList.innerHTML = myEvents.length ? '' : '<p style="color:#888;">Поки немає подій</p>';
+            myEvents.forEach(e => {
+                const div = document.createElement('div');
+                div.style.padding = '8px';
+                div.style.borderBottom = '1px solid #eee';
+                div.innerHTML = `<b>${e.title}</b> <span style="color:#666; font-size:0.8em;">(${utils.formatEventDate(e.date)})</span>`;
+                dom.userEventsList.appendChild(div);
+            });
+        }
+        utils.openModal(dom.profileModal);
+    } catch (e) { console.error(e); }
 }
 
-export const editProfileValidations = [
-    { inputId: 'editProfileName', errorId: 'editProfileNameError', validationFn: v => v.length >= 2, errorMessage: 'Ім’я: від 2 символів' },
-    { inputId: 'editProfileUsername', errorId: 'editProfileUsernameError', validationFn: v => /^[a-zA-Z0-9_]{3,15}$/.test(v), errorMessage: 'Логін: 3-15 символів, лише літери, цифри, _' },
-    { inputId: 'editProfileAge', errorId: 'editProfileAgeError', validationFn: v => v >= 16 && v <= 100, errorMessage: 'Вік: від 16 до 100' },
-    { inputId: 'editProfileLocation', errorId: 'editProfileLocationError', validationFn: v => v.length >= 2, errorMessage: 'Місце: від 2 символів' }
-];
+export const editProfileValidations = [{ inputId: 'editProfileName', errorId: 'editProfileNameError', validationFn: v => v.length >= 2, errorMessage: 'Ім’я: від 2 символів' }];
 
-export function openEditProfileModal() {
-    const user = utils.getCurrentUser();
-    if (!user) {
-        utils.showToast('Увійдіть, щоб редагувати профіль', 'error');
-        return;
-    }
+export async function openEditProfileModal() {
+    const currentUser = utils.getCurrentUser();
+    if (!currentUser) return;
+    const users = await utils.getUsers();
+    const user = users.find(u => u.id === currentUser.id);
+    if (!user) return;
 
-    if (dom.editProfileName) dom.editProfileName.value = user.name;
-    if (dom.editProfileUsername) dom.editProfileUsername.value = user.username;
-    if (dom.editProfileAge) dom.editProfileAge.value = user.age;
-    if (dom.editProfileLocation) dom.editProfileLocation.value = user.location;
-    if (dom.editProfileAvatarPreview) dom.editProfileAvatarPreview.src = user.avatarBase64 || 'https://via.placeholder.com/100?text=@';
-    if (dom.editProfileInterestsContainer) renderInterests(dom.editProfileInterestsContainer, user.interests, () => {});
-
+    if(dom.editProfileName) dom.editProfileName.value = user.name;
+    if(dom.editProfileUsername) dom.editProfileUsername.value = user.username;
+    if(dom.editProfileAge) dom.editProfileAge.value = user.age;
+    if(dom.editProfileLocation) dom.editProfileLocation.value = user.location;
+    if(dom.editProfileInterestsContainer) renderInterests(dom.editProfileInterestsContainer, user.interests, () => {});
+    utils.closeModal(dom.profileModal);
     utils.openModal(dom.editProfileModal);
 }
 
 export async function handleEditProfileSubmit(e) {
     e.preventDefault();
     const user = utils.getCurrentUser();
-    if (!user) {
-        utils.showToast('Увійдіть, щоб редагувати профіль', 'error');
-        return;
-    }
-
-    if (!editProfileValidations.every(v => utils.validateInput(dom.editProfileForm.querySelector(`#${v.inputId}`), dom.editProfileForm.querySelector(`#${v.errorId}`), v.validationFn, v.errorMessage))) {
-        utils.showToast('Заповніть усі поля коректно', 'error');
-        return;
-    }
-
-    const selectedInterests = Array.from(dom.editProfileInterestsContainer?.querySelectorAll('.interest-tag.selected') || []).map(tag => tag.dataset.interest);
-    if (selectedInterests.length < 1) {
-        utils.showToast('Виберіть хоча б один інтерес', 'error');
-        return;
-    }
-
-    const users = utils.getUsers();
-    const username = dom.editProfileUsername?.value.trim();
-    if (username && username !== user.username && users.some(u => u.username === username)) {
-        utils.showToast('Цей логін вже зайнятий', 'error');
-        return;
-    }
-
-    let avatarBase64 = user.avatarBase64;
-    const photo = dom.editProfilePhoto?.files[0];
-    if (photo) {
-        avatarBase64 = await utils.fileToBase64(photo);
-        if (!avatarBase64) return;
-    }
-
-    const updatedUser = {
-        ...user,
-        name: dom.editProfileName?.value.trim(),
-        username: username,
-        age: parseInt(dom.editProfileAge?.value),
-        location: dom.editProfileLocation?.value.trim(),
-        interests: selectedInterests,
-        avatarBase64
+    if (!user) return;
+    const updatedData = {
+        name: dom.editProfileName.value,
+        username: dom.editProfileUsername.value,
+        age: parseInt(dom.editProfileAge.value),
+        location: dom.editProfileLocation.value,
+        interests: Array.from(dom.editProfileInterestsContainer.querySelectorAll('.selected')).map(el => el.dataset.interest),
+        avatarBase64: user.avatarBase64
     };
+    const photo = dom.editProfilePhoto?.files[0];
+    if (photo) updatedData.avatarBase64 = await utils.fileToBase64(photo);
 
-    const updatedUsers = users.map(u => u.id === user.id ? updatedUser : u);
-    utils.saveUsers(updatedUsers);
-    localStorage.setItem('currentUser', JSON.stringify(updatedUser));
-    utils.closeModal(dom.editProfileModal);
-    // showMainApp(updatedUser) буде викликано з main.js
-    utils.showToast('Профіль оновлено!', 'success');
+    try {
+        const res = await fetch(`http://localhost:5000/api/users/${user.id}`, { method: 'PUT', headers: getAuthHeaders(), body: JSON.stringify(updatedData) });
+        if (res.ok) {
+            utils.showToast('Оновлено', 'success');
+            utils.closeModal(dom.editProfileModal);
+            setTimeout(() => location.reload(), 500);
+        } else { utils.showToast('Помилка оновлення', 'error'); }
+    } catch (e) { utils.showToast('Помилка сервера', 'error'); }
 }
 
 export function handleAddEditCustomInterest() {
-    const interest = dom.editCustomInterestInput.value.trim();
-    if (interest && interest.length <= 20) {
-        if (utils.addGlobalInterest(interest)) {
-            // updateAllInterestContainers() буде викликано з main.js
-            dom.editCustomInterestInput.value = '';
-            utils.showToast('Інтерес додано', 'success');
-        } else {
-            utils.showToast('Цей інтерес вже існує', 'error');
-        }
-    } else {
-        utils.showToast(interest.length > 20 ? 'Інтерес занадто довгий' : 'Введіть інтерес', 'error');
+    const input = dom.editCustomInterestInput;
+    const interest = input.value.trim();
+    if(interest) {
+        const container = dom.editProfileInterestsContainer;
+        const span = document.createElement('span');
+        span.className = 'interest-tag selected';
+        span.dataset.interest = interest;
+        span.textContent = interest;
+        container.appendChild(span);
+        input.value = '';
     }
 }

@@ -1,0 +1,524 @@
+from flask import Flask, jsonify, request
+import psycopg2
+from flask_cors import CORS
+from psycopg2.extras import RealDictCursor
+from werkzeug.security import generate_password_hash, check_password_hash
+from datetime import datetime, timedelta
+import jwt
+from functools import wraps
+from flask_socketio import SocketIO, emit, join_room, leave_room
+from flask_mail import Mail, Message
+import random
+
+app = Flask(__name__)
+app.config['SECRET_KEY'] = 'super_secret_key_for_tribeup_123'
+CORS(app)
+socketio = SocketIO(app, cors_allowed_origins="*")
+
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = 'tribeup.welcome@gmail.com'  
+app.config['MAIL_PASSWORD'] = 'gvolzjlyokrcffnl'     
+app.config['MAIL_DEFAULT_SENDER'] = 'TribeUp Team <tvoja.poshta@gmail.com>'
+
+mail = Mail(app)
+
+DB_CONFIG = {
+    'dbname': 'tribeup_db',
+    'user': 'postgres',
+    'password': 'qazwsxedcasd123', 
+    'host': 'localhost',
+    'port': 5432
+}
+
+def get_db():
+    conn = psycopg2.connect(**DB_CONFIG)
+    return conn
+
+# --- ДЕКОРАТОР (Той самий) ---
+def token_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = None
+        if 'Authorization' in request.headers:
+            auth_header = request.headers['Authorization']
+            if auth_header.startswith('Bearer '):
+                token = auth_header.split(" ")[1]
+        if not token:
+            return jsonify({'error': 'Token is missing!'}), 401
+        try:
+            jwt.decode(token, app.config['SECRET_KEY'], algorithms=["HS256"])
+        except:
+            return jsonify({'error': 'Token is invalid!'}), 401
+        return f(*args, **kwargs)
+    return decorated
+
+# Допоміжні функції
+def format_time(dt):
+    if isinstance(dt, datetime):
+        return dt.strftime("%H:%M")
+    return str(dt)
+
+def map_event(row):
+    return {
+        'eventId': row['id'],
+        'title': row['title'],
+        'description': row['description'],
+        'category': row['category'],
+        'location': row['location'],
+        'date': row['event_date'],
+        'participants': row['participants'],
+        'minParticipants': row['min_participants'], 
+        'status': row['status'],
+        'currentParticipants': row['current_participants'],
+        'creatorId': row['creator_id'],
+        'interests': row['interests'] if row['interests'] else []
+    }
+
+def map_user(row):
+    return {
+        'id': row['id'],
+        'name': row['name'],
+        'username': row['username'],
+        'email': row['email'],
+        'age': row['age'],
+        'location': row['location'],
+        'avatarBase64': row['avatar_base64'],
+        'interests': row['interests'] if row['interests'] else []
+    }
+
+def map_message(row):
+    return {
+        'id': row['id'],
+        'text': row['text'],
+        'time': format_time(row['created_at']),
+        'senderId': row['sender_id'],
+        'senderName': row.get('sender_name', ''),
+        'timestamp': row['created_at'].timestamp() * 1000
+    }
+
+def save_new_interests(cur, interests_list):
+    if not interests_list: return
+    for interest in interests_list:
+        cur.execute("INSERT INTO interests (name) VALUES (%s) ON CONFLICT (name) DO NOTHING", (interest,))
+
+# --- SOCKET.IO ПОДІЇ (REAL-TIME) ---
+
+@socketio.on('join')
+def on_join(data):
+    """Користувач заходить у кімнату (чат події або приватний)"""
+    room = data['room']
+    join_room(room)
+    # Можна розкоментувати для дебагу: print(f'User joined room: {room}')
+
+@socketio.on('leave')
+def on_leave(data):
+    """Користувач виходить"""
+    room = data['room']
+    leave_room(room)
+
+@socketio.on('send_event_message')
+def handle_event_message(data):
+    """Отримали повідомлення для події -> Зберігаємо -> Розсилаємо всім"""
+    conn = get_db()
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    try:
+        # 1. Зберегти в БД
+        cur.execute("""
+            INSERT INTO event_messages (event_id, sender_id, text)
+            VALUES (%s, %s, %s) RETURNING *
+        """, (data['eventId'], data['senderId'], data['text']))
+        new_msg = cur.fetchone()
+        
+        # 2. Отримати ім'я автора
+        cur.execute("SELECT username FROM users WHERE id = %s", (data['senderId'],))
+        sender_name = cur.fetchone()['username']
+        conn.commit()
+
+        # 3. Підготувати об'єкт для відправки
+        msg_response = map_message(new_msg)
+        msg_response['senderName'] = sender_name
+        
+        # 4. Відправити всім у кімнаті 'event_X'
+        room = f"event_{data['eventId']}"
+        emit('receive_message', msg_response, room=room)
+        
+    except Exception as e:
+        print(f"Error saving message: {e}")
+    finally:
+        conn.close()
+
+@socketio.on('send_private_message')
+def handle_private_message(data):
+    """Отримали приватне повідомлення -> Зберігаємо -> Розсилаємо"""
+    conn = get_db()
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    try:
+        # 1. Зберегти
+        cur.execute("""
+            INSERT INTO private_messages (sender_id, receiver_id, text)
+            VALUES (%s, %s, %s) RETURNING *
+        """, (data['senderId'], data['receiverId'], data['text']))
+        new_msg = cur.fetchone()
+        conn.commit()
+
+        # 2. Підготувати
+        msg_response = map_message(new_msg)
+
+        # 3. Відправити у кімнату 'private_minID_maxID'
+        # Генеруємо унікальний ID кімнати для пари юзерів (щоб 1-2 і 2-1 були однією кімнатою)
+        u1, u2 = sorted([int(data['senderId']), int(data['receiverId'])])
+        room = f"private_{u1}_{u2}"
+        
+        emit('receive_private_message', msg_response, room=room)
+        
+    except Exception as e:
+        print(f"Error private message: {e}")
+    finally:
+        conn.close()
+
+@app.route('/api/interests', methods=['GET'])
+def get_interests():
+    conn = get_db()
+    cur = conn.cursor()
+    try:
+        cur.execute("SELECT name FROM interests ORDER BY name")
+        interests = [row[0] for row in cur.fetchall()]
+        return jsonify(interests)
+    finally:
+        conn.close()
+
+@app.route('/api/auth/register', methods=['POST'])
+def register():
+    data = request.json
+    conn = get_db()
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    try:
+        hashed_password = generate_password_hash(data['password'])
+        verification_code = str(random.randint(100000, 999999))
+        save_new_interests(cur, data['interests'])
+        cur.execute("""
+            INSERT INTO users (name, username, email, password, age, location, avatar_base64, interests, is_verified, verification_code)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, FALSE, %s) RETURNING *
+        """, (data['name'], data['username'], data['email'], hashed_password, data['age'], data['location'], data.get('avatarBase64', ''), data['interests'], verification_code))
+        
+        new_user = map_user(cur.fetchone())
+        conn.commit()
+        try:
+            msg = Message("Ваш код підтвердження TribeUp", recipients=[new_user['email']])
+            msg.body = f"Привіт, {new_user['name']}!\n\nТвій код підтвердження: {verification_code}\n\nВведи його на сайті, щоб завершити реєстрацію."
+            mail.send(msg)
+        except Exception as e:
+            print(f"Mail Error: {e}") 
+        return jsonify({'userId': new_user['id'], 'message': 'Code sent'})
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
+    finally:
+        conn.close()
+
+@app.route('/api/auth/verify', methods=['POST'])
+def verify_email():
+    data = request.json
+    user_id = data.get('userId')
+    code = data.get('code')
+    
+    conn = get_db()
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    try:
+        cur.execute("SELECT * FROM users WHERE id = %s", (user_id,))
+        user = cur.fetchone()
+        
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+            
+        if user['verification_code'] == code:
+            cur.execute("UPDATE users SET is_verified = TRUE, verification_code = NULL WHERE id = %s RETURNING *", (user_id,))
+            updated_user = map_user(cur.fetchone())
+            conn.commit()
+            
+            token = jwt.encode({'user_id': updated_user['id'], 'exp': datetime.utcnow() + timedelta(days=7)}, app.config['SECRET_KEY'], algorithm="HS256")
+            return jsonify({'user': updated_user, 'token': token})
+        else:
+            return jsonify({'error': 'Невірний код'}), 400
+    finally:
+        conn.close()
+
+@app.route('/api/auth/login', methods=['POST'])
+def login():
+    data = request.json
+    conn = get_db()
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    try:
+        cur.execute("SELECT * FROM users WHERE email = %s", (data['email'],))
+        user = cur.fetchone()
+        
+        if user and check_password_hash(user['password'], data['password']):
+            if not user['is_verified']:
+                return jsonify({'error': 'Пошта не підтверджена. Перевірте email.'}), 403
+                
+            user_data = map_user(user)
+            token = jwt.encode({'user_id': user['id'], 'exp': datetime.utcnow() + timedelta(days=7)}, app.config['SECRET_KEY'], algorithm="HS256")
+            return jsonify({'user': user_data, 'token': token})
+        else:
+            return jsonify({'error': 'Невірна пошта або пароль'}), 401
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        conn.close()
+
+@app.route('/api/users/<int:user_id>', methods=['PUT'])
+@token_required
+def update_user(user_id):
+    data = request.json
+    conn = get_db()
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    try:
+        save_new_interests(cur, data['interests'])
+        cur.execute("""
+            UPDATE users SET name=%s, username=%s, age=%s, location=%s, interests=%s, avatar_base64=%s WHERE id=%s RETURNING *
+        """, (data['name'], data['username'], data['age'], data['location'], data['interests'], data['avatarBase64'], user_id))
+        updated_row = cur.fetchone()
+        if updated_row:
+            conn.commit()
+            return jsonify(map_user(updated_row))
+        return jsonify({'error': 'User not found'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
+    finally:
+        conn.close()
+
+@app.route('/api/events', methods=['GET'])
+def get_events():
+    conn = get_db()
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    try:
+        cur.execute("""
+            UPDATE events 
+            SET status = 'finished' 
+            WHERE event_date::timestamp < NOW() AND status = 'active'
+        """)
+        conn.commit()
+
+        status_filter = request.args.get('status', 'active')
+        
+        cur.execute("SELECT * FROM events WHERE status = %s ORDER BY id DESC", (status_filter,))
+        events = [map_event(row) for row in cur.fetchall()]
+        return jsonify(events)
+    except Exception as e:
+        print(f"ERROR: {e}") 
+        return jsonify({'error': str(e)}), 500
+    finally:
+        conn.close()
+
+@app.route('/api/events', methods=['POST'])
+@token_required
+def create_event():
+    data = request.json
+    conn = get_db()
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    try:
+        save_new_interests(cur, data['interests'])
+        # Додано min_participants та status
+        cur.execute("""
+            INSERT INTO events (title, description, category, location, event_date, participants, min_participants, current_participants, creator_id, interests, status)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, 1, %s, %s, 'active') RETURNING *
+        """, (data['title'], data['description'], data['category'], data['location'], data['date'], data['participants'], data.get('minParticipants', 0), data['creatorId'], data['interests']))
+        
+        event = cur.fetchone()
+        cur.execute("INSERT INTO event_participants (user_id, event_id) VALUES (%s, %s)", (data['creatorId'], event['id']))
+        conn.commit()
+        return jsonify(map_event(event))
+    except Exception as e:
+        print(f"ПОМИЛКА СТВОРЕННЯ: {e}")
+        return jsonify({'error': str(e)}), 400
+    finally:
+        conn.close()
+
+@app.route('/api/events/<int:event_id>', methods=['PUT'])
+@token_required
+def update_event(event_id):
+    data = request.json
+    conn = get_db()
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    try:
+        save_new_interests(cur, data['interests'])
+        cur.execute("""
+            UPDATE events SET title=%s, description=%s, category=%s, location=%s, event_date=%s, participants=%s, interests=%s WHERE id=%s RETURNING *
+        """, (data['title'], data['description'], data['category'], data['location'], data['date'], data['participants'], data['interests'], event_id))
+        updated_event = cur.fetchone()
+        if updated_event:
+            conn.commit()
+            return jsonify(map_event(updated_event))
+        return jsonify({'error': 'Not found'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
+    finally:
+        conn.close()
+
+@app.route('/api/events/<int:event_id>', methods=['DELETE'])
+@token_required
+def delete_event(event_id):
+    conn = get_db()
+    cur = conn.cursor()
+    try:
+        cur.execute("DELETE FROM event_participants WHERE event_id = %s", (event_id,))
+        cur.execute("DELETE FROM event_messages WHERE event_id = %s", (event_id,))
+        cur.execute("DELETE FROM events WHERE id = %s", (event_id,))
+        conn.commit()
+        return jsonify({'status': 'success'})
+    except Exception:
+        return jsonify({'error': 'Error'}), 400
+    finally:
+        conn.close()
+
+@app.route('/api/events/join', methods=['POST'])
+@token_required
+def join_event():
+    data = request.json
+    conn = get_db()
+    cur = conn.cursor()
+    try:
+        cur.execute("INSERT INTO event_participants (user_id, event_id) VALUES (%s, %s)", (data['userId'], data['eventId']))
+        cur.execute("UPDATE events SET current_participants = current_participants + 1 WHERE id = %s", (data['eventId'],))
+        conn.commit()
+        return jsonify({'status': 'success'})
+    except Exception: return jsonify({'error': 'Error'}), 400
+    finally: conn.close()
+
+@app.route('/api/events/leave', methods=['POST'])
+@token_required
+def leave_event():
+    data = request.json
+    conn = get_db()
+    cur = conn.cursor()
+    try:
+        cur.execute("DELETE FROM event_participants WHERE user_id = %s AND event_id = %s", (data['userId'], data['eventId']))
+        cur.execute("UPDATE events SET current_participants = current_participants - 1 WHERE id = %s", (data['eventId'],))
+        conn.commit()
+        return jsonify({'status': 'success'})
+    except Exception: return jsonify({'error': 'Error'}), 400
+    finally: conn.close()
+
+@app.route('/api/users', methods=['GET'])
+def get_users_list():
+    conn = get_db()
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    cur.execute("SELECT * FROM users")
+    users = [map_user(row) for row in cur.fetchall()]
+    conn.close()
+    return jsonify(users)
+
+@app.route('/api/my-joined-events/<int:user_id>', methods=['GET'])
+def get_joined_events(user_id):
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute("SELECT event_id FROM event_participants WHERE user_id = %s", (user_id,))
+    ids = [row[0] for row in cur.fetchall()]
+    conn.close()
+    return jsonify(ids)
+
+# GET для історії чатів (залишається REST для завантаження історії)
+@app.route('/api/messages/event/<int:event_id>', methods=['GET'])
+def get_event_messages(event_id):
+    conn = get_db()
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    cur.execute("""
+        SELECT em.*, u.username as sender_name FROM event_messages em
+        JOIN users u ON em.sender_id = u.id WHERE em.event_id = %s ORDER BY em.created_at ASC
+    """, (event_id,))
+    messages = [map_message(row) for row in cur.fetchall()]
+    conn.close()
+    return jsonify(messages)
+
+@app.route('/api/messages/private', methods=['GET'])
+def get_private_messages():
+    user1 = request.args.get('user1')
+    user2 = request.args.get('user2')
+    conn = get_db()
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    cur.execute("SELECT * FROM private_messages WHERE (sender_id = %s AND receiver_id = %s) OR (sender_id = %s AND receiver_id = %s) ORDER BY created_at ASC", (user1, user2, user2, user1))
+    messages = [map_message(row) for row in cur.fetchall()]
+    conn.close()
+    return jsonify(messages)
+
+@app.route('/api/my-chats/<int:user_id>', methods=['GET'])
+def get_my_chats(user_id):
+    conn = get_db()
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    cur.execute("""
+        WITH all_chats AS (
+            SELECT receiver_id as partner_id, created_at, text FROM private_messages WHERE sender_id = %s
+            UNION ALL
+            SELECT sender_id as partner_id, created_at, text FROM private_messages WHERE receiver_id = %s
+        )
+        SELECT DISTINCT ON (partner_id) partner_id, text, created_at FROM all_chats ORDER BY partner_id, created_at DESC
+    """, (user_id, user_id))
+    chats = []
+    rows = cur.fetchall()
+    for row in rows:
+        cur.execute("SELECT id, name, username, avatar_base64 FROM users WHERE id = %s", (row['partner_id'],))
+        user_data = cur.fetchone()
+        if user_data:
+            chats.append({
+                'otherUser': {'id': user_data['id'], 'name': user_data['name'], 'username': user_data['username'], 'avatarBase64': user_data['avatar_base64']},
+                'lastMessage': {'text': row['text'], 'time': format_time(row['created_at']), 'timestamp': row['created_at'].timestamp() * 1000}
+            })
+    chats.sort(key=lambda x: x['lastMessage']['timestamp'], reverse=True)
+    conn.close()
+    return jsonify(chats)
+
+@app.route('/api/events/<int:event_id>/participants', methods=['GET'])
+def get_event_participants(event_id):
+    conn = get_db()
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    try:
+        # Отримуємо дані користувачів, які записані на подію
+        cur.execute("""
+            SELECT u.id, u.name, u.username, u.avatar_base64 
+            FROM users u
+            JOIN event_participants ep ON u.id = ep.user_id
+            WHERE ep.event_id = %s
+        """, (event_id,))
+        
+        participants = []
+        for row in cur.fetchall():
+            participants.append({
+                'id': row['id'],
+                'name': row['name'],
+                'username': row['username'],
+                'avatarBase64': row['avatar_base64']
+            })
+        return jsonify(participants)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        conn.close()
+
+@app.route('/api/users/search', methods=['GET'])
+def search_users():
+    query = request.args.get('q', '').strip()
+    if not query:
+        return jsonify([])
+    
+    conn = get_db()
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    try:
+        search_pattern = f"%{query}%"
+        cur.execute("""
+            SELECT id, name, username, avatar_base64, age, location, interests 
+            FROM users 
+            WHERE username ILIKE %s OR name ILIKE %s
+            LIMIT 20
+        """, (search_pattern, search_pattern))
+        
+        users = [map_user(row) for row in cur.fetchall()]
+        return jsonify(users)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        conn.close()
+
+if __name__ == '__main__':
+    socketio.run(app, debug=True, port=5000)

@@ -5,16 +5,47 @@ export const loginFormInitial = document.getElementById('loginFormInitial');
 export const showRegisterFormLink = document.getElementById('showRegisterFormLink');
 export const eventsGrid = document.getElementById('eventsGrid');
 export const peopleGrid = document.getElementById('peopleGrid');
+
+// --- СТВОРЕННЯ ПОДІЇ ---
 export const createEventBtn = document.getElementById('createEventBtn');
 export const createEventModal = document.getElementById('createEventModal');
 export const closeEventModal = document.getElementById('closeEventModal');
 export const createEventForm = document.getElementById('createEventForm');
+
+// Поля форми створення (Ці рядки були пропущені)
+export const eventTitle = document.getElementById('eventTitle');
+export const eventDescription = document.getElementById('eventDescription');
+export const eventCategory = document.getElementById('eventCategory');
+export const eventLocation = document.getElementById('eventLocation');
+export const eventDate = document.getElementById('eventDate');
+export const eventParticipants = document.getElementById('eventParticipants');
+export const eventMinParticipants = document.getElementById('eventMinParticipants');
+export const eventInterestsContainer = document.getElementById('eventInterestsContainer');
+export const addEventCustomInterestBtn = document.getElementById('addEventCustomInterestBtn');
+export const eventCustomInterestInput = document.getElementById('eventCustomInterestInput');
+
+// Навігація в модалці створення
+export const eventStepNext1 = document.getElementById('eventStepNext1');
+export const eventStepNext2 = document.getElementById('eventStepNext2');
+export const eventStepBack2 = document.getElementById('eventStepBack2');
+export const eventStepBack3 = document.getElementById('eventStepBack3');
+export const eventStepIndicator = document.getElementById('eventStepIndicator');
+export const modalStepTitle = document.getElementById('createEventTitle');
+export const eventSteps = document.querySelectorAll('#createEventModal .modal-step');
+
+// --- РЕЄСТРАЦІЯ ---
 export const registerModal = document.getElementById('registerModal');
 export const closeRegisterModal = document.getElementById('closeRegisterModal');
 export const registerForm = document.getElementById('registerForm');
 export const registerInterestsContainer = document.getElementById('registerInterestsContainer');
 export const customInterestInput = document.getElementById('customInterestInput');
 export const addCustomInterestBtn = document.getElementById('addCustomInterestBtn');
+export const verifyModal = document.getElementById('verifyModal');
+export const verifyCodeInput = document.getElementById('verifyCodeInput');
+export const verifyBtn = document.getElementById('verifyBtn');
+export const verifyError = document.getElementById('verifyError');
+
+// --- ПРОФІЛЬ ---
 export const profileModal = document.getElementById('profileModal');
 export const closeProfileModal = document.getElementById('closeProfileModal');
 export const profileModalAvatar = document.getElementById('profileModalAvatar');
@@ -23,10 +54,12 @@ export const profileModalUsername = document.getElementById('profileModalUsernam
 export const profileModalMeta = document.getElementById('profileModalMeta');
 export const profileModalInterests = document.getElementById('profileModalInterests');
 export const profileLogoutBtn = document.getElementById('profileLogoutBtn');
-export const eventDetailModal = document.getElementById('eventDetailModal');
-export const closeEventDetailModal = document.getElementById('closeEventDetailModal');
-export const themeToggle = document.querySelector('.theme-toggle');
-export const backToTopBtn = document.querySelector('.back-to-top');
+export const profileDisplay = document.getElementById('profileDisplay');
+export const profileAvatar = document.getElementById('profileAvatar');
+export const profileUsername = document.getElementById('profileUsername');
+export const userEventsList = document.getElementById('userEventsList');
+
+// --- РЕДАГУВАННЯ ПРОФІЛЮ ---
 export const editProfileModal = document.getElementById('editProfileModal');
 export const closeEditProfileModal = document.getElementById('closeEditProfileModal');
 export const editProfileForm = document.getElementById('editProfileForm');
@@ -39,6 +72,12 @@ export const editProfileLocation = document.getElementById('editProfileLocation'
 export const editProfileInterestsContainer = document.getElementById('editProfileInterestsContainer');
 export const addEditCustomInterestBtn = document.getElementById('addEditCustomInterestBtn');
 export const editCustomInterestInput = document.getElementById('editCustomInterestInput');
+
+// --- ДЕТАЛІ ПОДІЇ ---
+export const eventDetailModal = document.getElementById('eventDetailModal');
+export const closeEventDetailModal = document.getElementById('closeEventDetailModal');
+
+// --- РЕДАГУВАННЯ ПОДІЇ ---
 export const editEventModal = document.getElementById('editEventModal');
 export const closeEditEventModal = document.getElementById('closeEditEventModal');
 export const editEventForm = document.getElementById('editEventForm');
@@ -51,6 +90,13 @@ export const editEventParticipants = document.getElementById('editEventParticipa
 export const editEventInterestsContainer = document.getElementById('editEventInterestsContainer');
 export const addEditEventCustomInterestBtn = document.getElementById('addEditEventCustomInterestBtn');
 export const editEventCustomInterestInput = document.getElementById('editEventCustomInterestInput');
+
+// --- ІНШЕ ---
+export const themeToggle = document.querySelector('.theme-toggle');
+export const backToTopBtn = document.querySelector('.back-to-top');
+export const toggleArchiveBtn = document.getElementById('toggleArchiveBtn');
+
+// --- ЧАТИ ---
 export const chatListModal = document.getElementById('chatListModal');
 export const closeChatListModal = document.getElementById('closeChatListModal');
 export const chatListBtn = document.querySelector('.chat-list-btn');
@@ -59,6 +105,8 @@ export const closePrivateChatModal = document.getElementById('closePrivateChatMo
 export const privateChatMessages = document.getElementById('privateChatMessages');
 export const privateChatInput = document.getElementById('privateChatInput');
 export const sendPrivateMessageBtn = document.getElementById('sendPrivateMessage');
+
+// --- ІНШИЙ ЮЗЕР ---
 export const otherUserProfileModal = document.getElementById('otherUserProfileModal');
 export const closeOtherUserProfileModal = document.getElementById('closeOtherUserProfileModal');
 export const otherUserProfileAvatar = document.getElementById('otherUserProfileAvatar');
@@ -69,13 +117,12 @@ export const otherUserProfileInterests = document.getElementById('otherUserProfi
 export const otherUserProfileEvents = document.getElementById('otherUserProfileEvents');
 export const otherUserMessageBtn = document.getElementById('otherUserMessageBtn');
 
-// Елементи керування каруселлю
+// --- КАРУСЕЛЬ ТА ФІЛЬТРИ ---
 export const eventsHorizontalTrack = document.getElementById('eventsHorizontalTrack');
 export const eventCount = document.getElementById('eventCount');
 export const scrollLeftBtn = document.getElementById('scrollLeftBtn');
 export const scrollRightBtn = document.getElementById('scrollRightBtn');
 
-// Елементи фільтрів
 export const searchQueryInput = document.getElementById('searchQueryInput');
 export const locationInput = document.getElementById('locationInput');
 export const categorySelect = document.getElementById('categorySelect');
@@ -88,29 +135,15 @@ export const interestSearchInput = document.getElementById('interestSearchInput'
 export const searchBtn = document.getElementById('searchBtn');
 export const clearFiltersBtn = document.getElementById('clearFiltersBtn');
 export const peopleInterestFilter = document.getElementById('peopleInterestFilter');
+export const userSearchInput = document.getElementById('userSearchInput');
+export const cityFilterInput = document.getElementById('cityFilterInput');
 
-// Модалка інтересів
+// --- ПОШУК ІНТЕРЕСІВ ---
 export const interestSearchModal = document.getElementById('interestSearchModal');
 export const closeInterestSearchModal = document.getElementById('closeInterestSearchModal');
 export const interestModalTitle = document.getElementById('interestModalTitle');
 export const interestModalEventsGrid = document.getElementById('interestModalEventsGrid');
 export const interestModalPeopleGrid = document.getElementById('interestModalPeopleGrid');
 
-// Кнопки навігації кроками
-export const eventStepNext1 = document.getElementById('eventStepNext1');
-export const eventStepNext2 = document.getElementById('eventStepNext2');
-export const eventStepBack2 = document.getElementById('eventStepBack2');
-export const eventStepBack3 = document.getElementById('eventStepBack3');
-export const eventStepIndicator = document.getElementById('eventStepIndicator');
-export const modalStepTitle = document.getElementById('createEventTitle');
-export const eventSteps = document.querySelectorAll('#createEventModal .modal-step');
-export const addEventCustomInterestBtn = document.getElementById('addEventCustomInterestBtn');
-export const eventCustomInterestInput = document.getElementById('eventCustomInterestInput');
-
-// Інші елементи
-export const profileDisplay = document.getElementById('profileDisplay');
-export const profileAvatar = document.getElementById('profileAvatar');
-export const profileUsername = document.getElementById('profileUsername');
-export const userEventsList = document.getElementById('userEventsList');
 export const searchEventsBtn = document.getElementById('searchEventsBtn');
 export const contactForm = document.getElementById('contactForm');

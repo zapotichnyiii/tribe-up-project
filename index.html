@@ -32,7 +32,7 @@
 </head>
 <body>
 
-    <div id="authScreen" class="auth-screen modern-auth-screen">
+    <div id="authScreen" class="auth-screen modern-auth-screen" style="display: none;">
     <div class="auth-container modern-auth-container">
         <div class="auth-form-section">
             <div class="form-header">
@@ -446,33 +446,44 @@
         </section>
 
         <section id="events">
-            <div class="section-header-controls">
-                <h2 class="section-title-modern">
-                    Популярні події зараз
-                    <span id="eventCount" class="event-count-badge"></span>
-                </h2>
-                <div class="carousel-nav">
-                    <button class="scroll-btn left" id="scrollLeftBtn" aria-label="Прокрутити вліво">
-                        <i class="fas fa-arrow-left"></i>
-                    </button>
-                    <button class="scroll-btn right" id="scrollRightBtn" aria-label="Прокрутити вправо">
-                        <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
-            
-            <div class="events-horizontal">
-                <div id="eventsHorizontalTrack" class="events-track" role="region" aria-label="Список подій"></div>
-            </div>
-        </section>
+    <div class="section-header-controls">
+        <h2 class="section-title-modern">
+            Нові події
+            <span id="eventCount" class="event-count-badge"></span>
+        </h2>
 
-        <section id="people">
+        <button id="toggleArchiveBtn" class="btn btn-outline btn-sm" style="margin-right: 15px;">
+            <i class="fas fa-history"></i> Архів
+        </button>
+        <div class="carousel-nav">
+            <button class="scroll-btn left" id="scrollLeftBtn" aria-label="Прокрутити вліво">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <button class="scroll-btn right" id="scrollRightBtn" aria-label="Прокрутити вправо">
+                <i class="fas fa-arrow-right"></i>
+            </button>
+        </div>
+    </div>
+    
+    <div class="events-horizontal">
+        <div id="eventsHorizontalTrack" class="events-track" role="region" aria-label="Список подій"></div>
+    </div>
+</section>
+
+<section id="people">
             <div class="container">
-                <h2 class="section-title">Люди з твого міста</h2>
+                <h2 class="section-title">Люди</h2>
 
-                <div class="people-filter">
-                    <p class="filter-label">Фільтр за інтересами:</p>
-                    <div id="peopleInterestFilter" class="interest-tags"></div>
+                <div class="people-controls" style="margin-bottom: 20px; display: flex; flex-direction: column; gap: 15px;">
+                    <div class="search-group" style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <input type="text" id="userSearchInput" class="form-control" placeholder="Пошук за нікнеймом..." style="flex: 1;">
+                        <input type="text" id="cityFilterInput" class="form-control" placeholder="Місто (напр. Львів)" style="flex: 1;">
+                    </div>
+
+                    <div class="people-filter">
+                        <p class="filter-label">Фільтр за інтересами:</p>
+                        <div id="peopleInterestFilter" class="interest-tags"></div>
+                    </div>
                 </div>
 
                 <div class="grid" id="peopleGrid" role="region" aria-label="Список користувачів"></div>
@@ -662,6 +673,10 @@
                         <label class="form-label" for="eventParticipants">Макс. учасників</label>
                         <input type="number" class="form-control" id="eventParticipants" min="2" max="100" placeholder="Наприклад: 10" required aria-required="true">
                         <span class="error-message" id="eventParticipantsError"></span>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="eventMinParticipants">Мін. учасників (для підтвердження)</label>
+                        <input type="number" class="form-control" id="eventMinParticipants" min="1" max="100" placeholder="Наприклад: 3" required>
                     </div>
                     <div class="step-nav">
                         <button type="button" class="btn btn-outline" id="eventStepBack2"><i class="fas fa-arrow-left"></i> Назад</button>
@@ -881,6 +896,18 @@
         </div>
     </div>
 
+    <div class="modal" id="verifyModal" role="dialog">
+        <div class="modal-content" style="max-width: 400px; text-align: center;">
+            <h2>Підтвердження пошти</h2>
+            <p>Ми надіслали 6-значний код на вашу пошту. Введіть його нижче:</p>
+            <div class="form-group">
+                <input type="text" id="verifyCodeInput" class="form-control" placeholder="123456" maxlength="6" style="text-align: center; font-size: 1.5em; letter-spacing: 5px;">
+            </div>
+            <button id="verifyBtn" class="btn btn-accent" style="width: 100%;">Підтвердити</button>
+            <p id="verifyError" style="color: red; margin-top: 10px; display: none;"></p>
+        </div>
+    </div>
+
     <div class="modal" id="otherUserProfileModal" role="dialog" aria-labelledby="otherUserProfileName">
         <div class="modal-content">
             <button class="modal-close" id="closeOtherUserProfileModal" aria-label="Закрити модалку">×</button>
@@ -929,6 +956,7 @@
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
     <script type="module" src="/scripts/main.js"></script>
 </body>
 </html>
