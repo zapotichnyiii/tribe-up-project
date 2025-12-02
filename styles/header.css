@@ -241,6 +241,102 @@ header.scrolled .profile-area:hover .profile-name {
     color: white;
 }
 
+/* Кнопка дзвіночка (окремий клас, щоб не конфліктував з чатом) */
+.notification-bell-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    color: var(--main-dark-color);
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    margin-right: 10px;
+}
+
+body.dark-theme .notification-bell-btn {
+    color: rgba(255, 255, 255, 0.9);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.notification-bell-btn:hover, .notification-bell-btn.active {
+    background: var(--auth-accent-color);
+    color: white;
+    transform: translateY(-2px);
+}
+
+/* Випадаюче меню сповіщень */
+.notification-dropdown {
+    display: none;
+    position: absolute;
+    top: 60px;
+    right: 0; 
+    width: 320px;
+    background: var(--main-card-background);
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+    z-index: 2000;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+    animation: slideDown 0.2s ease;
+}
+
+body.dark-theme .notification-dropdown {
+    background: var(--dark-card-bg);
+    border-color: var(--dark-border);
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.dropdown-header {
+    padding: 15px;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(0,0,0,0.02);
+}
+body.dark-theme .dropdown-header { border-bottom-color: var(--dark-border); }
+
+.dropdown-header b { font-size: 1rem; }
+.text-btn { background: none; border: none; color: var(--auth-accent-color); font-size: 0.8rem; cursor: pointer; font-weight: 600; }
+
+.notification-list {
+    max-height: 350px;
+    overflow-y: auto;
+}
+
+.notif-item {
+    padding: 12px 15px;
+    border-bottom: 1px solid #f1f5f9;
+    cursor: pointer;
+    transition: background 0.2s;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+body.dark-theme .notif-item { border-bottom-color: var(--dark-border); }
+
+.notif-item:hover { background: rgba(0,0,0,0.03); }
+body.dark-theme .notif-item:hover { background: rgba(255,255,255,0.05); }
+
+.notif-item.unread {
+    background: rgba(107, 33, 168, 0.05);
+    border-left: 3px solid var(--auth-accent-color);
+}
+
+.notif-text { font-size: 0.9rem; line-height: 1.4; }
+.notif-time { font-size: 0.75rem; color: var(--main-secondary-color); }
+
 @media (max-width: 768px) {
     .navbar {
         padding: 0.75rem 0;

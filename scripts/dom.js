@@ -12,7 +12,7 @@ export const createEventModal = document.getElementById('createEventModal');
 export const closeEventModal = document.getElementById('closeEventModal');
 export const createEventForm = document.getElementById('createEventForm');
 
-// Поля форми створення (Ці рядки були пропущені)
+// Поля форми створення
 export const eventTitle = document.getElementById('eventTitle');
 export const eventDescription = document.getElementById('eventDescription');
 export const eventCategory = document.getElementById('eventCategory');
@@ -147,3 +147,21 @@ export const interestModalPeopleGrid = document.getElementById('interestModalPeo
 
 export const searchEventsBtn = document.getElementById('searchEventsBtn');
 export const contactForm = document.getElementById('contactForm');
+
+// --- НОВІ ЕЛЕМЕНТИ (СОЦІАЛЬНІ ТА СПОВІЩЕННЯ) ---
+export const notificationBtn = document.getElementById('notificationBtn');
+export const notificationBadge = document.getElementById('notificationBadge');
+export const notificationDropdown = document.getElementById('notificationDropdown');
+export const notificationList = document.getElementById('notificationList');
+export const markAllReadBtn = document.getElementById('markAllReadBtn');
+
+export const myFollowersBtn = document.getElementById('myFollowersBtn');
+export const myFollowingBtn = document.getElementById('myFollowingBtn');
+export const socialListModal = document.getElementById('socialListModal');
+export const closeSocialListModal = document.getElementById('closeSocialListModal');
+export const socialListContainer = document.getElementById('socialListContainer');
+export const socialListTitle = document.getElementById('socialListTitle');
+
+export const otherUserFollowBtn = document.getElementById('otherUserFollowBtn');
+export const otherUserFollowersCount = document.getElementById('otherUserFollowersCount');
+export const otherUserFollowingCount = document.getElementById('otherUserFollowingCount');

@@ -226,6 +226,19 @@
                         <li><a href="#contact" onclick="scrollToSection('contact')" aria-label="Перейти до контактів">Контакти</a></li>
                     </ul>
                     <div class="navbar-right">
+                        
+                        <div class="notification-wrapper" style="position: relative;">
+                            <button class="notification-bell-btn" id="notificationBtn" style="margin-right: 8px;" aria-label="Сповіщення">
+                                <i class="fas fa-bell"></i>
+                                <span id="notificationBadge" style="display:none; position:absolute; top:-5px; right:-5px; background:red; color:white; font-size:10px; padding:2px 5px; border-radius:50%;">0</span>
+                            </button>
+                            <div id="notificationDropdown" style="display:none; position:absolute; top:50px; right:0; width:300px; background:var(--main-card-background); border:1px solid #ccc; border-radius:8px; z-index:2000; box-shadow:0 5px 15px rgba(0,0,0,0.2);">
+                                <div style="padding:10px; border-bottom:1px solid #eee; display:flex; justify-content:space-between;">
+                                    <b>Сповіщення</b> <span id="markAllReadBtn" style="cursor:pointer; color:blue; font-size:0.8em;">Прочитати все</span>
+                                </div>
+                                <div id="notificationList" style="max-height:300px; overflow-y:auto;"></div>
+                            </div>
+                        </div>
                         <button class="chat-list-btn" aria-label="Відкрити особисті чати">
                             <i class="fas fa-comments"></i>
                         </button>
@@ -832,6 +845,11 @@
                 <img id="profileModalAvatar" src="" alt="Аватар користувача" style="width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 2px solid #1a2b44;" loading="lazy">
                 <h3 id="profileModalName" style="margin: 0; font-size: 1.2em;"></h3>
                 <div id="profileModalUsername" style="font-weight: 600; color: #1a2b44; font-size: 0.9em;"></div>
+
+                <div style="display:flex; gap:15px; justify-content:center; margin:10px 0; font-size:0.9em;">
+                    <div id="myFollowersBtn" style="cursor:pointer;"><b>0</b> підписників</div>
+                    <div id="myFollowingBtn" style="cursor:pointer;"><b>0</b> підписок</div>
+                </div>
                 <div id="profileModalMeta" style="color: #64748b; font-size: 0.8em;"></div>
                 <div id="profileModalInterests" style="display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; margin: 6px 0;"></div>
                 <div id="userEvents" style="width: 100%; text-align: left;">
@@ -911,17 +929,25 @@
     <div class="modal" id="otherUserProfileModal" role="dialog" aria-labelledby="otherUserProfileName">
         <div class="modal-content">
             <button class="modal-close" id="closeOtherUserProfileModal" aria-label="Закрити модалку">×</button>
-            <img id="otherUserProfileAvatar" src="https://via.placeholder.com/100?text=@" alt="Аватар" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin: 0 auto 12px; display: block;">
-            <h2 id="otherUserProfileName" style="text-align: center; font-size: 1.5rem;"></h2>
-            <p id="otherUserProfileUsername" style="text-align: center; font-size: 1rem; color: var(--main-secondary-color);"></p>
+            <img id="otherUserProfileAvatar" src="" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin: 0 auto 12px; display: block;">
+            <h2 id="otherUserProfileName" style="text-align: center;"></h2>
+            <p id="otherUserProfileUsername" style="text-align: center; color: gray;"></p>
+            
+            <div style="display:flex; gap:15px; justify-content:center; margin:10px 0;">
+                <div><b id="otherUserFollowersCount">0</b> підписників</div>
+                <div><b id="otherUserFollowingCount">0</b> підписок</div>
+            </div>
+            
             <p id="otherUserProfileMeta" style="text-align: center; font-size: 0.9rem; color: var(--main-secondary-color); margin-bottom: 12px;"></p>
             <div id="otherUserProfileInterests" class="interests" style="justify-content: center;"></div>
             <div id="otherUserProfileEvents" style="margin-top: 16px;"></div>
-            <div style="text-align: center; margin-top: 16px;">
-                <button class="btn btn-accent" id="otherUserMessageBtn" aria-label="Написати користувачу">Написати</button>
+            
+            <div style="text-align: center; margin-top: 16px; display:flex; gap:10px; justify-content:center;">
+                <button class="btn btn-accent" id="otherUserMessageBtn">Написати</button>
+                <button class="btn btn-outline" id="otherUserFollowBtn">Підписатися</button>
             </div>
         </div>
-    </div>
+        </div>
 
     <div class="modal" id="privateChatModal" role="dialog" aria-labelledby="privateChatTitle">
         <div class="modal-content">
@@ -954,7 +980,14 @@
             </div>
         </div>
     </div>
-
+    
+    <div class="modal" id="socialListModal">
+        <div class="modal-content" style="max-width: 400px; height: 500px; display:flex; flex-direction:column;">
+            <button class="modal-close" id="closeSocialListModal">×</button>
+            <h2 id="socialListTitle" style="text-align: center; margin-bottom:10px;">Список</h2>
+            <div id="socialListContainer" style="overflow-y:auto; flex:1;"></div>
+        </div>
+    </div>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
     <script type="module" src="/scripts/main.js"></script>
