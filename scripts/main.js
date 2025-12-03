@@ -7,12 +7,7 @@ import * as user from './user.js';
 import * as chat from './chat.js';
 
 // Підключаємо Socket.IO для сповіщень
-let socket;
-try {
-    socket = io('http://localhost:5000');
-} catch (e) {
-    console.error("Socket.IO не знайдено! Перевірте script тег в index.html");
-}
+const socket = io('http://localhost:5000');
 
 document.addEventListener('DOMContentLoaded', async () => {
     // 1. Завантаження інтересів

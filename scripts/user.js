@@ -93,21 +93,18 @@ async function updateOtherUserProfileStats(userId) {
 }
 
 // Відкриття списку підписників або підписок у модалці
-export async function openSocialList(type, userId) {
-    // Якщо ID не передано, беремо поточного юзера
-    if (!userId) {
-        const currentUser = utils.getCurrentUser();
-        if (!currentUser) return;
-        userId = currentUser.id;
-    }
+export async function openSocialList(type) {
+    const user = utils.getCurrentUser();
+    if (!user) return;
     
+    // Встановлюємо заголовок
     dom.socialListTitle.textContent = type === 'followers' ? 'Підписники' : 'Підписки';
     dom.socialListContainer.innerHTML = '<p style="text-align: center; padding: 20px;">Завантаження...</p>';
     
     utils.openModal(dom.socialListModal);
     
     try {
-        const res = await fetch(`http://localhost:5000/api/users/${userId}/social`);
+        const res = await fetch(`http://localhost:5000/api/users/${user.id}/social`);
         const data = await res.json();
         const list = type === 'followers' ? data.followers : data.following;
         
@@ -120,33 +117,25 @@ export async function openSocialList(type, userId) {
 
         list.forEach(u => {
             const div = document.createElement('div');
-            // Жорстко задаємо стилі для flex контейнера
-            div.style.cssText = 'padding: 12px; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 15px; cursor: pointer; transition: background 0.2s;';
-            
-            // Перевірка аватарки + жорсткі стилі розміру
-            const avatarSrc = u.avatarBase64 || 'https://via.placeholder.com/100';
-            
+            div.style.cssText = 'padding: 10px; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: background 0.2s;';
             div.innerHTML = `
-                <img src="${avatarSrc}" style="width: 45px; height: 45px; min-width: 45px; border-radius: 50%; object-fit: cover; border: 1px solid #ddd; display: block;">
-                <div style="flex-grow: 1;">
-                    <div style="font-weight: 600; font-size: 0.95rem;">@${u.username}</div>
-                    <div style="font-size: 0.85rem; color: gray;">${u.name}</div>
+                <img src="${u.avatarBase64 || 'https://via.placeholder.com/40'}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+                <div>
+                    <div style="font-weight: 600;">@${u.username}</div>
+                    <div style="font-size: 0.8em; color: gray;">${u.name}</div>
                 </div>
-                <i class="fas fa-chevron-right" style="color: #ccc; font-size: 0.8rem;"></i>
             `;
             
-            div.addEventListener('mouseenter', () => div.style.background = 'rgba(0,0,0,0.03)');
+            div.addEventListener('mouseenter', () => div.style.background = 'rgba(0,0,0,0.05)');
             div.addEventListener('mouseleave', () => div.style.background = 'transparent');
             
             div.addEventListener('click', () => {
                 utils.closeModal(dom.socialListModal);
-                // Невелика затримка для плавності
-                setTimeout(() => openOtherUserProfile(u.id), 200);
+                openOtherUserProfile(u.id);
             });
             dom.socialListContainer.appendChild(div);
         });
     } catch(e) {
-        console.error(e);
         dom.socialListContainer.innerHTML = '<p style="text-align:center; color:red;">Помилка завантаження</p>';
     }
 }
@@ -341,73 +330,37 @@ export async function openOtherUserProfile(userId) {
 }
 
 // ОНОВЛЕНА функція власного профілю (додано завантаження статистики)
-export async function openOtherUserProfile(userId) {
-    const users = await utils.getUsers();
-    const user = users.find(u => u.id === userId);
-    if (!user) return;
-
-    // Заповнення інфо
-    if (dom.otherUserProfileAvatar) dom.otherUserProfileAvatar.src = user.avatarBase64 || 'https://via.placeholder.com/100';
-    if (dom.otherUserProfileName) dom.otherUserProfileName.textContent = user.name;
-    if (dom.otherUserProfileUsername) dom.otherUserProfileUsername.textContent = '@' + user.username;
-    if (dom.otherUserProfileInterests) dom.otherUserProfileInterests.innerHTML = user.interests.map(i => `<span class="interest-tag selected">${i}</span>`).join('');
-    
-    // Кнопки
+export async function openUserProfile() {
     const currentUser = utils.getCurrentUser();
-    const isMe = currentUser && currentUser.id === user.id;
+    if (!currentUser) return;
+    
+    // Завантажуємо свіжі дані соцмереж
+    await fetchMySocials();
 
-    if (dom.otherUserMessageBtn) {
-        dom.otherUserMessageBtn.dataset.userId = user.id;
-        dom.otherUserMessageBtn.style.display = isMe ? 'none' : 'block';
-    }
+    try {
+        const users = await utils.getUsers();
+        const freshUser = users.find(u => u.id === currentUser.id);
+        if (!freshUser) return utils.showToast('Не вдалося завантажити профіль', 'error');
 
-    if (dom.otherUserFollowBtn) {
-        if (isMe) {
-            dom.otherUserFollowBtn.style.display = 'none';
-        } else {
-            dom.otherUserFollowBtn.style.display = 'block';
-            await fetchMySocials(); 
-            const isFollowing = myFollowingIds.includes(user.id);
-            dom.otherUserFollowBtn.textContent = isFollowing ? 'Відписатися' : 'Підписатися';
-            dom.otherUserFollowBtn.className = isFollowing ? 'btn btn-outline' : 'btn btn-accent';
-            
-            const newBtn = dom.otherUserFollowBtn.cloneNode(true);
-            dom.otherUserFollowBtn.parentNode.replaceChild(newBtn, dom.otherUserFollowBtn);
-            newBtn.addEventListener('click', () => toggleFollow(user.id, newBtn));
+        if(dom.profileModalAvatar) dom.profileModalAvatar.src = freshUser.avatarBase64 || 'https://via.placeholder.com/100';
+        if(dom.profileModalName) dom.profileModalName.textContent = freshUser.name;
+        if(dom.profileModalUsername) dom.profileModalUsername.textContent = `@${freshUser.username}`;
+        if(dom.profileModalInterests) dom.profileModalInterests.innerHTML = freshUser.interests.map(i => `<span class="interest-tag selected">${i}</span>`).join('');
+
+        const allEvents = await utils.getEvents('active');
+        const myEvents = allEvents.filter(e => e.creatorId === freshUser.id);
+        if (dom.userEventsList) {
+            dom.userEventsList.innerHTML = myEvents.length ? '' : '<p style="color:#888;">Поки немає подій</p>';
+            myEvents.forEach(e => {
+                const div = document.createElement('div');
+                div.style.padding = '8px';
+                div.style.borderBottom = '1px solid #eee';
+                div.innerHTML = `<b>${e.title}</b> <span style="color:#666; font-size:0.8em;">(${utils.formatEventDate(e.date)})</span>`;
+                dom.userEventsList.appendChild(div);
+            });
         }
-    }
-    
-    // Статистика
-    updateOtherUserProfileStats(userId);
-    
-    
-    const followersEl = document.getElementById('otherUserFollowersCount')?.parentElement;
-    const followingEl = document.getElementById('otherUserFollowingCount')?.parentElement;
-    
-    if (followersEl) {
-        followersEl.style.cursor = 'pointer';
-        followersEl.onclick = () => openSocialList('followers', userId); // Передаємо ID цього юзера
-    }
-    if (followingEl) {
-        followingEl.style.cursor = 'pointer';
-        followingEl.onclick = () => openSocialList('following', userId); // Передаємо ID цього юзера
-    }
-
-    // Події (без змін)
-    const allEvents = await utils.getEvents();
-    const userEvents = allEvents.filter(e => e.creatorId === userId);
-    
-    if (dom.otherUserProfileEvents) {
-        dom.otherUserProfileEvents.innerHTML = userEvents.length ? '' : '<p>Немає подій</p>';
-        userEvents.forEach(e => {
-            const div = document.createElement('div');
-            div.className = 'event-item';
-            div.textContent = `${e.title} (${utils.formatEventDate(e.date)})`;
-            dom.otherUserProfileEvents.appendChild(div);
-        });
-    }
-
-    utils.openModal(dom.otherUserProfileModal);
+        utils.openModal(dom.profileModal);
+    } catch (e) { console.error(e); }
 }
 
 export const editProfileValidations = [{ inputId: 'editProfileName', errorId: 'editProfileNameError', validationFn: v => v.length >= 2, errorMessage: 'Ім’я: від 2 символів' }];

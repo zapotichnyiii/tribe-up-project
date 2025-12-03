@@ -310,33 +310,6 @@ body.dark-theme .dropdown-header { border-bottom-color: var(--dark-border); }
 .dropdown-header b { font-size: 1rem; }
 .text-btn { background: none; border: none; color: var(--auth-accent-color); font-size: 0.8rem; cursor: pointer; font-weight: 600; }
 
-.notification-list {
-    max-height: 350px;
-    overflow-y: auto;
-}
-
-.notif-item {
-    padding: 12px 15px;
-    border-bottom: 1px solid #f1f5f9;
-    cursor: pointer;
-    transition: background 0.2s;
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-}
-body.dark-theme .notif-item { border-bottom-color: var(--dark-border); }
-
-.notif-item:hover { background: rgba(0,0,0,0.03); }
-body.dark-theme .notif-item:hover { background: rgba(255,255,255,0.05); }
-
-.notif-item.unread {
-    background: rgba(107, 33, 168, 0.05);
-    border-left: 3px solid var(--auth-accent-color);
-}
-
-.notif-text { font-size: 0.9rem; line-height: 1.4; }
-.notif-time { font-size: 0.75rem; color: var(--main-secondary-color); }
-
 @media (max-width: 768px) {
     .navbar {
         padding: 0.75rem 0;
