@@ -38,7 +38,6 @@ def get_db():
     conn = psycopg2.connect(**DB_CONFIG)
     return conn
 
-# --- ДЕКОРАТОР (Той самий) ---
 def token_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
@@ -56,7 +55,6 @@ def token_required(f):
         return f(*args, **kwargs)
     return decorated
 
-# Допоміжні функції
 def format_time(dt):
     if isinstance(dt, datetime):
         return dt.strftime("%H:%M")
@@ -149,19 +147,16 @@ def on_join_notifications(data):
 
 @socketio.on('join')
 def on_join(data):
-    """Користувач заходить у кімнату (чат події або приватний)"""
     room = data['room']
     join_room(room)
 
 @socketio.on('leave')
 def on_leave(data):
-    """Користувач виходить"""
     room = data['room']
     leave_room(room)
 
 @socketio.on('send_event_message')
 def handle_event_message(data):
-    """Отримали повідомлення для події -> Зберігаємо -> Розсилаємо всім"""
     conn = get_db()
     cur = conn.cursor(cursor_factory=RealDictCursor)
     try:
@@ -185,7 +180,6 @@ def handle_event_message(data):
 
 @socketio.on('send_private_message')
 def handle_private_message(data):
-    """Отримали приватне повідомлення -> Зберігаємо -> Розсилаємо"""
     conn = get_db()
     cur = conn.cursor(cursor_factory=RealDictCursor)
     try:
@@ -359,6 +353,21 @@ def create_event():
         
         event = cur.fetchone()
         cur.execute("INSERT INTO event_participants (user_id, event_id) VALUES (%s, %s)", (data['creatorId'], event['id']))
+        
+        # --- СИСТЕМА СПОВІЩЕНЬ: НОВА ПОДІЯ ---
+        try:
+            cur.execute("SELECT username FROM users WHERE id = %s", (data['creatorId'],))
+            creator_name = cur.fetchone()['username']
+
+            cur.execute("SELECT follower_id FROM followers WHERE followed_id = %s", (data['creatorId'],))
+            followers = cur.fetchall()
+
+            for f in followers:
+                create_notification(f['follower_id'], 'new_event', f"{creator_name} створює нову подію: {data['title']}", event['id'])
+        except Exception as e:
+            print(f"Notification error: {e}")
+        # ---------------------------------------
+
         conn.commit()
         return jsonify(map_event(event))
     except Exception as e:
@@ -380,6 +389,17 @@ def update_event(event_id):
         """, (data['title'], data['description'], data['category'], data['location'], data['date'], data['participants'], data['interests'], event_id))
         updated_event = cur.fetchone()
         if updated_event:
+            # --- СИСТЕМА СПОВІЩЕНЬ: ОНОВЛЕННЯ ПОДІЇ ---
+            try:
+                cur.execute("SELECT user_id FROM event_participants WHERE event_id = %s", (event_id,))
+                participants = cur.fetchall()
+                for p in participants:
+                    if p['user_id'] != updated_event['creator_id']:
+                        create_notification(p['user_id'], 'update', f"Оновлено деталі події '{updated_event['title']}'", event_id)
+            except Exception as e:
+                print(f"Notification error (update): {e}")
+            # ------------------------------------------
+
             conn.commit()
             return jsonify(map_event(updated_event))
         return jsonify({'error': 'Not found'}), 404
@@ -392,8 +412,23 @@ def update_event(event_id):
 @token_required
 def delete_event(event_id):
     conn = get_db()
-    cur = conn.cursor()
+    cur = conn.cursor(cursor_factory=RealDictCursor)
     try:
+        # --- СИСТЕМА СПОВІЩЕНЬ: СКАСУВАННЯ ПОДІЇ ---
+        try:
+            cur.execute("SELECT title, creator_id FROM events WHERE id = %s", (event_id,))
+            evt = cur.fetchone()
+            
+            if evt:
+                cur.execute("SELECT user_id FROM event_participants WHERE event_id = %s", (event_id,))
+                participants = cur.fetchall()
+                for p in participants:
+                    if p['user_id'] != evt['creator_id']:
+                        create_notification(p['user_id'], 'system', f"Подію '{evt['title']}' було скасовано організатором.", None)
+        except Exception as e:
+            print(f"Notification error (delete): {e}")
+        # ------------------------------------------
+
         cur.execute("DELETE FROM event_participants WHERE event_id = %s", (event_id,))
         cur.execute("DELETE FROM event_messages WHERE event_id = %s", (event_id,))
         cur.execute("DELETE FROM events WHERE id = %s", (event_id,))
@@ -409,10 +444,25 @@ def delete_event(event_id):
 def join_event():
     data = request.json
     conn = get_db()
-    cur = conn.cursor()
+    cur = conn.cursor(cursor_factory=RealDictCursor)
     try:
         cur.execute("INSERT INTO event_participants (user_id, event_id) VALUES (%s, %s)", (data['userId'], data['eventId']))
         cur.execute("UPDATE events SET current_participants = current_participants + 1 WHERE id = %s", (data['eventId'],))
+        
+        # --- СИСТЕМА СПОВІЩЕНЬ: НОВИЙ УЧАСНИК ---
+        try:
+            cur.execute("SELECT title, creator_id FROM events WHERE id = %s", (data['eventId'],))
+            evt_info = cur.fetchone()
+            
+            cur.execute("SELECT username FROM users WHERE id = %s", (data['userId'],))
+            joiner_name = cur.fetchone()['username']
+            
+            if evt_info and evt_info['creator_id'] != data['userId']:
+                create_notification(evt_info['creator_id'], 'join', f"{joiner_name} йде на вашу подію '{evt_info['title']}'", data['eventId'])
+        except Exception as e:
+            print(f"Notification error (join): {e}")
+        # ----------------------------------------
+
         conn.commit()
         return jsonify({'status': 'success'})
     except Exception: return jsonify({'error': 'Error'}), 400

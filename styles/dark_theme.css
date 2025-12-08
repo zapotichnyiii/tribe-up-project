@@ -150,9 +150,6 @@ body.dark-theme .scroll-btn:hover {
     border-color: var(--dt-accent) !important;
 }
 
-/* ==========================================================================
-   5. ТЕКСТ ТА ІКОНКИ
-========================================================================== */
 body.dark-theme p,
 body.dark-theme small,
 body.dark-theme .text-muted,
@@ -180,11 +177,6 @@ body.dark-theme .icon-circle i {
     color: white !important;
 }
 
-/* ==========================================================================
-   6. СПЕЦИФІЧНІ ЕЛЕМЕНТИ
-========================================================================== */
-
-/* Login Background */
 body.dark-theme .modern-auth-screen,
 body.dark-theme .auth-hero-section {
     background: linear-gradient(135deg, var(--dt-bg-deep), var(--dt-bg-surface)) !important;
@@ -226,4 +218,9 @@ body.dark-theme .leaflet-control-attribution {
 body.dark-theme #eventMap,
 body.dark-theme #contactMap {
     background: var(--dt-bg-input) !important;
+}
+
+body.dark-theme #events {
+    background-color: var(--dark-bg);
+    border-top: 1px solid var(--dark-border);
 }

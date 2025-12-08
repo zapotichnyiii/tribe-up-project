@@ -3,9 +3,9 @@ import * as utils from './utils.js';
 import { renderInterests } from './ui.js';
 import { loadEventChat } from './chat.js';
 
-// --- ГЛОБАЛЬНИЙ КЕШ (Як у секції Люди) ---
 let allEventsCache = []; 
 let usersCache = new Map(); 
+let myJoinedEventIds = [];
 let isShowingArchive = false;
 
 const getAuthHeaders = () => ({
@@ -13,50 +13,38 @@ const getAuthHeaders = () => ({
     'Authorization': `Bearer ${localStorage.getItem('token')}`
 });
 
-// --- ПОЛІНГ (Автооновлення) ---
 export function startEventPolling() {
-    // Перше завантаження одразу
     refreshEventsCache();
-    // Далі кожні 5 секунд
     setInterval(() => {
         refreshEventsCache();
     }, 5000);
 }
 
-// Функція для оновлення даних з сервера "тихо"
 export async function refreshEventsCache() {
     try {
-        // 1. Вантажимо юзерів (щоб мати аватарки/імена)
         const users = await utils.getUsers();
         usersCache = new Map(users.map(u => [u.id, u]));
 
-        // 2. Вантажимо події (активні або архів, залежно від режиму)
+        const currentUser = utils.getCurrentUser();
+        if (currentUser) {
+            const joinedData = await utils.getJoinedEvents();
+            myJoinedEventIds = joinedData[currentUser.id] || [];
+        }
+
         const status = isShowingArchive ? 'finished' : 'active';
         const events = await utils.getEvents(status);
         
-        // Перевіряємо, чи змінилися дані, щоб дарма не перемальовувати DOM
-        // (Проста перевірка по довжині або ID першого елемента)
-        const needsUpdate = JSON.stringify(events.map(e => e.eventId)) !== JSON.stringify(allEventsCache.map(e => e.eventId)) 
-                            || allEventsCache.length !== events.length;
-
         allEventsCache = events;
-
-        // Якщо дані змінилися або це перше завантаження, або користувач щось шукає -> рендеримо
-        // Але якщо користувач активно друкує (input у фокусі), можна не перебивати, 
-        // хоча при локальному фільтрі це буде непомітно.
-        if (needsUpdate || dom.eventsHorizontalTrack.innerHTML === '') {
-            renderEventsLocal();
-        }
+        renderEventsLocal();
     } catch (e) {
         console.error("Polling error:", e);
     }
 }
 
-// Зміна режиму Архів/Актуальні
 export function toggleArchiveMode(showArchive) {
     isShowingArchive = showArchive;
     dom.eventsHorizontalTrack.innerHTML = '<p style="padding:20px; text-align:center;">Завантаження...</p>';
-    refreshEventsCache(); // Примусове оновлення
+    refreshEventsCache();
 }
 
 export function initEventFilters() {
@@ -72,7 +60,6 @@ export function initEventFilters() {
         dom.interestSearchInput
     ];
 
-    // МИТТЄВА реакція на кожну зміну (без debounce)
     inputs.forEach(input => {
         if (input) {
             input.addEventListener('input', renderEventsLocal);
@@ -87,13 +74,11 @@ export function initEventFilters() {
         });
     }
     
-    // Кнопка пошуку тепер просто скидає фокус, бо пошук і так працює
     if (dom.searchBtn) {
         dom.searchBtn.addEventListener('click', renderEventsLocal);
     }
 }
 
-// Локальна фільтрація (працює миттєво по кешу)
 function filterEventsLocal(events) {
     const query = dom.searchQueryInput?.value.toLowerCase().trim() || '';
     const loc = dom.locationInput?.value.toLowerCase().trim() || '';
@@ -149,19 +134,16 @@ function sortEventsLocal(events) {
     });
 }
 
-// Головна функція рендеру (синхронна, тому миттєва)
 export function renderEventsLocal() {
     const track = dom.eventsHorizontalTrack;
     const eventCount = dom.eventCount;
     if (!track) return;
 
-    // 1. Фільтруємо та сортуємо дані з пам'яті
     let processedEvents = filterEventsLocal(allEventsCache);
     processedEvents = sortEventsLocal(processedEvents);
     
     if (eventCount) eventCount.textContent = `(${processedEvents.length})`;
 
-    // 2. Очищаємо трек
     track.innerHTML = '';
 
     if (processedEvents.length === 0) {
@@ -173,7 +155,6 @@ export function renderEventsLocal() {
 
     const currentUser = utils.getCurrentUser();
     
-    // 3. Створюємо фрагмент (оптимізація)
     const fragment = document.createDocumentFragment();
 
     processedEvents.forEach(event => {
@@ -194,7 +175,6 @@ export function renderEventsLocal() {
             }
         }
 
-        // Беремо дані творця з MAP (швидко)
         const creator = usersCache.get(event.creatorId);
         const creatorName = creator ? creator.username : 'Невідомий';
         const creatorAvatar = creator?.avatarBase64 || 'https://via.placeholder.com/24';
@@ -207,10 +187,15 @@ export function renderEventsLocal() {
         const interestsHtml = event.interests.map(i => `<span class="interest-tag selected">${i}</span>`).join('');
         
         let buttonHtml = '';
+        
+        // Додаємо position: relative і z-index: 2 до кнопок, щоб вони були поверх картки
         if (currentUser && currentUser.id === event.creatorId) {
-            buttonHtml = `<button class="card-action-button card-action-organizer" disabled style="background: #f1f5f9; color: #6b21a8; cursor: default;"><i class="fas fa-crown"></i> Ви організатор</button>`;
+            buttonHtml = `<button class="card-action-button card-action-organizer" disabled style="background: #f1f5f9; color: #6b21a8; cursor: default; position: relative; z-index: 2;"><i class="fas fa-crown"></i> Ви організатор</button>`;
+        } else if (currentUser && myJoinedEventIds.includes(event.eventId) && !isShowingArchive) {
+            // ПРИБРАНО ІКОНКУ МІНУСА
+            buttonHtml = `<button class="card-action-button leave-btn-v4" data-event-id="${event.eventId}" style="background: #ef4444; position: relative; z-index: 2;">Покинути</button>`;
         } else if (!isShowingArchive) {
-            buttonHtml = `<button class="card-action-button join-btn-v4" data-event-id="${event.eventId}"><i class="fas fa-plus"></i> Приєднатися</button>`;
+            buttonHtml = `<button class="card-action-button join-btn-v4" data-event-id="${event.eventId}" style="position: relative; z-index: 2;"><i class="fas fa-plus"></i> Приєднатися</button>`;
         }
 
         card.innerHTML = `
@@ -256,17 +241,12 @@ export function updateScrollButtons() {
     dom.scrollLeftBtn.disabled = track.scrollLeft <= 10;
 }
 
-// Ця функція сумісності, щоб старий код main.js не ламався, 
-// але вона просто викликає оновлення кешу
 export async function renderEvents(events, isArchive) {
     if (events) allEventsCache = events;
     if (typeof isArchive !== 'undefined') isShowingArchive = isArchive;
     renderEventsLocal();
 }
 
-// ... Далі йде решта коду (openEventDetail і т.д.), вона не змінюється ...
-// Але для коректності скопіюйте сюди решту функцій з попереднього файлу, 
-// починаючи з export async function openEventDetail(event) ...
 export async function openEventDetail(event) {
     const user = utils.getCurrentUser();
     if (!user) {
@@ -399,7 +379,6 @@ export async function handleJoinEvent(event, callback) {
             body: JSON.stringify({ userId: user.id, eventId: event.eventId })
         });
         if (res.ok) {
-            // Одразу оновлюємо кеш, щоб відобразити зміни
             await refreshEventsCache();
             if (callback) callback();
             return true;
@@ -476,7 +455,6 @@ export async function handleCreateEventSubmit(e) {
             utils.closeModal(dom.createEventModal);
             dom.createEventForm.reset();
             utils.showToast('Подію створено!', 'success');
-            // Оновлюємо список миттєво
             refreshEventsCache();
         } else {
             utils.showToast('Помилка створення', 'error');

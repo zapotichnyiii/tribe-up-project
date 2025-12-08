@@ -1,11 +1,14 @@
 #events {
-    padding: 0;
+    padding: 40px 0 80px; 
+    background-color: var(--main-card-background);
+    border-top: 1px solid #e2e8f0;
+    
     max-width: 100%;
     margin: 0 auto;
     overflow: hidden;
+    position: relative;
+    z-index: 1; 
 }
-
-/* Очищено старі стилі заголовків */
 .event-count-badge {
     font-size: 0.6em;
     color: var(--main-secondary-color);
