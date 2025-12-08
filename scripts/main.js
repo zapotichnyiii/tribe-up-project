@@ -10,23 +10,19 @@ import * as chat from './chat.js';
 const socket = io('http://localhost:5000');
 
 document.addEventListener('DOMContentLoaded', async () => {
-    // Завантажуємо глобальні інтереси при старті
     await utils.fetchGlobalInterests();
     
-    // Ініціалізація фільтрів та UI
     events.initEventFilters();
     ui.updateAllInterestContainers();
     ui.loadTheme();
     ui.handleBackToTop();
     ui.setupNavigation();
-    ui.initEventSteps();
 
     const currentUser = utils.getCurrentUser();
     
     if (currentUser) {
         ui.showMainApp(currentUser);
         
-        // Оновлюємо дані користувача в localStorage, щоб вони були актуальні
         utils.getUsers().then(users => {
             const freshUser = users.find(u => u.id === currentUser.id);
             if (freshUser) {
@@ -35,18 +31,18 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
 
-        // ЗАПУСК ПОЛІНГУ (АВТООНОВЛЕННЯ)
-        // Це забезпечить миттєве відображення подій та людей з кешу
         events.startEventPolling();
         user.startUserPolling();
         
-        // Завантажуємо соціальні зв'язки та сповіщення
         await user.fetchMySocials();
         setupNotifications(currentUser.id);
         
-        // Ініціалізація списку людей (хоча startUserPolling це теж зробить, це для певності)
         user.renderPeople();
         user.renderPeopleInterestFilter();
+
+        // --- НОВЕ: Перевірка дій з URL (для переходів з create_event.html) ---
+        checkUrlActions();
+
     } else {
         ui.showAuthScreen();
         auth.initAuthTabs();
@@ -55,18 +51,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         utils.setupFormValidation(dom.registerForm, auth.registerValidations);
     }
 
-    // Налаштування валідації форм
-    utils.setupFormValidation(dom.createEventForm, events.createEventValidations);
     utils.setupFormValidation(dom.editProfileForm, user.editProfileValidations);
     utils.setupFormValidation(dom.editEventForm, events.editEventValidations);
     
     // --- ГЛОБАЛЬНІ СЛУХАЧІ ПОДІЙ ---
-
-    // Клік по тегу інтересу (пошук)
     document.body.addEventListener('click', (e) => {
         const tag = e.target.closest('.interest-tag');
         if (tag) {
-            // Перевіряємо, чи цей тег не в контейнері вибору (де він просто виділяється)
             const selectionContainer = e.target.closest('#registerForm, #createEventModal, #editEventModal, #editProfileModal, #peopleInterestFilter');
             if (!selectionContainer) {
                 const interest = tag.dataset.interest || tag.textContent;
@@ -77,7 +68,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }
 
-        // Закриття дропдауну сповіщень при кліку поза ним
         if (dom.notificationDropdown && dom.notificationDropdown.style.display === 'block') {
             if (!e.target.closest('.notification-wrapper')) {
                 dom.notificationDropdown.style.display = 'none';
@@ -86,14 +76,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // Тема, Авторизація, Інтереси
     if (dom.themeToggle) dom.themeToggle.addEventListener('click', ui.toggleTheme);
     if (dom.loginFormInitial) dom.loginFormInitial.addEventListener('submit', auth.handleLoginSubmit);
     if (dom.registerForm) dom.registerForm.addEventListener('submit', auth.handleRegisterSubmit);
     if (dom.addCustomInterestBtn) dom.addCustomInterestBtn.addEventListener('click', auth.handleAddCustomInterest);
     if (dom.verifyBtn) dom.verifyBtn.addEventListener('click', auth.handleVerifySubmit);
     
-    // Профіль
     if (dom.profileDisplay) dom.profileDisplay.addEventListener('click', user.openUserProfile);
     if (dom.profileLogoutBtn) {
         dom.profileLogoutBtn.addEventListener('click', () => {
@@ -103,21 +91,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // Редагування профілю
     const editProfileBtn = document.getElementById('editProfileBtn');
     if (editProfileBtn) editProfileBtn.addEventListener('click', user.openEditProfileModal);
     if (dom.editProfileForm) dom.editProfileForm.addEventListener('submit', user.handleEditProfileSubmit);
     if (dom.addEditCustomInterestBtn) dom.addEditCustomInterestBtn.addEventListener('click', user.handleAddEditCustomInterest);
     
-    // Пошук подій (скрол до секції)
     if (dom.searchEventsBtn) dom.searchEventsBtn.addEventListener('click', () => utils.scrollToSection('events'));
 
-    // Редагування події
     if (dom.editEventForm) dom.editEventForm.addEventListener('submit', events.handleEditEventSubmit);
     if (dom.addEditEventCustomInterestBtn) dom.addEditEventCustomInterestBtn.addEventListener('click', events.handleAddEditEventInterest);
     if (dom.addEventCustomInterestBtn) dom.addEventCustomInterestBtn.addEventListener('click', ui.handleAddEventInterest);
 
-    // --- КНОПКА АРХІВУ (Оновлена логіка) ---
     if (dom.toggleArchiveBtn) {
         let showingArchive = false;
         dom.toggleArchiveBtn.addEventListener('click', () => {
@@ -128,19 +112,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (title && title.childNodes[0]) {
                 title.childNodes[0].textContent = showingArchive ? 'Архів подій ' : 'Нові події ';
             }
-            
-            // Викликаємо функцію з events.js для перемикання режиму і оновлення кешу
             events.toggleArchiveMode(showingArchive);
         });
     }
 
-    // Пошук людей
     if (dom.userSearchInput) dom.userSearchInput.addEventListener('input', user.handleUserSearch);
     if (dom.cityFilterInput) dom.cityFilterInput.addEventListener('input', () => user.renderPeople());
     if (dom.peopleInterestFilter) dom.peopleInterestFilter.addEventListener('click', user.handlePeopleInterestClick);
 
-    // Кліки в сітці людей (Підписатися, Написати, Профіль)
-if (dom.peopleHorizontalTrack) {
+    if (dom.peopleHorizontalTrack) {
         dom.peopleHorizontalTrack.addEventListener('click', (e) => {
             const followBtn = e.target.closest('.follow-btn');
             if (followBtn) {
@@ -166,7 +146,6 @@ if (dom.peopleHorizontalTrack) {
         });
     }
 
-    // Списки підписників/підписок
     if (dom.myFollowersBtn) {
         dom.myFollowersBtn.addEventListener('click', () => {
             const u = utils.getCurrentUser();
@@ -193,7 +172,6 @@ if (dom.peopleHorizontalTrack) {
     }
     if (dom.closeSocialListModal) dom.closeSocialListModal.addEventListener('click', () => utils.closeModal(dom.socialListModal));
 
-    // Сповіщення
     if (dom.notificationBtn) {
         dom.notificationBtn.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -207,7 +185,6 @@ if (dom.peopleHorizontalTrack) {
         dom.markAllReadBtn.addEventListener('click', markAllNotificationsRead);
     }
 
-    // Чати
     if (dom.chatListBtn) {
         dom.chatListBtn.addEventListener('click', () => {
             chat.renderChatList();
@@ -250,22 +227,19 @@ if (dom.peopleHorizontalTrack) {
         });
     }
 
-    // --- КЛІКИ НА КАРТКАХ ПОДІЙ (Карусель) ---
     if (dom.eventsHorizontalTrack) {
         dom.eventsHorizontalTrack.addEventListener('scroll', events.updateScrollButtons);
         dom.eventsHorizontalTrack.addEventListener('click', async (e) => {
             const card = e.target.closest('.event-card-horizontal');
             const joinBtn = e.target.closest('.join-btn-v4');
-            const leaveBtn = e.target.closest('.leave-btn-v4'); // Обробка кнопки "Покинути"
+            const leaveBtn = e.target.closest('.leave-btn-v4'); 
             const creatorInfo = e.target.closest('.creator-info-v4');
             
             if (joinBtn) {
-                // Приєднання (тепер кнопка не є частиною картки, але логіка та сама)
                 e.stopPropagation();
                 const eventId = parseInt(joinBtn.dataset.eventId);
                 await events.handleJoinEvent({ eventId: eventId });
             } else if (leaveBtn) {
-                // Покидання
                 e.stopPropagation();
                 const eventId = parseInt(leaveBtn.dataset.eventId);
                 await events.handleLeaveEvent({ eventId: eventId });
@@ -274,7 +248,6 @@ if (dom.peopleHorizontalTrack) {
                 const userId = parseInt(creatorInfo.dataset.userId);
                 if (userId) user.openOtherUserProfile(userId);
             } else if (card) {
-                // Відкриття деталей події (тільки при кліку на саму картку)
                 const eventId = parseInt(card.dataset.eventId);
                 const allEvents = await utils.getEvents(); 
                 const event = allEvents.find(e => e.eventId === eventId);
@@ -283,11 +256,9 @@ if (dom.peopleHorizontalTrack) {
         });
     }
     
-    // Стрілки каруселі
     if (dom.scrollLeftBtn) dom.scrollLeftBtn.addEventListener('click', () => dom.eventsHorizontalTrack.scrollBy({ left: 420, behavior: 'smooth' }));
     if (dom.scrollRightBtn) dom.scrollRightBtn.addEventListener('click', () => dom.eventsHorizontalTrack.scrollBy({ left: 420, behavior: 'smooth' }));
 
-    // Список чатів
     const chatListEl = document.getElementById('chatList');
     if (chatListEl) {
         chatListEl.addEventListener('click', (e) => {
@@ -300,9 +271,8 @@ if (dom.peopleHorizontalTrack) {
         });
     }
 
-    // Закриття модалок
     const closeButtons = [
-        dom.closeRegisterModal, dom.closeEventModal, dom.closeProfileModal,
+        dom.closeRegisterModal, dom.closeProfileModal,
         dom.closeEditProfileModal, dom.closeEventDetailModal, dom.closeEditEventModal,
         dom.closeChatListModal, dom.closePrivateChatModal, dom.closeOtherUserProfileModal,
         dom.closeInterestSearchModal
@@ -313,7 +283,28 @@ if (dom.peopleHorizontalTrack) {
     });
 });
 
-// --- СИСТЕМА СПОВІЩЕНЬ ---
+// --- Функція обробки URL параметрів ---
+function checkUrlActions() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const action = urlParams.get('action');
+
+    if (action === 'profile') {
+        user.openUserProfile();
+    } else if (action === 'chat') {
+        chat.renderChatList();
+        utils.openModal(dom.chatListModal);
+    } else if (action === 'notifications') {
+        if(dom.notificationDropdown) {
+             dom.notificationDropdown.style.display = 'block';
+             dom.notificationBtn.classList.add('active');
+        }
+    }
+
+    // Очищаємо URL, щоб при оновленні сторінки не відкривалося знову
+    if (action) {
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+}
 
 async function setupNotifications(userId) {
     socket.emit('join_notifications', { userId: userId });
@@ -325,11 +316,9 @@ async function setupNotifications(userId) {
         await addNotificationToUI(notif);
         updateBadgeCount(1);
         
-        // --- ВАЖЛИВО: Оновлюємо список подій, якщо хтось створив нову ---
         if (notif.type === 'new_event') {
             events.refreshEventsCache();
         }
-        // ----------------------------------------------------------------
     });
 
     socket.on('chat_alert', (msg) => {
@@ -337,7 +326,7 @@ async function setupNotifications(userId) {
         const talkingToSender = dom.privateChatModal && (dom.privateChatModal.dataset.otherUserId == msg.senderId);
         
         if (isChatOpen && talkingToSender) {
-            return; // Не показуємо тост, якщо чат відкритий
+            return; 
         }
         utils.showToast(`Нове повідомлення від ${msg.senderName}`, 'info');
         updateChatBadge(1);

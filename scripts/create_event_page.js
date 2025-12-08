@@ -1,7 +1,11 @@
 import * as utils from './utils.js';
 import * as ui from './ui.js';
+import { initSharedComponents } from './shared.js'; // ІМПОРТ СПІЛЬНОЇ ЛОГІКИ
 
-// Елементи DOM, специфічні для цієї сторінки
+// Ініціалізація Socket.IO
+const socket = io('http://localhost:5000');
+
+// Елементи форми (унікальні для цієї сторінки)
 const elements = {
     form: document.getElementById('fullPageCreateEventForm'),
     title: document.getElementById('eventTitle'),
@@ -14,48 +18,45 @@ const elements = {
     interestsContainer: document.getElementById('eventInterestsContainer'),
     customInterestInput: document.getElementById('eventCustomInterestInput'),
     addInterestBtn: document.getElementById('addEventCustomInterestBtn'),
+    // Прев'ю елементи
     previewTitle: document.getElementById('previewTitle'),
     previewDate: document.getElementById('previewDate'),
-    profileAvatar: document.getElementById('profileAvatar'),
-    profileUsername: document.getElementById('profileUsername'),
-    themeToggle: document.getElementById('themeToggle')
+    previewLocation: document.getElementById('previewLocation'),
+    previewDesc: document.getElementById('previewDesc'),
+    previewCategoryBadge: document.getElementById('previewCategoryBadge'),
+    previewParticipantsInfo: document.getElementById('previewParticipantsInfo'),
+    previewAvatarImg: document.getElementById('previewAvatarImg'),
+    previewCreatorName: document.getElementById('previewCreatorName')
 };
 
-// Змінні стану
 let currentStep = 1;
 const totalSteps = 3;
 const user = utils.getCurrentUser();
 
-// --- Ініціалізація ---
 document.addEventListener('DOMContentLoaded', async () => {
-    // 1. Перевірка авторизації
     if (!user) {
         window.location.href = '/'; 
         return;
     }
 
-    // 2. Заповнення хедера профілю
-    if (elements.profileAvatar) elements.profileAvatar.src = user.avatarBase64 || 'https://via.placeholder.com/48';
-    if (elements.profileUsername) elements.profileUsername.textContent = user.username;
+    // --- КЛЮЧОВИЙ МОМЕНТ: Запуск спільних компонентів ---
+    // Це автоматично додасть хедер, модалки і всю їхню логіку
+    await initSharedComponents(socket);
 
-    // 3. Тема
-    ui.loadTheme();
-    if (elements.themeToggle) elements.themeToggle.addEventListener('click', ui.toggleTheme);
-
-    // 4. Завантаження інтересів
     await utils.fetchGlobalInterests();
     ui.renderInterests(elements.interestsContainer, [], () => {});
 
-    // 5. Налаштування подій (Wizard, Preview, Interests)
     setupWizard();
     setupPreview();
     setupInterests();
     
-    // 6. Обробка відправки форми
     elements.form.addEventListener('submit', handleFormSubmit);
 });
 
-// --- Логіка Wizard (Кроки) ---
+// ... Далі йде логіка Wizard, Preview і Submit, яка не змінюється ...
+// (Скопіюйте сюди функції setupWizard, updateStepsUI, validateStep, setupPreview, setupInterests, handleFormSubmit з попередньої відповіді, бо вони специфічні для цієї форми)
+// АЛЕ! Переконайтесь, що validateStep використовує пом'якшені правила, як я показував раніше.
+
 function setupWizard() {
     document.querySelectorAll('.next-step-btn').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -64,8 +65,6 @@ function setupWizard() {
                     currentStep++;
                     updateStepsUI();
                 }
-            } else {
-                utils.showToast('Будь ласка, заповніть обов’язкові поля', 'error');
             }
         });
     });
@@ -81,11 +80,9 @@ function setupWizard() {
 }
 
 function updateStepsUI() {
-    // Перемикання вмісту кроків
     document.querySelectorAll('.form-step').forEach(el => el.classList.remove('active'));
     document.getElementById(`step${currentStep}`).classList.add('active');
 
-    // Оновлення прогрес-бару
     document.querySelectorAll('.progress-step').forEach(el => {
         const stepNum = parseInt(el.dataset.step);
         if (stepNum <= currentStep) el.classList.add('active');
@@ -98,32 +95,103 @@ function validateStep(step) {
         const title = elements.title.value.trim();
         const desc = elements.description.value.trim();
         const cat = elements.category.value;
-        // Валідація: мінімум 3 символи для назви
+        
         if (title.length < 3) {
             utils.showToast('Назва має бути довшою (мін. 3 символи)', 'error');
             return false;
         }
-        return title.length >= 3 && desc.length > 0 && cat !== "";
+        if (desc.length < 3) { 
+            utils.showToast('Введіть хоча б короткий опис', 'error');
+            return false;
+        }
+        if (cat === "") {
+            utils.showToast('Оберіть категорію', 'error');
+            return false;
+        }
+        return true; 
     }
     if (step === 2) {
         const loc = elements.location.value.trim();
         const date = elements.date.value;
         const part = elements.participants.value;
-        return loc.length > 0 && date !== "" && part > 1;
+        const minPart = elements.minParticipants.value;
+        
+        if (loc.length < 3) {
+            utils.showToast('Введіть коректне місце проведення', 'error');
+            return false;
+        }
+        if (!date) {
+            utils.showToast('Встановіть дату та час події', 'error');
+            return false;
+        }
+        if (parseInt(part) < 2 || parseInt(part) > 100) {
+            utils.showToast('Макс. учасників: від 2 до 100', 'error');
+            return false;
+        }
+        if (minPart && parseInt(minPart) > parseInt(part)) {
+            utils.showToast('Мін. учасників не може перевищувати макс. учасників', 'error');
+            return false;
+        }
+        return true;
     }
-    return true; // Крок 3 (інтереси) не обов'язковий, або можна додати перевірку
+    return true; 
 }
 
-// --- Логіка Preview ---
 function setupPreview() {
-    elements.title.addEventListener('input', (e) => elements.previewTitle.textContent = e.target.value || 'Назва події...');
-    elements.date.addEventListener('input', (e) => {
-        const d = e.target.value ? utils.formatEventDate(e.target.value) : 'Дата';
-        elements.previewDate.innerHTML = `<i class="fas fa-calendar"></i> ${d}`;
+    if (user) {
+        if (elements.previewCreatorName) elements.previewCreatorName.textContent = user.username;
+        if (elements.previewAvatarImg) elements.previewAvatarImg.src = user.avatarBase64 || 'https://via.placeholder.com/32';
+    }
+
+    elements.title.addEventListener('input', (e) => {
+        elements.previewTitle.textContent = e.target.value.trim() || 'Назва події...';
     });
+
+    const categoryNames = {
+        'sports': 'Спорт', 'games': 'Ігри', 'arts': 'Мистецтво',
+        'food': 'Їжа', 'outdoors': 'Природа', 'learning': 'Навчання',
+        'social': 'Спілкування', 'music': 'Музика', 'travel': 'Подорожі',
+        'boardgames': 'Настільні ігри'
+    };
+
+    elements.category.addEventListener('change', (e) => {
+        const val = e.target.value;
+        if (val && categoryNames[val]) {
+            elements.previewCategoryBadge.textContent = categoryNames[val];
+            elements.previewCategoryBadge.style.display = 'inline-block';
+        } else {
+            elements.previewCategoryBadge.style.display = 'none';
+        }
+    });
+
+    elements.location.addEventListener('input', (e) => {
+        elements.previewLocation.textContent = e.target.value.trim() || 'Місце проведення';
+    });
+
+    elements.date.addEventListener('input', (e) => {
+        const val = e.target.value;
+        if (val) {
+            const dateObj = new Date(val);
+            const options = { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+            elements.previewDate.textContent = dateObj.toLocaleString('uk-UA', options);
+        } else {
+            elements.previewDate.textContent = 'Дата та час';
+        }
+    });
+
+    elements.description.addEventListener('input', (e) => {
+        const val = e.target.value.trim();
+        elements.previewDesc.textContent = val || 'Тут з\'явиться короткий опис вашої події...';
+    });
+
+    elements.participants.addEventListener('input', updateParticipantsPreview);
+    
+    function updateParticipantsPreview() {
+        const max = elements.participants.value || 0;
+        elements.previewParticipantsInfo.innerHTML = `<i class="fas fa-users"></i> 1/${max}`;
+    }
 }
 
-// --- Логіка Інтересів ---
 function setupInterests() {
     elements.addInterestBtn.addEventListener('click', () => {
         const val = elements.customInterestInput.value.trim();
@@ -133,7 +201,6 @@ function setupInterests() {
                 return;
             }
             if (utils.addGlobalInterest(val)) {
-                // Перемальовуємо і вибираємо новий тег
                 ui.renderInterests(elements.interestsContainer, [], () => {});
                 setTimeout(() => {
                    const tags = elements.interestsContainer.querySelectorAll('.interest-tag');
@@ -148,7 +215,6 @@ function setupInterests() {
     });
 }
 
-// --- Відправка форми ---
 async function handleFormSubmit(e) {
     e.preventDefault();
     
@@ -179,10 +245,16 @@ async function handleFormSubmit(e) {
 
         if (res.ok) {
             utils.showToast('Подію успішно створено!', 'success');
-            // Перенаправлення на головну сторінку до списку подій
+            
+            const submitBtn = elements.form.querySelector('button[type="submit"]');
+            if(submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Перехід...';
+            }
+
             setTimeout(() => {
-                window.location.href = '/#events';
-            }, 1000);
+                window.location.replace('/#events');
+            }, 500);
         } else {
             const err = await res.json();
             utils.showToast(err.error || 'Помилка створення', 'error');

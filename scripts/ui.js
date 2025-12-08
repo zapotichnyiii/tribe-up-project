@@ -157,23 +157,3 @@ export async function openInterestSearchModal(interest) {
 
     utils.openModal(dom.interestSearchModal);
 }
-
-export let currentEventStep = 1;
-const stepTitles = ["Основна інформація", "Логістика", "Інтереси"];
-
-export function handleAddEventInterest() {
-    const interest = dom.eventCustomInterestInput.value.trim();
-    if (interest && interest.length <= 20) {
-        if (utils.addGlobalInterest(interest)) {
-            updateAllInterestContainers(); 
-            const newTag = document.querySelector(`#eventInterestsContainer .interest-tag[data-interest="${interest}"]`);
-            if (newTag) {
-                newTag.classList.add('selected');
-            }
-            dom.eventCustomInterestInput.value = '';
-            utils.showToast('Інтерес додано та обрано', 'success');
-        }
-    } else {
-        utils.showToast(interest.length > 20 ? 'Інтерес занадто довгий' : 'Введіть інтерес', 'error');
-    }
-}

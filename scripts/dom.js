@@ -1,182 +1,305 @@
-// Експортуємо всі DOM-елементи для легкого доступу з інших модулів
-export const authScreen = document.getElementById('authScreen');
-export const mainApp = document.getElementById('mainApp');
-export const loginFormInitial = document.getElementById('loginFormInitial');
-export const showRegisterFormLink = document.getElementById('showRegisterFormLink');
-export const eventsGrid = document.getElementById('eventsGrid');
-export const peopleGrid = document.getElementById('peopleGrid');
-export const peopleHorizontalTrack = document.getElementById('peopleHorizontalTrack');
-export const peopleScrollLeftBtn = document.getElementById('peopleScrollLeftBtn');
-export const peopleScrollRightBtn = document.getElementById('peopleScrollRightBtn');
+// scripts/dom.js (повна версія)
 
-// --- СТВОРЕННЯ ПОДІЇ (Видалено: перенесено на окрему сторінку create_event.html) ---
-// export const createEventBtn = document.getElementById('createEventBtn'); // Замінено на посилання <a> в HTML
-// export const createEventModal = document.getElementById('createEventModal');
-// export const closeEventModal = document.getElementById('closeEventModal');
-// export const createEventForm = document.getElementById('createEventForm');
-// export const eventTitle = document.getElementById('eventTitle');
-// export const eventDescription = document.getElementById('eventDescription');
-// export const eventCategory = document.getElementById('eventCategory');
-// export const eventLocation = document.getElementById('eventLocation');
-// export const eventDate = document.getElementById('eventDate');
-// export const eventParticipants = document.getElementById('eventParticipants');
-// export const eventMinParticipants = document.getElementById('eventMinParticipants');
-// export const eventInterestsContainer = document.getElementById('eventInterestsContainer');
-// export const addEventCustomInterestBtn = document.getElementById('addEventCustomInterestBtn');
-// export const eventCustomInterestInput = document.getElementById('eventCustomInterestInput');
-// export const eventStepNext1 = document.getElementById('eventStepNext1');
-// export const eventStepNext2 = document.getElementById('eventStepNext2');
-// export const eventStepBack2 = document.getElementById('eventStepBack2');
-// export const eventStepBack3 = document.getElementById('eventStepBack3');
-// export const eventStepIndicator = document.getElementById('eventStepIndicator');
-// export const modalStepTitle = document.getElementById('createEventTitle');
-// export const eventSteps = document.querySelectorAll('#createEventModal .modal-step');
+export let authScreen = null;
+export let mainApp = null;
+export let loginFormInitial = null;
+export let showRegisterFormLink = null;
+export let eventsGrid = null;
+export let peopleGrid = null;
+export let peopleHorizontalTrack = null;
+export let peopleScrollLeftBtn = null;
+export let peopleScrollRightBtn = null;
 
-// --- РЕЄСТРАЦІЯ ---
-export const registerModal = document.getElementById('registerModal');
-export const closeRegisterModal = document.getElementById('closeRegisterModal');
-export const registerForm = document.getElementById('registerForm');
-export const registerInterestsContainer = document.getElementById('registerInterestsContainer');
-export const customInterestInput = document.getElementById('customInterestInput');
-export const addCustomInterestBtn = document.getElementById('addCustomInterestBtn');
-export const verifyModal = document.getElementById('verifyModal');
-export const verifyCodeInput = document.getElementById('verifyCodeInput');
-export const verifyBtn = document.getElementById('verifyBtn');
-export const verifyError = document.getElementById('verifyError');
+export let registerModal = null;
+export let closeRegisterModal = null;
+export let registerForm = null;
+export let registerInterestsContainer = null;
+export let customInterestInput = null;
+export let addCustomInterestBtn = null;
+export let verifyModal = null;
+export let verifyCodeInput = null;
+export let verifyBtn = null;
+export let verifyError = null;
 
-// --- ПРОФІЛЬ ---
-export const profileModal = document.getElementById('profileModal');
-export const closeProfileModal = document.getElementById('closeProfileModal');
-export const profileModalAvatar = document.getElementById('profileModalAvatar');
-export const profileModalName = document.getElementById('profileModalName');
-export const profileModalUsername = document.getElementById('profileModalUsername');
-export const profileModalMeta = document.getElementById('profileModalMeta');
-export const profileModalInterests = document.getElementById('profileModalInterests');
-export const profileLogoutBtn = document.getElementById('profileLogoutBtn');
-export const profileDisplay = document.getElementById('profileDisplay');
-export const profileAvatar = document.getElementById('profileAvatar');
-export const profileUsername = document.getElementById('profileUsername');
-export const userEventsList = document.getElementById('userEventsList');
+export let profileModal = null;
+export let closeProfileModal = null;
+export let profileModalAvatar = null;
+export let profileModalName = null;
+export let profileModalUsername = null;
+export let profileModalMeta = null;
+export let profileModalInterests = null;
+export let profileLogoutBtn = null;
+export let profileDisplay = null;
+export let profileAvatar = null;
+export let profileUsername = null;
+export let userEventsList = null;
 
-// --- РЕДАГУВАННЯ ПРОФІЛЮ ---
-export const editProfileModal = document.getElementById('editProfileModal');
-export const closeEditProfileModal = document.getElementById('closeEditProfileModal');
-export const editProfileForm = document.getElementById('editProfileForm');
-export const editProfileAvatarPreview = document.getElementById('editProfileAvatarPreview');
-export const editProfilePhoto = document.getElementById('editProfilePhoto');
-export const editProfileName = document.getElementById('editProfileName');
-export const editProfileUsername = document.getElementById('editProfileUsername');
-export const editProfileAge = document.getElementById('editProfileAge');
-export const editProfileLocation = document.getElementById('editProfileLocation');
-export const editProfileInterestsContainer = document.getElementById('editProfileInterestsContainer');
-export const addEditCustomInterestBtn = document.getElementById('addEditCustomInterestBtn');
-export const editCustomInterestInput = document.getElementById('editCustomInterestInput');
+export let editProfileModal = null;
+export let closeEditProfileModal = null;
+export let editProfileForm = null;
+export let editProfileAvatarPreview = null;
+export let editProfilePhoto = null;
+export let editProfileName = null;
+export let editProfileUsername = null;
+export let editProfileAge = null;
+export let editProfileLocation = null;
+export let editProfileInterestsContainer = null;
+export let addEditCustomInterestBtn = null;
+export let editCustomInterestInput = null;
 
-// --- ДЕТАЛІ ПОДІЇ ---
-export const eventDetailModal = document.getElementById('eventDetailModal');
-export const closeEventDetailModal = document.getElementById('closeEventDetailModal');
+export let eventDetailModal = null;
+export let closeEventDetailModal = null;
 
-// --- РЕДАГУВАННЯ ПОДІЇ ---
-export const editEventModal = document.getElementById('editEventModal');
-export const closeEditEventModal = document.getElementById('closeEditEventModal');
-export const editEventForm = document.getElementById('editEventForm');
-export const editEventTitle = document.getElementById('editEventTitle');
-export const editEventDescription = document.getElementById('editEventDescription');
-export const editEventCategory = document.getElementById('editEventCategory');
-export const editEventLocation = document.getElementById('editEventLocation');
-export const editEventDate = document.getElementById('editEventDate');
-export const editEventParticipants = document.getElementById('editEventParticipants');
-export const editEventInterestsContainer = document.getElementById('editEventInterestsContainer');
-export const addEditEventCustomInterestBtn = document.getElementById('addEditEventCustomInterestBtn');
-export const editEventCustomInterestInput = document.getElementById('editEventCustomInterestInput');
+export let editEventModal = null;
+export let closeEditEventModal = null;
+export let editEventForm = null;
+export let editEventTitle = null;
+export let editEventDescription = null;
+export let editEventCategory = null;
+export let editEventLocation = null;
+export let editEventDate = null;
+export let editEventParticipants = null;
+export let editEventInterestsContainer = null;
+export let addEditEventCustomInterestBtn = null;
+export let editEventCustomInterestInput = null;
 
-// --- ІНШЕ ---
-export const themeToggle = document.querySelector('.theme-toggle');
-export const backToTopBtn = document.querySelector('.back-to-top');
-export const toggleArchiveBtn = document.getElementById('toggleArchiveBtn');
+export let themeToggle = null;
+export let backToTopBtn = null;
+export let toggleArchiveBtn = null;
 
-// --- ЧАТИ ---
-export const chatListModal = document.getElementById('chatListModal');
-export const closeChatListModal = document.getElementById('closeChatListModal');
-export const chatListBtn = document.querySelector('.chat-list-btn');
-export const privateChatModal = document.getElementById('privateChatModal');
-export const closePrivateChatModal = document.getElementById('closePrivateChatModal');
-export const privateChatMessages = document.getElementById('privateChatMessages');
-export const privateChatInput = document.getElementById('privateChatInput');
-export const sendPrivateMessageBtn = document.getElementById('sendPrivateMessage');
-export const chatBadge = document.getElementById('chatBadge');
+export let chatListModal = null;
+export let closeChatListModal = null;
+export let chatListBtn = null;
+export let privateChatModal = null;
+export let closePrivateChatModal = null;
+export let privateChatMessages = null;
+export let privateChatInput = null;
+export let sendPrivateMessageBtn = null;
+export let chatBadge = null;
 
-// --- ІНШИЙ ЮЗЕР ---
-export const otherUserProfileModal = document.getElementById('otherUserProfileModal');
-export const closeOtherUserProfileModal = document.getElementById('closeOtherUserProfileModal');
-export const otherUserProfileAvatar = document.getElementById('otherUserProfileAvatar');
-export const otherUserProfileName = document.getElementById('otherUserProfileName');
-export const otherUserProfileUsername = document.getElementById('otherUserProfileUsername');
-export const otherUserProfileMeta = document.getElementById('otherUserProfileMeta');
-export const otherUserProfileInterests = document.getElementById('otherUserProfileInterests');
-export const otherUserProfileEvents = document.getElementById('otherUserProfileEvents');
-export const otherUserMessageBtn = document.getElementById('otherUserMessageBtn');
-export const otherUserFollowersBtn = document.getElementById('otherUserFollowersBtn');
-export const otherUserFollowingBtn = document.getElementById('otherUserFollowingBtn');
+export let otherUserProfileModal = null;
+export let closeOtherUserProfileModal = null;
+export let otherUserProfileAvatar = null;
+export let otherUserProfileName = null;
+export let otherUserProfileUsername = null;
+export let otherUserProfileMeta = null;
+export let otherUserProfileInterests = null;
+export let otherUserProfileEvents = null;
+export let otherUserMessageBtn = null;
+export let otherUserFollowersBtn = null;
+export let otherUserFollowingBtn = null;
 
-// --- КАРУСЕЛЬ ТА ФІЛЬТРИ ---
-export const eventsHorizontalTrack = document.getElementById('eventsHorizontalTrack');
-export const eventCount = document.getElementById('eventCount');
-export const scrollLeftBtn = document.getElementById('scrollLeftBtn');
-export const scrollRightBtn = document.getElementById('scrollRightBtn');
+export let eventsHorizontalTrack = null;
+export let eventCount = null;
+export let scrollLeftBtn = null;
+export let scrollRightBtn = null;
 
-export const searchQueryInput = document.getElementById('searchQueryInput');
-export const locationInput = document.getElementById('locationInput');
-export const categorySelect = document.getElementById('categorySelect');
-export const dateInput = document.getElementById('dateInput');
-export const peopleSelect = document.getElementById('peopleSelect');
-export const distanceInput = document.getElementById('distanceInput');
-export const sortSelect = document.getElementById('sortSelect');
-export const statusSelect = document.getElementById('statusSelect');
-export const interestSearchInput = document.getElementById('interestSearchInput');
-export const searchBtn = document.getElementById('searchBtn');
-export const clearFiltersBtn = document.getElementById('clearFiltersBtn');
-export const peopleInterestFilter = document.getElementById('peopleInterestFilter');
-export const userSearchInput = document.getElementById('userSearchInput');
-export const cityFilterInput = document.getElementById('cityFilterInput');
+export let searchQueryInput = null;
+export let locationInput = null;
+export let categorySelect = null;
+export let dateInput = null;
+export let peopleSelect = null;
+export let distanceInput = null;
+export let sortSelect = null;
+export let statusSelect = null;
+export let interestSearchInput = null;
+export let searchBtn = null;
+export let clearFiltersBtn = null;
+export let peopleInterestFilter = null;
+export let userSearchInput = null;
+export let cityFilterInput = null;
 
-// --- ПОШУК ІНТЕРЕСІВ ---
-export const interestSearchModal = document.getElementById('interestSearchModal');
-export const closeInterestSearchModal = document.getElementById('closeInterestSearchModal');
-export const interestModalTitle = document.getElementById('interestModalTitle');
-export const interestModalEventsGrid = document.getElementById('interestModalEventsGrid');
-export const interestModalPeopleGrid = document.getElementById('interestModalPeopleGrid');
+export let interestSearchModal = null;
+export let closeInterestSearchModal = null;
+export let interestModalTitle = null;
+export let interestModalEventsGrid = null;
+export let interestModalPeopleGrid = null;
 
-export const searchEventsBtn = document.getElementById('searchEventsBtn');
-export const contactForm = document.getElementById('contactForm');
+export let searchEventsBtn = null;
+export let contactForm = null;
 
-// --- НОВІ ЕЛЕМЕНТИ (СОЦІАЛЬНІ ТА СПОВІЩЕННЯ) ---
-export const notificationBtn = document.getElementById('notificationBtn');
-export const notificationBadge = document.getElementById('notificationBadge');
-export const notificationDropdown = document.getElementById('notificationDropdown');
-export const notificationList = document.getElementById('notificationList');
-export const markAllReadBtn = document.getElementById('markAllReadBtn');
+export let notificationBtn = null;
+export let notificationBadge = null;
+export let notificationDropdown = null;
+export let notificationList = null;
+export let markAllReadBtn = null;
 
-export const myFollowersBtn = document.getElementById('myFollowersBtn');
-export const myFollowingBtn = document.getElementById('myFollowingBtn');
-export const socialListModal = document.getElementById('socialListModal');
-export const closeSocialListModal = document.getElementById('closeSocialListModal');
-export const socialListContainer = document.getElementById('socialListContainer');
-export const socialListTitle = document.getElementById('socialListTitle');
+export let myFollowersBtn = null;
+export let myFollowingBtn = null;
+export let socialListModal = null;
+export let closeSocialListModal = null;
+export let socialListContainer = null;
+export let socialListTitle = null;
 
-export const otherUserFollowBtn = document.getElementById('otherUserFollowBtn');
-export const otherUserFollowersCount = document.getElementById('otherUserFollowersCount');
-export const otherUserFollowingCount = document.getElementById('otherUserFollowingCount');
+export let otherUserFollowBtn = null;
+export let otherUserFollowersCount = null;
+export let otherUserFollowingCount = null;
 
-// --- ВІДНОВЛЕННЯ ПАРОЛЮ ---
-export const forgotPasswordLink = document.getElementById('forgotPasswordLink');
-export const forgotPasswordModal = document.getElementById('forgotPasswordModal');
-export const closeForgotPasswordModal = document.getElementById('closeForgotPasswordModal');
-export const forgotStep1 = document.getElementById('forgotStep1');
-export const forgotStep2 = document.getElementById('forgotStep2');
-export const forgotEmailInput = document.getElementById('forgotEmailInput');
-export const sendResetCodeBtn = document.getElementById('sendResetCodeBtn');
-export const forgotEmailDisplay = document.getElementById('forgotEmailDisplay');
-export const forgotCodeInput = document.getElementById('forgotCodeInput');
-export const forgotNewPassword = document.getElementById('forgotNewPassword');
-export const confirmResetBtn = document.getElementById('confirmResetBtn');
+export let forgotPasswordLink = null;
+export let forgotPasswordModal = null;
+export let closeForgotPasswordModal = null;
+export let forgotStep1 = null;
+export let forgotStep2 = null;
+export let forgotEmailInput = null;
+export let sendResetCodeBtn = null;
+export let forgotEmailDisplay = null;
+export let forgotCodeInput = null;
+export let forgotNewPassword = null;
+export let confirmResetBtn = null;
+
+export let profileArea = null;
+export let editProfileBtn = null;
+
+export function refreshElements() {
+    authScreen = document.getElementById('authScreen');
+    mainApp = document.getElementById('mainApp');
+    loginFormInitial = document.getElementById('loginFormInitial');
+    showRegisterFormLink = document.getElementById('showRegisterFormLink');
+    eventsGrid = document.getElementById('eventsGrid');
+    peopleGrid = document.getElementById('peopleGrid');
+    peopleHorizontalTrack = document.getElementById('peopleHorizontalTrack');
+    peopleScrollLeftBtn = document.getElementById('peopleScrollLeftBtn');
+    peopleScrollRightBtn = document.getElementById('peopleScrollRightBtn');
+
+    registerModal = document.getElementById('registerModal');
+    closeRegisterModal = document.getElementById('closeRegisterModal');
+    registerForm = document.getElementById('registerForm');
+    registerInterestsContainer = document.getElementById('registerInterestsContainer');
+    customInterestInput = document.getElementById('customInterestInput');
+    addCustomInterestBtn = document.getElementById('addCustomInterestBtn');
+    verifyModal = document.getElementById('verifyModal');
+    verifyCodeInput = document.getElementById('verifyCodeInput');
+    verifyBtn = document.getElementById('verifyBtn');
+    verifyError = document.getElementById('verifyError');
+
+    profileModal = document.getElementById('profileModal');
+    closeProfileModal = document.getElementById('closeProfileModal');
+    profileModalAvatar = document.getElementById('profileModalAvatar');
+    profileModalName = document.getElementById('profileModalName');
+    profileModalUsername = document.getElementById('profileModalUsername');
+    profileModalMeta = document.getElementById('profileModalMeta');
+    profileModalInterests = document.getElementById('profileModalInterests');
+    profileLogoutBtn = document.getElementById('profileLogoutBtn');
+    profileDisplay = document.getElementById('profileDisplay');
+    profileAvatar = document.getElementById('profileAvatar');
+    profileUsername = document.getElementById('profileUsername');
+    userEventsList = document.getElementById('userEventsList');
+
+    editProfileModal = document.getElementById('editProfileModal');
+    closeEditProfileModal = document.getElementById('closeEditProfileModal');
+    editProfileForm = document.getElementById('editProfileForm');
+    editProfileAvatarPreview = document.getElementById('editProfileAvatarPreview');
+    editProfilePhoto = document.getElementById('editProfilePhoto');
+    editProfileName = document.getElementById('editProfileName');
+    editProfileUsername = document.getElementById('editProfileUsername');
+    editProfileAge = document.getElementById('editProfileAge');
+    editProfileLocation = document.getElementById('editProfileLocation');
+    editProfileInterestsContainer = document.getElementById('editProfileInterestsContainer');
+    addEditCustomInterestBtn = document.getElementById('addEditCustomInterestBtn');
+    editCustomInterestInput = document.getElementById('editCustomInterestInput');
+
+    eventDetailModal = document.getElementById('eventDetailModal');
+    closeEventDetailModal = document.getElementById('closeEventDetailModal');
+
+    editEventModal = document.getElementById('editEventModal');
+    closeEditEventModal = document.getElementById('closeEditEventModal');
+    editEventForm = document.getElementById('editEventForm');
+    editEventTitle = document.getElementById('editEventTitle');
+    editEventDescription = document.getElementById('editEventDescription');
+    editEventCategory = document.getElementById('editEventCategory');
+    editEventLocation = document.getElementById('editEventLocation');
+    editEventDate = document.getElementById('editEventDate');
+    editEventParticipants = document.getElementById('editEventParticipants');
+    editEventInterestsContainer = document.getElementById('editEventInterestsContainer');
+    addEditEventCustomInterestBtn = document.getElementById('addEditEventCustomInterestBtn');
+    editEventCustomInterestInput = document.getElementById('editEventCustomInterestInput');
+
+    themeToggle = document.querySelector('.theme-toggle');
+    backToTopBtn = document.querySelector('.back-to-top');
+    toggleArchiveBtn = document.getElementById('toggleArchiveBtn');
+
+    chatListModal = document.getElementById('chatListModal');
+    closeChatListModal = document.getElementById('closeChatListModal');
+    chatListBtn = document.getElementById('chatListBtn') || document.querySelector('.chat-list-btn');
+    privateChatModal = document.getElementById('privateChatModal');
+    closePrivateChatModal = document.getElementById('closePrivateChatModal');
+    privateChatMessages = document.getElementById('privateChatMessages');
+    privateChatInput = document.getElementById('privateChatInput');
+    sendPrivateMessageBtn = document.getElementById('sendPrivateMessage');
+    chatBadge = document.getElementById('chatBadge');
+
+    otherUserProfileModal = document.getElementById('otherUserProfileModal');
+    closeOtherUserProfileModal = document.getElementById('closeOtherUserProfileModal');
+    otherUserProfileAvatar = document.getElementById('otherUserProfileAvatar');
+    otherUserProfileName = document.getElementById('otherUserProfileName');
+    otherUserProfileUsername = document.getElementById('otherUserProfileUsername');
+    otherUserProfileMeta = document.getElementById('otherUserProfileMeta');
+    otherUserProfileInterests = document.getElementById('otherUserProfileInterests');
+    otherUserProfileEvents = document.getElementById('otherUserProfileEvents');
+    otherUserMessageBtn = document.getElementById('otherUserMessageBtn');
+    otherUserFollowersBtn = document.getElementById('otherUserFollowersBtn');
+    otherUserFollowingBtn = document.getElementById('otherUserFollowingBtn');
+
+    eventsHorizontalTrack = document.getElementById('eventsHorizontalTrack');
+    eventCount = document.getElementById('eventCount');
+    scrollLeftBtn = document.getElementById('scrollLeftBtn');
+    scrollRightBtn = document.getElementById('scrollRightBtn');
+
+    searchQueryInput = document.getElementById('searchQueryInput');
+    locationInput = document.getElementById('locationInput');
+    categorySelect = document.getElementById('categorySelect');
+    dateInput = document.getElementById('dateInput');
+    peopleSelect = document.getElementById('peopleSelect');
+    distanceInput = document.getElementById('distanceInput');
+    sortSelect = document.getElementById('sortSelect');
+    statusSelect = document.getElementById('statusSelect');
+    interestSearchInput = document.getElementById('interestSearchInput');
+    searchBtn = document.getElementById('searchBtn');
+    clearFiltersBtn = document.getElementById('clearFiltersBtn');
+    peopleInterestFilter = document.getElementById('peopleInterestFilter');
+    userSearchInput = document.getElementById('userSearchInput');
+    cityFilterInput = document.getElementById('cityFilterInput');
+
+    interestSearchModal = document.getElementById('interestSearchModal');
+    closeInterestSearchModal = document.getElementById('closeInterestSearchModal');
+    interestModalTitle = document.getElementById('interestModalTitle');
+    interestModalEventsGrid = document.getElementById('interestModalEventsGrid');
+    interestModalPeopleGrid = document.getElementById('interestModalPeopleGrid');
+
+    searchEventsBtn = document.getElementById('searchEventsBtn');
+    contactForm = document.getElementById('contactForm');
+
+    notificationBtn = document.getElementById('notificationBtn');
+    notificationBadge = document.getElementById('notificationBadge');
+    notificationDropdown = document.getElementById('notificationDropdown');
+    notificationList = document.getElementById('notificationList');
+    markAllReadBtn = document.getElementById('markAllReadBtn');
+
+    myFollowersBtn = document.getElementById('myFollowersBtn');
+    myFollowingBtn = document.getElementById('myFollowingBtn');
+    socialListModal = document.getElementById('socialListModal');
+    closeSocialListModal = document.getElementById('closeSocialListModal');
+    socialListContainer = document.getElementById('socialListContainer');
+    socialListTitle = document.getElementById('socialListTitle');
+
+    otherUserFollowBtn = document.getElementById('otherUserFollowBtn');
+    otherUserFollowersCount = document.getElementById('otherUserFollowersCount');
+    otherUserFollowingCount = document.getElementById('otherUserFollowingCount');
+
+    forgotPasswordLink = document.getElementById('forgotPasswordLink');
+    forgotPasswordModal = document.getElementById('forgotPasswordModal');
+    closeForgotPasswordModal = document.getElementById('closeForgotPasswordModal');
+    forgotStep1 = document.getElementById('forgotStep1');
+    forgotStep2 = document.getElementById('forgotStep2');
+    forgotEmailInput = document.getElementById('forgotEmailInput');
+    sendResetCodeBtn = document.getElementById('sendResetCodeBtn');
+    forgotEmailDisplay = document.getElementById('forgotEmailDisplay');
+    forgotCodeInput = document.getElementById('forgotCodeInput');
+    forgotNewPassword = document.getElementById('forgotNewPassword');
+    confirmResetBtn = document.getElementById('confirmResetBtn');
+
+    profileArea = document.getElementById('profileArea');
+    editProfileBtn = document.getElementById('editProfileBtn');
+}
+
+refreshElements();
