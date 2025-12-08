@@ -194,12 +194,16 @@ def handle_private_message(data):
             VALUES (%s, %s, %s) RETURNING *
         """, (data['senderId'], data['receiverId'], data['text']))
         new_msg = cur.fetchone()
+        cur.execute("SELECT username FROM users WHERE id = %s", (data['senderId'],))
+        sender_name = cur.fetchone()['username']
+        
         conn.commit()
         msg_response = map_message(new_msg)
+        msg_response['senderName'] = sender_name
         u1, u2 = sorted([int(data['senderId']), int(data['receiverId'])])
         room = f"private_{u1}_{u2}"
-        
         emit('receive_private_message', msg_response, room=room)
+        emit('chat_alert', msg_response, room=f"user_{data['receiverId']}")
         
     except Exception as e:
         print(f"Error private message: {e}")

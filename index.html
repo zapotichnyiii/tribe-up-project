@@ -245,8 +245,9 @@
                                 <div id="notificationList" style="max-height:300px; overflow-y:auto;"></div>
                             </div>
                         </div>
-                        <button class="chat-list-btn" aria-label="Відкрити особисті чати">
-                            <i class="fas fa-comments"></i>
+                        <button class="chat-list-btn" id="chatListBtn" aria-label="Відкрити особисті чати" style="position: relative;">
+                        <i class="fas fa-comments"></i>
+                        <span id="chatBadge" style="display:none; position:absolute; top:-5px; right:-5px; background: var(--auth-accent-color); color:white; font-size:10px; padding:2px 5px; border-radius:50%; border: 2px solid white;">0</span>
                         </button>
                         <div class="profile-area" id="profileArea">
                             <div class="profile-display" id="profileDisplay" style="display: none; align-items: center; gap: 8px;">
@@ -370,122 +371,91 @@
     </div>
 </section>
 
-        <section id="search">
-            <div class="container">
-                <div class="filters">
-                    <h3>Знайди ідеальну подію</h3>
-                    <div class="filter-row">
-                        <div class="filter-group">
-                            <label class="form-label" for="searchQueryInput">Пошук за назвою/описом</label>
-                            <input type="text" class="form-control" id="searchQueryInput" placeholder="Пошук за назвою/описом" aria-label="Пошук за назвою або описом">
-                        </div>
-                        <div class="filter-group">
-                            <label class="form-label" for="locationInput">Місце</label>
-                            <input type="text" class="form-control" id="locationInput" placeholder="Місце" aria-label="Місце проведення події">
-                        </div>
-                    </div>
-                    <div class="filter-row">
-                        <div class="filter-group">
-                            <label class="form-label" for="categorySelect">Категорія</label>
-                            <select class="form-select" id="categorySelect" aria-label="Категорія події">
-                                <option value="">Всі категорії</option>
-                                <option value="sports">Спорт</option>
-                                <option value="games">Ігри</option>
-                                <option value="arts">Мистецтво</option>
-                                <option value="food">Їжа та напої</option>
-                                <option value="outdoors">На природі</option>
-                                <option value="learning">Навчання</option>
-                                <option value="social">Соціальні</option>
-                                <option value="music">Музика</option>
-                                <option value="photo">Фотографія</option>
-                                <option value="dance">Танці</option>
-                                <option value="cinema">Кіно</option>
-                                <option value="travel">Подорожі</option>
-                                <option value="yoga">Йога</option>
-                                <option value="boardgames">Настільні ігри</option>
-                                <option value="coding">Програмування</option>
-                                <option value="fest">Фестивалі</option>
-                                <option value="quest">Квести</option>
-                                <option value="volunteer">Волонтерство</option>
-                                <option value="fashion">Мода</option>
-                            </select>
-                        </div>
-                        <div class="filter-group">
-                            <label class="form-label" for="dateInput">Дата</label>
-                            <input type="date" class="form-control" id="dateInput" aria-label="Дата події">
-                        </div>
-                    </div>
-                    <div class="filter-row">
-                        <div class="filter-group">
-                            <label class="form-label" for="peopleSelect">Люди</label>
-                            <select class="form-select" id="peopleSelect" aria-label="Кількість учасників">
-                                <option value="">Кількість людей</option>
-                                <option value="1-5">1-5</option>
-                                <option value="5-10">5-10</option>
-                                <option value="10+">10+</option>
-                            </select>
-                        </div>
-                        <div class="filter-group">
-                            <label class="form-label" for="distanceInput">Відстань (км)</label>
-                            <input type="number" class="form-control" id="distanceInput" min="0" max="100" placeholder="Відстань (км)" aria-label="Відстань у кілометрах">
-                        </div>
-                    </div>
-                    <div class="filter-row">
-                        <div class="filter-group">
-                            <label class="form-label" for="sortSelect">Сортування</label>
-                            <select class="form-select" id="sortSelect" aria-label="Сортування подій">
-                                <option value="date-asc">Найближчі</option>
-                                <option value="date-desc">Найдавніші</option>
-                                <option value="participants-asc">Менше учасників</option>
-                                <option value="participants-desc">Більше учасників</option>
-                                <option value="title">За назвою</option>
-                            </select>
-                        </div>
-                        <div class="filter-group">
-                            <label class="form-label" for="statusSelect">Статус</label>
-                            <select class="form-select" id="statusSelect" aria-label="Статус події">
-                                <option value="">Всі статуси</option>
-                                <option value="open">Відкриті</option>
-                                <option value="full">Повні</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="filter-row">
-                        <div class="filter-group">
-                            <label class="form-label" for="interestSearchInput">Пошук за інтересами</label>
-                            <input type="text" class="form-control" id="interestSearchInput" placeholder="Пошук за інтересами" aria-label="Пошук за інтересами">
-                        </div>
-                    </div>
-                    <div class="filter-row">
-                        <button class="btn btn-accent" id="searchBtn" aria-label="Шукати події">Шукати</button>
-                        <button class="btn btn-outline" id="clearFiltersBtn" style="margin-left: 10px;" aria-label="Очистити фільтри">Очистити</button>
-                    </div>
+<section id="events">
+    <div class="container" style="position: relative;">
+        <div class="section-header-controls">
+            <h2 class="section-title-modern">
+                Нові події
+                <span id="eventCount" class="event-count-badge"></span>
+            </h2>
+
+            <div class="controls-right-group">
+                <button id="toggleArchiveBtn" class="btn btn-outline btn-sm">
+                    <i class="fas fa-history"></i> Архів
+                </button>
+                <div class="carousel-nav">
+                    <button class="scroll-btn left" id="scrollLeftBtn" aria-label="Прокрутити вліво">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <button class="scroll-btn right" id="scrollRightBtn" aria-label="Прокрутити вправо">
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
                 </div>
             </div>
-        </section>
-
-        <section id="events">
-    <div class="section-header-controls">
-        <h2 class="section-title-modern">
-            Нові події
-            <span id="eventCount" class="event-count-badge"></span>
-        </h2>
-
-        <button id="toggleArchiveBtn" class="btn btn-outline btn-sm" style="margin-right: 15px;">
-            <i class="fas fa-history"></i> Архів
-        </button>
-        <div class="carousel-nav">
-            <button class="scroll-btn left" id="scrollLeftBtn" aria-label="Прокрутити вліво">
-                <i class="fas fa-arrow-left"></i>
-            </button>
-            <button class="scroll-btn right" id="scrollRightBtn" aria-label="Прокрутити вправо">
-                <i class="fas fa-arrow-right"></i>
-            </button>
         </div>
-    </div>
-    
-    <div class="events-horizontal">
-        <div id="eventsHorizontalTrack" class="events-track" role="region" aria-label="Список подій"></div>
+
+        <div class="events-filter-bar">
+            <div class="filter-primary">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchQueryInput" placeholder="Пошук події..." aria-label="Пошук">
+            </div>
+            
+            <div class="filter-secondary">
+                <div class="filter-item">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <input type="text" id="locationInput" placeholder="Місце">
+                </div>
+                
+                <div class="filter-item">
+                    <i class="fas fa-calendar"></i>
+                    <input type="date" id="dateInput">
+                </div>
+
+                <div class="filter-item dropdown">
+                    <select id="categorySelect">
+                        <option value="">Категорія</option>
+                        <option value="sports">Спорт</option>
+                        <option value="games">Ігри</option>
+                        <option value="arts">Мистецтво</option>
+                        <option value="food">Їжа</option>
+                        <option value="outdoors">Природа</option>
+                        <option value="music">Музика</option>
+                        <option value="party">Вечірки</option>
+                    </select>
+                </div>
+
+                <div class="filter-item dropdown">
+                    <select id="peopleSelect">
+                        <option value="">Люди</option>
+                        <option value="1-5">1-5</option>
+                        <option value="5-10">5-10</option>
+                        <option value="10+">10+</option>
+                    </select>
+                </div>
+
+                <div class="filter-item dropdown">
+                    <select id="statusSelect">
+                        <option value="">Статус</option>
+                        <option value="open">Відкриті</option>
+                        <option value="full">Повні</option>
+                    </select>
+                </div>
+
+                <div class="filter-item">
+                    <i class="fas fa-hashtag"></i>
+                    <input type="text" id="interestSearchInput" placeholder="Інтерес...">
+                </div>
+                
+                <input type="hidden" id="distanceInput">
+                <select id="sortSelect" style="display:none;"><option value="date-asc">Default</option></select>
+                <button id="searchBtn" style="display:none;"></button>
+                <button id="clearFiltersBtn" style="display:none;"></button>
+            </div>
+        </div>
+        
+        <div class="events-horizontal">
+            <div id="eventsHorizontalTrack" class="events-track" role="region" aria-label="Список подій"></div>
+        </div>
     </div>
 </section>
 

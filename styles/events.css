@@ -106,7 +106,7 @@
 .events-track::-webkit-scrollbar { display: none; }
 
 .event-card-horizontal {
-    flex: 0 0 400px; 
+    flex: 0 0 420px; 
     min-height: auto;
     background: var(--main-card-background);
     border-radius: 16px; 
@@ -342,4 +342,139 @@ body.dark-theme #contactInput { background: var(--dark-card-bg); border-color: #
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+/* --- Вбудована панель фільтрів --- */
+.events-filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 30px;
+    background: white;
+    padding: 15px;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    border: 1px solid #e2e8f0;
+    align-items: center;
+}
+
+body.dark-theme .events-filter-bar {
+    background: var(--dark-card-bg);
+    border-color: var(--dark-border);
+}
+
+.filter-primary {
+    flex: 2;
+    min-width: 200px;
+    position: relative;
+}
+
+.filter-primary i {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--main-secondary-color);
+}
+
+.filter-primary input {
+    width: 100%;
+    padding: 12px 12px 12px 40px;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    background: #f8fafc;
+    font-size: 1rem;
+    transition: all 0.3s;
+}
+
+.filter-primary input:focus {
+    background: white;
+    border-color: var(--auth-accent-color);
+    outline: none;
+}
+
+.filter-secondary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    flex: 5;
+}
+
+.filter-item {
+    flex: 1;
+    min-width: 110px;
+    position: relative;
+}
+
+.filter-item input,
+.filter-item select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    background: white;
+    font-size: 0.9rem;
+    color: var(--main-dark-color);
+}
+
+.filter-item i {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.8rem;
+    color: var(--main-secondary-color);
+    pointer-events: none;
+}
+
+/* Відступ для інпутів з іконками */
+.filter-item input {
+    padding-left: 30px;
+}
+
+body.dark-theme .filter-primary input,
+body.dark-theme .filter-item input,
+body.dark-theme .filter-item select {
+    background: var(--dark-input-bg);
+    border-color: var(--dark-border);
+    color: var(--dark-text-primary);
+}
+
+/* Корекція заголовка секції */
+.section-header-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.section-title-modern {
+    position: static; /* Прибираємо абсолютне позиціонування */
+    transform: none;
+    text-align: left;
+    margin: 0;
+    font-size: 2rem;
+}
+
+.controls-right-group {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+@media (max-width: 900px) {
+    .section-header-controls {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+    .controls-right-group {
+        width: 100%;
+        justify-content: space-between;
+    }
+    .events-filter-bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
 }

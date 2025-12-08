@@ -139,16 +139,21 @@ export async function renderEvents(events, isArchive = false) {
         users.forEach(u => usersMap[u.id] = u);
     } catch(e) { console.error(e); }
 
-    processedEvents.forEach(event => {
-        let statusBadge = '';
+processedEvents.forEach(event => {
+        let statusText = '';
+        let statusColor = ''; 
+
         if (isArchive) {
-            statusBadge = '<span style="color: #64748b; font-size: 0.7em; margin-left: 8px; border: 1px solid #ccc; padding: 2px 6px; border-radius: 4px;">Завершено</span>';
+            statusText = '(Завершено)';
+            statusColor = '#64748b';
         } else if (event.minParticipants > 0) {
             if (event.currentParticipants >= event.minParticipants) {
-                statusBadge = '<span style="color: #10b981; font-size: 0.7em; margin-left: 8px; font-weight: bold;">✓ Відбудеться</span>';
+                statusText = '✓ Відбудеться';
+                statusColor = '#10b981';
             } else {
                 const needed = event.minParticipants - event.currentParticipants;
-                statusBadge = `<span style="color: #f59e0b; font-size: 0.7em; margin-left: 8px;">Ще ${needed} до підтвердження</span>`;
+                statusText = `(Ще ${needed} до підтвердження)`;
+                statusColor = '#f59e0b';
             }
         }
 
@@ -159,16 +164,10 @@ export async function renderEvents(events, isArchive = false) {
         
         const interestsHtml = event.interests.map(i => `<span class="interest-tag selected">${i}</span>`).join('');
         
-        const creator = usersMap[event.creatorId];
-        const creatorName = creator ? creator.username : `ID: ${event.creatorId}`;
-        const creatorAvatar = (creator && creator.avatarBase64) ? creator.avatarBase64 : 'https://via.placeholder.com/24';
+        let usersMap = {};
 
-        const creatorHtml = `
-            <div class="creator-info-v4 creator-chip" data-user-id="${event.creatorId}">
-                <img src="${creatorAvatar}" alt="${creatorName}">
-                <span>${creatorName}</span>
-            </div>
-        `;
+        const creatorName = `ID: ${event.creatorId}`; 
+        const creatorAvatar = 'https://via.placeholder.com/24';
 
         let buttonHtml = '';
         if (currentUser && currentUser.id === event.creatorId) {
@@ -176,24 +175,48 @@ export async function renderEvents(events, isArchive = false) {
         } else if (!isArchive) {
             buttonHtml = `<button class="card-action-button join-btn-v4" data-event-id="${event.eventId}"><i class="fas fa-plus"></i> Приєднатися</button>`;
         }
-
         card.innerHTML = `
             <div class="card-content-v4">
-                <h3 class="card-title-v4">${event.title} ${statusBadge}</h3>
+                <h3 class="card-title-v4" style="margin-bottom: 0.5rem;">${event.title}</h3>
+                
                 <ul class="card-meta-list-v4">
                     <li class="meta-item-v4"><i class="fas fa-calendar-alt"></i><span>${utils.formatEventDate(event.date)}</span></li>
                     <li class="meta-item-v4"><i class="fas fa-map-marker-alt"></i><span>${event.location}</span></li>
                 </ul>
+                
                 <div class="card-interests-v4">${interestsHtml}</div>
-                <div class="card-footer-v4">
-                    ${creatorHtml}
-                    <span class="card-participants-v4">
-                        <i class="fas fa-users"></i> ${event.currentParticipants}/${event.participants}
-                    </span>
+                
+                <div class="card-footer-v4" style="margin-top: auto; padding-top: 15px;">
+                    <div class="creator-info-v4 creator-chip" data-user-id="${event.creatorId}">
+                        <i class="fas fa-user-circle" style="font-size: 1.2em;"></i>
+                        <span>Організатор</span>
+                    </div>
+                    
+                    <div style="text-align: right;">
+                        <span class="card-participants-v4" style="display: block;">
+                            <i class="fas fa-users"></i> ${event.currentParticipants}/${event.participants}
+                        </span>
+                        <span style="font-size: 0.75em; font-weight: 600; color: ${statusColor}; display: block; margin-top: 2px;">
+                            ${statusText}
+                        </span>
+                    </div>
                 </div>
             </div>
             ${buttonHtml}
         `;
+        utils.getUsers().then(users => {
+            const creator = users.find(u => u.id === event.creatorId);
+            if (creator) {
+                const chip = card.querySelector('.creator-chip');
+                if (chip) {
+                    chip.innerHTML = `
+                        <img src="${creator.avatarBase64 || 'https://via.placeholder.com/24'}" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover;">
+                        <span>${creator.username}</span>
+                    `;
+                }
+            }
+        });
+
         track.appendChild(card);
     });
 }

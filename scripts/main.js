@@ -11,6 +11,7 @@ const socket = io('http://localhost:5000');
 document.addEventListener('DOMContentLoaded', async () => {
     await utils.fetchGlobalInterests();
     
+    events.initEventFilters()
     ui.updateAllInterestContainers();
     ui.loadTheme();
     ui.handleBackToTop();
@@ -195,6 +196,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         dom.chatListBtn.addEventListener('click', () => {
             chat.renderChatList();
             utils.openModal(dom.chatListModal);
+            updateChatBadge(0);
         });
     }
     if (dom.sendPrivateMessageBtn) dom.sendPrivateMessageBtn.addEventListener('click', chat.sendPrivateMessage);
@@ -303,6 +305,16 @@ async function setupNotifications(userId) {
         await addNotificationToUI(notif);
         updateBadgeCount(1);
     });
+
+    socket.on('chat_alert', (msg) => {
+    const isChatOpen = dom.privateChatModal && dom.privateChatModal.classList.contains('open');
+    const talkingToSender = dom.privateChatModal && (dom.privateChatModal.dataset.otherUserId == msg.senderId);
+    if (isChatOpen && talkingToSender) {
+        return;
+    }
+    utils.showToast(`Нове повідомлення від ${msg.senderName}`, 'info');
+    updateChatBadge(1);
+});
 }
 
 async function loadNotifications(userId) {
@@ -441,4 +453,20 @@ function updateBadgeCount(change) {
 function updateBadgeDisplay(count) {
     dom.notificationBadge.textContent = count;
     dom.notificationBadge.style.display = count > 0 ? 'block' : 'none';
+}
+
+function updateChatBadge(change) {
+    if (!dom.chatBadge) return;
+    
+    if (change === 0) {
+        dom.chatBadge.textContent = '0';
+        dom.chatBadge.style.display = 'none';
+        return;
+    }
+
+    const current = parseInt(dom.chatBadge.textContent) || 0;
+    const newVal = current + change;
+    
+    dom.chatBadge.textContent = newVal;
+    dom.chatBadge.style.display = newVal > 0 ? 'block' : 'none';
 }

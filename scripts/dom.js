@@ -105,6 +105,7 @@ export const closePrivateChatModal = document.getElementById('closePrivateChatMo
 export const privateChatMessages = document.getElementById('privateChatMessages');
 export const privateChatInput = document.getElementById('privateChatInput');
 export const sendPrivateMessageBtn = document.getElementById('sendPrivateMessage');
+export const chatBadge = document.getElementById('chatBadge');
 
 // --- ІНШИЙ ЮЗЕР ---
 export const otherUserProfileModal = document.getElementById('otherUserProfileModal');
