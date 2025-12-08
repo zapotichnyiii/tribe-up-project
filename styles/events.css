@@ -79,8 +79,18 @@
 }
 .events-track::-webkit-scrollbar { display: none; }
 
+/* НОВИЙ КЛАС-ОБГОРТКА */
+.event-card-wrapper {
+    flex: 0 0 420px; /* Ширина тепер задається тут */
+    scroll-snap-align: start;
+    display: flex;
+    flex-direction: column;
+    gap: 12px; /* Відступ між карткою і кнопкою */
+}
+
+/* ОНОВЛЕНИЙ КЛАС КАРТКИ */
 .event-card-horizontal {
-    flex: 0 0 420px; 
+    flex: 1; /* Картка розтягується на доступну висоту */
     min-height: auto;
     background: var(--main-card-background);
     border-radius: 16px; 
@@ -90,7 +100,6 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    scroll-snap-align: start;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     padding: 0; 
     gap: 0; 
@@ -197,21 +206,21 @@
 .card-action-button {
     width: 100%;
     display: block;
-    padding: 1rem; 
+    padding: 14px; /* Збільшено padding */
     font-size: 1.1em;
     font-weight: 700;
     border: none;
-    border-radius: 0; 
+    border-radius: 16px; /* Заокруглені краї для окремої кнопки */
     background: linear-gradient(135deg, var(--main-primary-color), var(--auth-accent-color));
     color: white;
-    box-shadow: 0 8px 20px rgba(107, 33, 168, 0.3);
+    box-shadow: 0 4px 12px rgba(107, 33, 168, 0.2);
     transition: var(--transition);
 }
 
 .card-action-button:hover:not(:disabled) {
     background: linear-gradient(135deg, #15213a, #5b1891);
     box-shadow: 0 8px 25px rgba(107, 33, 168, 0.4);
-    transform: none; 
+    transform: translateY(-2px); /* Ефект підняття */
 }
 
 .card-action-button:disabled {
@@ -220,6 +229,7 @@
     box-shadow: none;
     opacity: 1; 
     cursor: not-allowed;
+    transform: none;
 }
 
 .card-action-organizer {
@@ -227,6 +237,7 @@
     color: var(--auth-accent-color);
     box-shadow: none;
     font-size: 1em;
+    border: 1px solid #e2e8f0; /* Додано рамку */
 }
 .card-action-organizer:hover {
     background: #f1f5f9;
@@ -246,7 +257,7 @@
     .carousel-nav {
         display: none;
     }
-    .event-card-horizontal {
+    .event-card-wrapper { /* Змінено селектор */
         flex: 0 0 320px; 
     }
     .card-title-v4 {

@@ -268,22 +268,26 @@ document.addEventListener('DOMContentLoaded', async () => {
         dom.eventsHorizontalTrack.addEventListener('click', async (e) => {
             const card = e.target.closest('.event-card-horizontal');
             const joinBtn = e.target.closest('.join-btn-v4');
+            const leaveBtn = e.target.closest('.leave-btn-v4'); // Обробка кнопки "Покинути"
             const creatorInfo = e.target.closest('.creator-info-v4');
             
             if (joinBtn) {
+                // Приєднання (тепер кнопка не є частиною картки, але логіка та сама)
+                e.stopPropagation();
                 const eventId = parseInt(joinBtn.dataset.eventId);
-                // Оскільки у нас тепер кеш в events.js, нам треба отримати подію.
-                // Передаємо об'єкт з ID, а events.js розбереться (або оновимо кеш)
                 await events.handleJoinEvent({ eventId: eventId });
+            } else if (leaveBtn) {
+                // Покидання
+                e.stopPropagation();
+                const eventId = parseInt(leaveBtn.dataset.eventId);
+                await events.handleLeaveEvent({ eventId: eventId });
             } else if (creatorInfo) {
                 e.stopPropagation();
                 const userId = parseInt(creatorInfo.dataset.userId);
                 if (userId) user.openOtherUserProfile(userId);
             } else if (card) {
+                // Відкриття деталей події (тільки при кліку на саму картку)
                 const eventId = parseInt(card.dataset.eventId);
-                // Шукаємо подію, щоб відкрити деталі.
-                // Оскільки всі події зараз завантажені (для рендеру), ми можемо взяти їх з API або кешу.
-                // Тут найпростіше взяти свіжий список (це швидко з localStorage/сервера)
                 const allEvents = await utils.getEvents(); 
                 const event = allEvents.find(e => e.eventId === eventId);
                 if (event) events.openEventDetail(event);

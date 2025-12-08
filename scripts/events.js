@@ -179,56 +179,56 @@ export function renderEventsLocal() {
         const creatorName = creator ? creator.username : 'Невідомий';
         const creatorAvatar = creator?.avatarBase64 || 'https://via.placeholder.com/24';
 
-        const card = document.createElement('div');
-        card.className = 'event-card-horizontal';
-        card.dataset.eventId = event.eventId;
-        if (isShowingArchive) card.style.opacity = '0.7';
-        
         const interestsHtml = event.interests.map(i => `<span class="interest-tag selected">${i}</span>`).join('');
         
         let buttonHtml = '';
         
-        // Додаємо position: relative і z-index: 2 до кнопок, щоб вони були поверх картки
+        // Кнопки тепер без inline-стилів для позиціонування
         if (currentUser && currentUser.id === event.creatorId) {
-            buttonHtml = `<button class="card-action-button card-action-organizer" disabled style="background: #f1f5f9; color: #6b21a8; cursor: default; position: relative; z-index: 2;"><i class="fas fa-crown"></i> Ви організатор</button>`;
+            buttonHtml = `<button class="card-action-button card-action-organizer" disabled style="background: #f1f5f9; color: #6b21a8; cursor: default;"><i class="fas fa-crown"></i> Ви організатор</button>`;
         } else if (currentUser && myJoinedEventIds.includes(event.eventId) && !isShowingArchive) {
-            // ПРИБРАНО ІКОНКУ МІНУСА
-            buttonHtml = `<button class="card-action-button leave-btn-v4" data-event-id="${event.eventId}" style="background: #ef4444; position: relative; z-index: 2;">Покинути</button>`;
+            buttonHtml = `<button class="card-action-button leave-btn-v4" data-event-id="${event.eventId}" style="background: #ef4444;">Покинути</button>`;
         } else if (!isShowingArchive) {
-            buttonHtml = `<button class="card-action-button join-btn-v4" data-event-id="${event.eventId}" style="position: relative; z-index: 2;"><i class="fas fa-plus"></i> Приєднатися</button>`;
+            buttonHtml = `<button class="card-action-button join-btn-v4" data-event-id="${event.eventId}"><i class="fas fa-plus"></i> Приєднатися</button>`;
         }
 
-        card.innerHTML = `
-            <div class="card-content-v4">
-                <h3 class="card-title-v4" style="margin-bottom: 0.5rem;">${event.title}</h3>
-                
-                <ul class="card-meta-list-v4">
-                    <li class="meta-item-v4"><i class="fas fa-calendar-alt"></i><span>${utils.formatEventDate(event.date)}</span></li>
-                    <li class="meta-item-v4"><i class="fas fa-map-marker-alt"></i><span>${event.location}</span></li>
-                </ul>
-                
-                <div class="card-interests-v4">${interestsHtml}</div>
-                
-                <div class="card-footer-v4" style="margin-top: auto; padding-top: 15px;">
-                    <div class="creator-info-v4 creator-chip" data-user-id="${event.creatorId}">
-                        <img src="${creatorAvatar}" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover;">
-                        <span>${creatorName}</span>
-                    </div>
+        // СТВОРЮЄМО ОБГОРТКУ
+        const wrapper = document.createElement('div');
+        wrapper.className = 'event-card-wrapper';
+
+        wrapper.innerHTML = `
+            <div class="event-card-horizontal" data-event-id="${event.eventId}" ${isShowingArchive ? 'style="opacity: 0.7"' : ''}>
+                <div class="card-content-v4">
+                    <h3 class="card-title-v4" style="margin-bottom: 0.5rem;">${event.title}</h3>
                     
-                    <div style="text-align: right;">
-                        <span class="card-participants-v4" style="display: block;">
-                            <i class="fas fa-users"></i> ${event.currentParticipants}/${event.participants}
-                        </span>
-                        <span style="font-size: 0.75em; font-weight: 600; color: ${statusColor}; display: block; margin-top: 2px;">
-                            ${statusText}
-                        </span>
+                    <ul class="card-meta-list-v4">
+                        <li class="meta-item-v4"><i class="fas fa-calendar-alt"></i><span>${utils.formatEventDate(event.date)}</span></li>
+                        <li class="meta-item-v4"><i class="fas fa-map-marker-alt"></i><span>${event.location}</span></li>
+                    </ul>
+                    
+                    <div class="card-interests-v4">${interestsHtml}</div>
+                    
+                    <div class="card-footer-v4" style="margin-top: auto; padding-top: 15px;">
+                        <div class="creator-info-v4 creator-chip" data-user-id="${event.creatorId}">
+                            <img src="${creatorAvatar}" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover;">
+                            <span>${creatorName}</span>
+                        </div>
+                        
+                        <div style="text-align: right;">
+                            <span class="card-participants-v4" style="display: block;">
+                                <i class="fas fa-users"></i> ${event.currentParticipants}/${event.participants}
+                            </span>
+                            <span style="font-size: 0.75em; font-weight: 600; color: ${statusColor}; display: block; margin-top: 2px;">
+                                ${statusText}
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>
             ${buttonHtml}
         `;
 
-        fragment.appendChild(card);
+        fragment.appendChild(wrapper);
     });
 
     track.appendChild(fragment);
