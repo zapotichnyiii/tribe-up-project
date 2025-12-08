@@ -189,29 +189,40 @@ export function handlePeopleInterestClick(e) {
     renderPeople();
 }
 
+let scrollInitialized = false;
+
+function initPeopleScroll() {
+    if (dom.peopleScrollLeftBtn && dom.peopleHorizontalTrack) {
+        dom.peopleScrollLeftBtn.addEventListener('click', () => {
+            dom.peopleHorizontalTrack.scrollBy({ left: -320, behavior: 'smooth' });
+        });
+    }
+    if (dom.peopleScrollRightBtn && dom.peopleHorizontalTrack) {
+        dom.peopleScrollRightBtn.addEventListener('click', () => {
+            dom.peopleHorizontalTrack.scrollBy({ left: 320, behavior: 'smooth' });
+        });
+    }
+}
+
 export async function renderPeople(customUsersList = null, isSearchResult = false) {
-    if (!dom.peopleGrid) return;
+    if (!dom.peopleHorizontalTrack) return;
+
+    if (!scrollInitialized) {
+        initPeopleScroll();
+        scrollInitialized = true;
+    }
     
     const currentUser = utils.getCurrentUser();
     if (!currentUser) {
-        dom.peopleGrid.innerHTML = '<p>Увійдіть, щоб бачити людей.</p>';
+        dom.peopleHorizontalTrack.innerHTML = '<p style="padding: 20px;">Увійдіть, щоб бачити людей.</p>';
         return;
     }
 
-    // Якщо це перший запуск і кеш пустий - вантажимо
     if (allUsersCache.length === 0 && !customUsersList) {
         allUsersCache = await utils.getUsers();
     }
 
-    let usersToRender = [];
-
-    if (customUsersList) {
-        usersToRender = customUsersList;
-    } else {
-        // Завжди беремо з кешу, який оновлюється фоново
-        usersToRender = allUsersCache;
-    }
-
+    let usersToRender = customUsersList || allUsersCache;
     let filtered = usersToRender.filter(u => u.id !== currentUser.id);
 
     if (!isSearchResult) {
@@ -225,46 +236,49 @@ export async function renderPeople(customUsersList = null, isSearchResult = fals
         }
     }
 
-    dom.peopleGrid.innerHTML = '';
+    filtered.sort((a, b) => b.id - a.id);
+
+    dom.peopleHorizontalTrack.innerHTML = '';
 
     if (filtered.length === 0) {
-        dom.peopleGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #888;">Нікого не знайдено.</p>';
+        dom.peopleHorizontalTrack.innerHTML = '<p style="padding: 20px; text-align: center; color: #888; width: 100%;">Нікого не знайдено.</p>';
         return;
     }
 
     filtered.forEach(person => {
         const isFollowing = myFollowingIds.includes(person.id);
-        const card = document.createElement('div');
-        card.className = 'card people-card';
-        card.dataset.userId = person.id;
+        const wrapper = document.createElement('div');
+        wrapper.className = 'people-card-wrapper';
         
         const interestsHtml = person.interests.slice(0, 3).map(i => `<span class="interest-tag selected">${i}</span>`).join('');
         
-        card.innerHTML = `
-            <div class="people-card-header">
-                <img src="${person.avatarBase64 || 'https://via.placeholder.com/60'}" alt="${person.name}">
+        wrapper.innerHTML = `
+            <div class="people-card" data-user-id="${person.id}">
                 <div>
-                    <h3>${person.username}</h3>
-                    <p style="font-size: 0.8em; color: #666;">${person.name}, ${person.age} років</p>
-                    <p style="font-size: 0.8em; color: #666;">${person.location}</p>
+                    <div class="people-card-header">
+                        <img src="${person.avatarBase64 || 'https://via.placeholder.com/60'}" alt="${person.name}">
+                        <div>
+                            <h3>${person.username}</h3>
+                            <p style="font-size: 0.8em; color: var(--main-secondary-color);">${person.name}, ${person.age} років</p>
+                            <p style="font-size: 0.8em; color: var(--main-secondary-color);"><i class="fas fa-map-marker-alt"></i> ${person.location}</p>
+                        </div>
+                    </div>
+                    <div class="interests" style="margin-bottom: 10px;">${interestsHtml}</div>
+                </div>
+                
+                <div style="display: flex; gap: 8px; margin-top: 10px;">
+                    <button class="btn btn-outline btn-sm message-btn" style="flex: 1;">Написати</button>
+                    <button class="btn btn-sm follow-btn ${isFollowing ? 'btn-outline' : 'btn-accent'}" style="flex: 1;">
+                        ${isFollowing ? 'Відписатися' : 'Підписатися'}
+                    </button>
                 </div>
             </div>
-            <div class="interests" style="margin-bottom: 10px;">${interestsHtml}</div>
-            
-            <div style="display: flex; gap: 8px; margin-top: auto;">
-                <button class="btn btn-outline btn-sm message-btn" style="flex: 1;">Написати</button>
-                <button class="btn btn-sm follow-btn ${isFollowing ? 'btn-outline' : 'btn-accent'}" style="flex: 1;">
-                    ${isFollowing ? 'Відписатися' : 'Підписатися'}
-                </button>
-            </div>
         `;
-        dom.peopleGrid.appendChild(card);
+        dom.peopleHorizontalTrack.appendChild(wrapper);
     });
 }
 
-// Миттєвий пошук
 export function handleUserSearch(e) {
-    // Беремо value або з події, або з об'єкта-заглушки (якщо викликаємо з refreshUserCache)
     const query = (e.target.value || '').toLowerCase().trim();
 
     if (allUsersCache.length === 0) return;
@@ -283,10 +297,8 @@ export function handleUserSearch(e) {
 }
 
 export async function openOtherUserProfile(userId) {
-    // Спочатку шукаємо в кеші для швидкості
     let user = allUsersCache.find(u => u.id === userId);
     if (!user) {
-        // Якщо раптом немає в кеші, робимо запит
         const users = await utils.getUsers();
         user = users.find(u => u.id === userId);
     }

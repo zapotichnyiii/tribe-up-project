@@ -457,24 +457,37 @@
 </section>
 
 <section id="people">
-            <div class="container">
-                <h2 class="section-title">Люди</h2>
+    <div class="container">
+        <h2 class="section-title">Люди</h2>
 
-                <div class="people-controls" style="margin-bottom: 20px; display: flex; flex-direction: column; gap: 15px;">
-                    <div class="search-group" style="display: flex; gap: 10px; flex-wrap: wrap;">
-                        <input type="text" id="userSearchInput" class="form-control" placeholder="Пошук за нікнеймом..." style="flex: 1;">
-                        <input type="text" id="cityFilterInput" class="form-control" placeholder="Місто (напр. Львів)" style="flex: 1;">
-                    </div>
-
-                    <div class="people-filter">
-                        <p class="filter-label">Фільтр за інтересами:</p>
-                        <div id="peopleInterestFilter" class="interest-tags"></div>
-                    </div>
-                </div>
-
-                <div class="grid" id="peopleGrid" role="region" aria-label="Список користувачів"></div>
+        <div class="people-controls" style="margin-bottom: 20px; display: flex; flex-direction: column; gap: 15px;">
+            <div class="search-group" style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <input type="text" id="userSearchInput" class="form-control" placeholder="Пошук за нікнеймом..." style="flex: 1;">
+                <input type="text" id="cityFilterInput" class="form-control" placeholder="Місто (напр. Львів)" style="flex: 1;">
             </div>
-        </section>
+
+            <div class="people-filter">
+                <p class="filter-label">Фільтр за інтересами:</p>
+                <div id="peopleInterestFilter" class="interest-tags"></div>
+            </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 15px; margin-bottom: 15px; align-items: center;">
+            <div class="carousel-nav">
+                <button class="scroll-btn left" id="peopleScrollLeftBtn" aria-label="Прокрутити вліво">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <button class="scroll-btn right" id="peopleScrollRightBtn" aria-label="Прокрутити вправо">
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="people-horizontal">
+            <div id="peopleHorizontalTrack" class="people-track" role="region" aria-label="Список користувачів"></div>
+        </div>
+        </div>
+</section>
 
         <section id="about" style="padding: 40px 0;">
             <div class="container">

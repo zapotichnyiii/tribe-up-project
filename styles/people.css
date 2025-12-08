@@ -63,3 +63,55 @@ background: var(--main-accent-color);
 color: white;
 border-color: var(--main-accent-color);
 }
+
+/* Карусель для людей */
+.people-horizontal {
+    position: relative;
+    overflow: hidden;
+}
+
+.people-track {
+    display: flex;
+    gap: 1.5rem;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    scroll-snap-type: x mandatory;
+    padding: 10px 5px 20px 5px; /* Відступи для тіней */
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.people-track::-webkit-scrollbar {
+    display: none;
+}
+
+/* Обгортка картки для фіксації ширини в каруселі */
+.people-card-wrapper {
+    flex: 0 0 300px; /* Ширина картки людини */
+    scroll-snap-align: start;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Модифікація картки для каруселі */
+.people-card {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background: var(--main-card-background);
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+body.dark-theme .people-card {
+    border-color: var(--dark-border);
+    background: var(--dark-card-bg);
+}
+
+.people-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    border-color: var(--auth-accent-color);
+}

@@ -5,6 +5,9 @@ export const loginFormInitial = document.getElementById('loginFormInitial');
 export const showRegisterFormLink = document.getElementById('showRegisterFormLink');
 export const eventsGrid = document.getElementById('eventsGrid');
 export const peopleGrid = document.getElementById('peopleGrid');
+export const peopleHorizontalTrack = document.getElementById('peopleHorizontalTrack');
+export const peopleScrollLeftBtn = document.getElementById('peopleScrollLeftBtn');
+export const peopleScrollRightBtn = document.getElementById('peopleScrollRightBtn');
 
 // --- СТВОРЕННЯ ПОДІЇ ---
 export const createEventBtn = document.getElementById('createEventBtn');

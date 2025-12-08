@@ -152,8 +152,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (dom.peopleInterestFilter) dom.peopleInterestFilter.addEventListener('click', user.handlePeopleInterestClick);
 
     // Кліки в сітці людей (Підписатися, Написати, Профіль)
-    if (dom.peopleGrid) {
-        dom.peopleGrid.addEventListener('click', (e) => {
+if (dom.peopleHorizontalTrack) {
+        dom.peopleHorizontalTrack.addEventListener('click', (e) => {
             const followBtn = e.target.closest('.follow-btn');
             if (followBtn) {
                 const card = e.target.closest('.people-card');
