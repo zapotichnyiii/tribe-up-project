@@ -1,6 +1,7 @@
 import * as dom from './dom.js';
 import * as utils from './utils.js';
-import { renderInterests } from './ui.js';   
+import { renderInterests } from './ui.js';
+import * as events from './events.js';
 
 const getAuthHeaders = () => ({
     'Content-Type': 'application/json',
@@ -9,6 +10,32 @@ const getAuthHeaders = () => ({
 
 export let myFollowingIds = [];
 export let selectedPeopleInterests = [];
+let allUsersCache = []; 
+
+export function startUserPolling() {
+    refreshUserCache();
+    setInterval(() => {
+        refreshUserCache();
+    }, 10000);
+}
+
+async function refreshUserCache() {
+    try {
+        const users = await utils.getUsers();
+        
+        if (JSON.stringify(users.map(u => u.id)) !== JSON.stringify(allUsersCache.map(u => u.id))) {
+            allUsersCache = users;
+            
+            const currentQuery = dom.userSearchInput?.value.trim();
+            if (currentQuery) {
+                const fakeEvent = { target: { value: currentQuery } };
+                handleUserSearch(fakeEvent);
+            } else {
+                renderPeople();
+            }
+        }
+    } catch (e) { console.error("Polling error", e); }
+}
 
 export async function fetchMySocials() {
     const user = utils.getCurrentUser();
@@ -21,7 +48,7 @@ export async function fetchMySocials() {
         
         if (dom.myFollowersBtn) dom.myFollowersBtn.innerHTML = `<b>${data.followers.length}</b> підписників`;
         if (dom.myFollowingBtn) dom.myFollowingBtn.innerHTML = `<b>${data.following.length}</b> підписок`;
-    } catch (e) { console.error('Error fetching socials:', e); }
+    } catch (e) { console.error(e); }
 }
 
 export async function toggleFollow(targetUserId, btnElement) {
@@ -66,7 +93,7 @@ export async function toggleFollow(targetUserId, btnElement) {
             const err = await res.json();
             utils.showToast(err.error || 'Помилка', 'error');
         }
-    } catch (e) { console.error(e); utils.showToast('Помилка сервера', 'error'); }
+    } catch (e) { utils.showToast('Помилка сервера', 'error'); }
 }
 
 async function updateOtherUserProfileStats(userId) {
@@ -78,9 +105,9 @@ async function updateOtherUserProfileStats(userId) {
     } catch(e) {}
 }
 
-export async function openSocialList(type) {
-    const user = utils.getCurrentUser();
-    if (!user) return;
+export async function openSocialList(type, userId = null) {
+    const targetId = userId || utils.getCurrentUser()?.id;
+    if (!targetId) return;
     
     dom.socialListTitle.textContent = type === 'followers' ? 'Підписники' : 'Підписки';
     dom.socialListContainer.innerHTML = '<p style="text-align: center; padding: 20px;">Завантаження...</p>';
@@ -88,7 +115,7 @@ export async function openSocialList(type) {
     utils.openModal(dom.socialListModal);
     
     try {
-        const res = await fetch(`http://localhost:5000/api/users/${user.id}/social`);
+        const res = await fetch(`http://localhost:5000/api/users/${targetId}/social`);
         const data = await res.json();
         const list = type === 'followers' ? data.followers : data.following;
         
@@ -108,7 +135,7 @@ export async function openSocialList(type) {
             div.innerHTML = `
                 <img src="${avatarSrc}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
                 <div>
-                    <div style="font-weight: 600;">@${u.username}</div>
+                    <div style="font-weight: 600;">${u.username}</div>
                     <div style="font-size: 0.8em; color: gray;">${u.name}</div>
                 </div>
             `;
@@ -128,11 +155,14 @@ export async function openSocialList(type) {
 }
 
 export async function renderPeopleInterestFilter() {
-    const users = await utils.getUsers();
+    if (allUsersCache.length === 0) {
+        allUsersCache = await utils.getUsers();
+    }
+    
     const currentUser = utils.getCurrentUser();
     if (!currentUser) return;
     
-    const otherUsers = users.filter(u => u.id !== currentUser.id);
+    const otherUsers = allUsersCache.filter(u => u.id !== currentUser.id);
     const allInterests = [...new Set(otherUsers.flatMap(u => u.interests))].sort();
     
     if (dom.peopleInterestFilter) {
@@ -159,10 +189,8 @@ export function handlePeopleInterestClick(e) {
     renderPeople();
 }
 
-export async function renderPeople(customUsersList = null) {
+export async function renderPeople(customUsersList = null, isSearchResult = false) {
     if (!dom.peopleGrid) return;
-    
-    await fetchMySocials();
     
     const currentUser = utils.getCurrentUser();
     if (!currentUser) {
@@ -170,24 +198,31 @@ export async function renderPeople(customUsersList = null) {
         return;
     }
 
+    // Якщо це перший запуск і кеш пустий - вантажимо
+    if (allUsersCache.length === 0 && !customUsersList) {
+        allUsersCache = await utils.getUsers();
+    }
+
     let usersToRender = [];
 
     if (customUsersList) {
         usersToRender = customUsersList;
     } else {
-        const users = await utils.getUsers();
-        usersToRender = users;
+        // Завжди беремо з кешу, який оновлюється фоново
+        usersToRender = allUsersCache;
     }
 
     let filtered = usersToRender.filter(u => u.id !== currentUser.id);
 
-    const cityQuery = dom.cityFilterInput?.value.toLowerCase().trim();
-    if (cityQuery) {
-        filtered = filtered.filter(u => u.location.toLowerCase().includes(cityQuery));
-    }
+    if (!isSearchResult) {
+        const cityQuery = dom.cityFilterInput?.value.toLowerCase().trim();
+        if (cityQuery) {
+            filtered = filtered.filter(u => u.location.toLowerCase().includes(cityQuery));
+        }
 
-    if (selectedPeopleInterests.length > 0) {
-        filtered = filtered.filter(u => u.interests.some(i => selectedPeopleInterests.includes(i)));
+        if (selectedPeopleInterests.length > 0) {
+            filtered = filtered.filter(u => u.interests.some(i => selectedPeopleInterests.includes(i)));
+        }
     }
 
     dom.peopleGrid.innerHTML = '';
@@ -209,7 +244,7 @@ export async function renderPeople(customUsersList = null) {
             <div class="people-card-header">
                 <img src="${person.avatarBase64 || 'https://via.placeholder.com/60'}" alt="${person.name}">
                 <div>
-                    <h3>@${person.username}</h3>
+                    <h3>${person.username}</h3>
                     <p style="font-size: 0.8em; color: #666;">${person.name}, ${person.age} років</p>
                     <p style="font-size: 0.8em; color: #666;">${person.location}</p>
                 </div>
@@ -227,64 +262,64 @@ export async function renderPeople(customUsersList = null) {
     });
 }
 
-let searchTimeout;
+// Миттєвий пошук
 export function handleUserSearch(e) {
-    const query = e.target.value.trim();
-    clearTimeout(searchTimeout);
+    // Беремо value або з події, або з об'єкта-заглушки (якщо викликаємо з refreshUserCache)
+    const query = (e.target.value || '').toLowerCase().trim();
+
+    if (allUsersCache.length === 0) return;
 
     if (query.length === 0) {
         renderPeople(null);
         return;
     }
 
-    searchTimeout = setTimeout(async () => {
-        try {
-            const res = await fetch(`http://localhost:5000/api/users/search?q=${encodeURIComponent(query)}`);
-            if (res.ok) {
-                const users = await res.json();
-                renderPeople(users);
-            }
-        } catch (e) { console.error(e); }
-    }, 300);
+    const filtered = allUsersCache.filter(u => 
+        u.username.toLowerCase().includes(query) || 
+        u.name.toLowerCase().includes(query)
+    );
+    
+    renderPeople(filtered, true);
 }
 
-// ОНОВЛЕНА функція профілю іншого юзера (додані кнопки та статистика)
 export async function openOtherUserProfile(userId) {
-    const users = await utils.getUsers();
-    const user = users.find(u => u.id === userId);
+    // Спочатку шукаємо в кеші для швидкості
+    let user = allUsersCache.find(u => u.id === userId);
+    if (!user) {
+        // Якщо раптом немає в кеші, робимо запит
+        const users = await utils.getUsers();
+        user = users.find(u => u.id === userId);
+    }
+    
     if (!user) return;
 
     if (dom.otherUserProfileAvatar) dom.otherUserProfileAvatar.src = user.avatarBase64 || 'https://via.placeholder.com/100';
     if (dom.otherUserProfileName) dom.otherUserProfileName.textContent = user.name;
-    if (dom.otherUserProfileUsername) dom.otherUserProfileUsername.textContent = '@' + user.username;
+    if (dom.otherUserProfileUsername) dom.otherUserProfileUsername.textContent = user.username;
     if (dom.otherUserProfileInterests) dom.otherUserProfileInterests.innerHTML = user.interests.map(i => `<span class="interest-tag selected">${i}</span>`).join('');
     
-    // --- НОВА ЛОГІКА КНОПОК ТА СТАТИСТИКИ ---
+    if (dom.otherUserFollowersBtn) dom.otherUserFollowersBtn.dataset.userId = userId;
+    if (dom.otherUserFollowingBtn) dom.otherUserFollowingBtn.dataset.userId = userId;
+
     const currentUser = utils.getCurrentUser();
     const isMe = currentUser && currentUser.id === user.id;
 
-    // Кнопка "Написати"
     if (dom.otherUserMessageBtn) {
         dom.otherUserMessageBtn.dataset.userId = user.id;
         dom.otherUserMessageBtn.style.display = isMe ? 'none' : 'block';
     }
 
-    // Кнопка "Підписатися"
     if (dom.otherUserFollowBtn) {
         if (isMe) {
             dom.otherUserFollowBtn.style.display = 'none';
         } else {
             dom.otherUserFollowBtn.style.display = 'block';
-            
-            // Завантажуємо актуальний стан підписок
             await fetchMySocials(); 
             const isFollowing = myFollowingIds.includes(user.id);
             
             dom.otherUserFollowBtn.textContent = isFollowing ? 'Відписатися' : 'Підписатися';
             dom.otherUserFollowBtn.className = isFollowing ? 'btn btn-outline' : 'btn btn-accent';
             
-            // ВИПРАВЛЕНО: Використовуємо .onclick замість replaceChild,
-            // щоб не втратити посилання на DOM елемент (dom.otherUserFollowBtn).
             dom.otherUserFollowBtn.onclick = (e) => {
                 e.preventDefault();
                 toggleFollow(user.id, dom.otherUserFollowBtn);
@@ -292,32 +327,37 @@ export async function openOtherUserProfile(userId) {
         }
     }
 
-    // Оновлюємо статистику (підписники/підписки)
     updateOtherUserProfileStats(userId);
 
-    // Відображення подій користувача (без змін)
     const allEvents = await utils.getEvents();
     const userEvents = allEvents.filter(e => e.creatorId === userId);
     
     if (dom.otherUserProfileEvents) {
         dom.otherUserProfileEvents.innerHTML = userEvents.length ? '' : '<p>Немає подій</p>';
         userEvents.forEach(e => {
-            const div = document.createElement('div');
-            div.className = 'event-item';
-            div.textContent = `${e.title} (${utils.formatEventDate(e.date)})`;
-            dom.otherUserProfileEvents.appendChild(div);
+            const card = document.createElement('div');
+            card.className = 'mini-event-card';
+            card.innerHTML = `
+                <div class="mini-event-title">${e.title}</div>
+                <div class="mini-event-date"><i class="fas fa-calendar-alt"></i> ${utils.formatEventDate(e.date)}</div>
+            `;
+            
+            card.addEventListener('click', () => {
+                utils.closeModal(dom.otherUserProfileModal);
+                events.openEventDetail(e);
+            });
+
+            dom.otherUserProfileEvents.appendChild(card);
         });
     }
 
     utils.openModal(dom.otherUserProfileModal);
 }
 
-// ОНОВЛЕНА функція власного профілю (додано завантаження статистики)
 export async function openUserProfile() {
     const currentUser = utils.getCurrentUser();
     if (!currentUser) return;
     
-    // Завантажуємо свіжі дані соцмереж
     await fetchMySocials();
 
     try {
@@ -327,19 +367,28 @@ export async function openUserProfile() {
 
         if(dom.profileModalAvatar) dom.profileModalAvatar.src = freshUser.avatarBase64 || 'https://via.placeholder.com/100';
         if(dom.profileModalName) dom.profileModalName.textContent = freshUser.name;
-        if(dom.profileModalUsername) dom.profileModalUsername.textContent = `@${freshUser.username}`;
+        if(dom.profileModalUsername) dom.profileModalUsername.textContent = freshUser.username;
         if(dom.profileModalInterests) dom.profileModalInterests.innerHTML = freshUser.interests.map(i => `<span class="interest-tag selected">${i}</span>`).join('');
 
         const allEvents = await utils.getEvents('active');
         const myEvents = allEvents.filter(e => e.creatorId === freshUser.id);
         if (dom.userEventsList) {
             dom.userEventsList.innerHTML = myEvents.length ? '' : '<p style="color:#888;">Поки немає подій</p>';
+            
             myEvents.forEach(e => {
-                const div = document.createElement('div');
-                div.style.padding = '8px';
-                div.style.borderBottom = '1px solid #eee';
-                div.innerHTML = `<b>${e.title}</b> <span style="color:#666; font-size:0.8em;">(${utils.formatEventDate(e.date)})</span>`;
-                dom.userEventsList.appendChild(div);
+                const card = document.createElement('div');
+                card.className = 'mini-event-card';
+                card.innerHTML = `
+                    <div class="mini-event-title">${e.title}</div>
+                    <div class="mini-event-date"><i class="fas fa-calendar-alt"></i> ${utils.formatEventDate(e.date)}</div>
+                `;
+                
+                card.addEventListener('click', () => {
+                    utils.closeModal(dom.profileModal);
+                    events.openEventDetail(e);
+                });
+
+                dom.userEventsList.appendChild(card);
             });
         }
         utils.openModal(dom.profileModal);

@@ -194,3 +194,88 @@ export function handleAddCustomInterest() {
         });
     }
 }
+
+// --- ВІДНОВЛЕННЯ ПАРОЛЮ ---
+
+export function initForgotPassword() {
+    // Відкриття модалки
+    if (dom.forgotPasswordLink) {
+        dom.forgotPasswordLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            utils.openModal(dom.forgotPasswordModal);
+            // Скидаємо стан до кроку 1
+            if(dom.forgotStep1) dom.forgotStep1.style.display = 'block';
+            if(dom.forgotStep2) dom.forgotStep2.style.display = 'none';
+            if(dom.forgotEmailInput) dom.forgotEmailInput.value = '';
+            if(dom.forgotCodeInput) dom.forgotCodeInput.value = '';
+            if(dom.forgotNewPassword) dom.forgotNewPassword.value = '';
+        });
+    }
+
+    if (dom.closeForgotPasswordModal) {
+        dom.closeForgotPasswordModal.addEventListener('click', () => utils.closeModal(dom.forgotPasswordModal));
+    }
+
+    // Крок 1: Відправка коду
+    if (dom.sendResetCodeBtn) {
+        dom.sendResetCodeBtn.addEventListener('click', async () => {
+            const email = dom.forgotEmailInput.value.trim();
+            if (!email || !email.includes('@')) {
+                utils.showToast('Введіть коректну пошту', 'error');
+                return;
+            }
+
+            try {
+                const res = await fetch('http://localhost:5000/api/auth/forgot-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+
+                if (res.ok) {
+                    utils.showToast('Код надіслано!', 'success');
+                    dom.forgotStep1.style.display = 'none';
+                    dom.forgotStep2.style.display = 'block';
+                    dom.forgotEmailDisplay.textContent = email;
+                } else {
+                    const err = await res.json();
+                    utils.showToast(err.error || 'Помилка', 'error');
+                }
+            } catch (e) {
+                utils.showToast('Помилка сервера', 'error');
+            }
+        });
+    }
+
+    // Крок 2: Зміна паролю
+    if (dom.confirmResetBtn) {
+        dom.confirmResetBtn.addEventListener('click', async () => {
+            const email = dom.forgotEmailDisplay.textContent;
+            const code = dom.forgotCodeInput.value.trim();
+            const newPassword = dom.forgotNewPassword.value;
+
+            if (code.length < 6) return utils.showToast('Введіть код', 'error');
+            if (newPassword.length < 6) return utils.showToast('Пароль занадто короткий', 'error');
+
+            try {
+                const res = await fetch('http://localhost:5000/api/auth/reset-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, code, newPassword })
+                });
+
+                if (res.ok) {
+                    utils.showToast('Пароль успішно змінено!', 'success');
+                    utils.closeModal(dom.forgotPasswordModal);
+                    // Перемикаємо на таб входу, якщо ми були деінде
+                    document.querySelector('.tab-btn[data-tab="login"]')?.click();
+                } else {
+                    const err = await res.json();
+                    utils.showToast(err.error || 'Помилка зміни паролю', 'error');
+                }
+            } catch (e) {
+                utils.showToast('Помилка сервера', 'error');
+            }
+        });
+    }
+}

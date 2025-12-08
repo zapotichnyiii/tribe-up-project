@@ -64,7 +64,7 @@ export function showMainApp(user) {
         dom.authScreen.style.display = 'none';
         dom.mainApp.style.display = 'block';
     }
-    if (dom.profileUsername) dom.profileUsername.textContent = `@${user.username}`;
+    if (dom.profileUsername) dom.profileUsername.textContent = user.username;
     if (dom.profileAvatar) dom.profileAvatar.src = user.avatarBase64 || 'https://via.placeholder.com/48';
     if (dom.profileDisplay) dom.profileDisplay.style.display = 'flex';
 }
@@ -149,7 +149,7 @@ export async function openInterestSearchModal(interest) {
             <div class="interest-modal-person-item" data-user-id="${person.id}">
                 <img src="${person.avatarBase64 || 'https://via.placeholder.com/40'}" loading="lazy">
                 <div>
-                    <div class="item-title">@${person.username}</div>
+                    <div class="item-title">${person.username}</div>
                 </div>
             </div>
         `).join('');

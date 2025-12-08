@@ -308,3 +308,38 @@ body.dark-theme .chat-message .time { color: var(--dark-secondary-color); }
 #chatInput { flex-grow: 1; padding: 8px; border: 1px solid #e2e8f0; border-radius: var(--border-radius-small); font-size: 0.85em; background: var(--main-card-background); color: var(--main-dark-color); }
 body.dark-theme #contactInput { background: var(--dark-card-bg); border-color: #475569; color: var(--dark-text-color); }
 #sendChatMessage { padding: 8px 12px; font-size: 0.85em; }
+
+.creator-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    max-width: 100%;
+}
+
+.creator-chip:hover {
+    border-color: var(--auth-accent-color);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.creator-chip img {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.creator-chip span {
+    font-size: 0.85em;
+    font-weight: 600;
+    color: var(--main-dark-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

@@ -6,14 +6,11 @@ import * as events from './events.js';
 import * as user from './user.js';
 import * as chat from './chat.js';
 
-// Підключаємо Socket.IO для сповіщень
 const socket = io('http://localhost:5000');
 
 document.addEventListener('DOMContentLoaded', async () => {
-    // 1. Завантаження інтересів
     await utils.fetchGlobalInterests();
     
-    // 2. Ініціалізація UI
     ui.updateAllInterestContainers();
     ui.loadTheme();
     ui.handleBackToTop();
@@ -23,14 +20,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     const currentUser = utils.getCurrentUser();
     let showingArchive = false;
 
-    // 3. Завантаження подій
     const allEvents = await utils.getEvents('active');
     
     if (currentUser) {
         ui.showMainApp(currentUser);
         events.renderEvents(allEvents, false);
         
-        // Авто-оновлення профілю та соціальних даних
         utils.getUsers().then(users => {
             const freshUser = users.find(u => u.id === currentUser.id);
             if (freshUser) {
@@ -39,7 +34,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
 
-        // === НОВЕ: Завантаження соціальних даних та налаштування сповіщень ===
         await user.fetchMySocials();
         setupNotifications(currentUser.id);
         
@@ -48,6 +42,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     } else {
         ui.showAuthScreen();
         auth.initAuthTabs();
+        auth.initForgotPassword();
         utils.setupFormValidation(dom.loginFormInitial, auth.loginValidations);
         utils.setupFormValidation(dom.registerForm, auth.registerValidations);
     }
@@ -56,10 +51,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     utils.setupFormValidation(dom.editProfileForm, user.editProfileValidations);
     utils.setupFormValidation(dom.editEventForm, events.editEventValidations);
     
-    // --- ГЛОБАЛЬНІ ОБРОБНИКИ ---
-
     document.body.addEventListener('click', (e) => {
-        // Логіка кліку по тегу інтересу
         const tag = e.target.closest('.interest-tag');
         if (tag) {
             const selectionContainer = e.target.closest('#registerForm, #createEventModal, #editEventModal, #editProfileModal, #peopleInterestFilter');
@@ -72,7 +64,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }
 
-        // Закриття дропдауну сповіщень при кліку поза ним
         if (dom.notificationDropdown && dom.notificationDropdown.style.display === 'block') {
             if (!e.target.closest('.notification-wrapper')) {
                 dom.notificationDropdown.style.display = 'none';
@@ -96,13 +87,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // Редагування профілю
     const editProfileBtn = document.getElementById('editProfileBtn');
     if (editProfileBtn) editProfileBtn.addEventListener('click', user.openEditProfileModal);
     if (dom.editProfileForm) dom.editProfileForm.addEventListener('submit', user.handleEditProfileSubmit);
     if (dom.addEditCustomInterestBtn) dom.addEditCustomInterestBtn.addEventListener('click', user.handleAddEditCustomInterest);
 
-    // Створення події
     if (dom.createEventBtn) {
         dom.createEventBtn.addEventListener('click', () => {
             ui.updateAllInterestContainers(); 
@@ -118,7 +107,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (dom.addEditEventCustomInterestBtn) dom.addEditEventCustomInterestBtn.addEventListener('click', events.handleAddEditEventInterest);
     if (dom.addEventCustomInterestBtn) dom.addEventCustomInterestBtn.addEventListener('click', ui.handleAddEventInterest);
 
-    // Архів подій
     if (dom.toggleArchiveBtn) {
         dom.toggleArchiveBtn.addEventListener('click', async () => {
             showingArchive = !showingArchive;
@@ -131,17 +119,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // --- ПОШУК ТА ФІЛЬТРИ ЛЮДЕЙ ---
     if (dom.userSearchInput) dom.userSearchInput.addEventListener('input', user.handleUserSearch);
     if (dom.cityFilterInput) dom.cityFilterInput.addEventListener('input', () => user.renderPeople());
     if (dom.peopleInterestFilter) dom.peopleInterestFilter.addEventListener('click', user.handlePeopleInterestClick);
 
-    // === НОВЕ: ОБРОБНИКИ ДЛЯ СОЦІАЛЬНИХ ФУНКЦІЙ ===
-    
-    // 1. Делегування подій в сітці людей (кнопка підписатися)
     if (dom.peopleGrid) {
         dom.peopleGrid.addEventListener('click', (e) => {
-            // Кнопка підписатися
             const followBtn = e.target.closest('.follow-btn');
             if (followBtn) {
                 const card = e.target.closest('.people-card');
@@ -149,7 +132,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return;
             }
 
-            // Кнопка написати
             const messageBtn = e.target.closest('.message-btn');
             if (messageBtn) {
                 const card = e.target.closest('.people-card');
@@ -160,7 +142,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return;
             }
 
-            // Клік по картці (відкрити профіль)
             const card = e.target.closest('.people-card');
             if (card) {
                 user.openOtherUserProfile(parseInt(card.dataset.userId));
@@ -168,12 +149,34 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // 2. Списки підписників у власному профілі
-    if (dom.myFollowersBtn) dom.myFollowersBtn.addEventListener('click', () => user.openSocialList('followers'));
-    if (dom.myFollowingBtn) dom.myFollowingBtn.addEventListener('click', () => user.openSocialList('following'));
+    if (dom.myFollowersBtn) {
+        dom.myFollowersBtn.addEventListener('click', () => {
+            const currentUser = utils.getCurrentUser();
+            if(currentUser) user.openSocialList('followers', currentUser.id);
+        });
+    }
+    if (dom.myFollowingBtn) {
+        dom.myFollowingBtn.addEventListener('click', () => {
+            const currentUser = utils.getCurrentUser();
+            if(currentUser) user.openSocialList('following', currentUser.id);
+        });
+    }
+
+    if (dom.otherUserFollowersBtn) {
+        dom.otherUserFollowersBtn.addEventListener('click', () => {
+            const uid = dom.otherUserFollowersBtn.dataset.userId;
+            if (uid) user.openSocialList('followers', uid);
+        });
+    }
+    if (dom.otherUserFollowingBtn) {
+        dom.otherUserFollowingBtn.addEventListener('click', () => {
+            const uid = dom.otherUserFollowingBtn.dataset.userId;
+            if (uid) user.openSocialList('following', uid);
+        });
+    }
+
     if (dom.closeSocialListModal) dom.closeSocialListModal.addEventListener('click', () => utils.closeModal(dom.socialListModal));
 
-    // 3. Меню сповіщень
     if (dom.notificationBtn) {
         dom.notificationBtn.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -187,9 +190,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (dom.markAllReadBtn) {
         dom.markAllReadBtn.addEventListener('click', markAllNotificationsRead);
     }
-    // ============================================
 
-    // --- ЧАТИ ---
     if (dom.chatListBtn) {
         dom.chatListBtn.addEventListener('click', () => {
             chat.renderChatList();
@@ -231,7 +232,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // --- КАРУСЕЛЬ ПОДІЙ ---
     if (dom.eventsHorizontalTrack) {
         dom.eventsHorizontalTrack.addEventListener('scroll', events.updateScrollButtons);
         dom.eventsHorizontalTrack.addEventListener('click', async (e) => {
@@ -266,10 +266,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
     
-    if (dom.scrollLeftBtn) dom.scrollLeftBtn.addEventListener('click', () => dom.eventsHorizontalTrack.scrollBy({ left: -420, behavior: 'smooth' }));
+    if (dom.scrollLeftBtn) dom.scrollLeftBtn.addEventListener('click', () => dom.eventsHorizontalTrack.scrollBy({ left: 420, behavior: 'smooth' }));
     if (dom.scrollRightBtn) dom.scrollRightBtn.addEventListener('click', () => dom.eventsHorizontalTrack.scrollBy({ left: 420, behavior: 'smooth' }));
 
-    // Список чатів
     const chatList = document.getElementById('chatList');
     if (chatList) {
         chatList.addEventListener('click', (e) => {
@@ -282,7 +281,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // Кнопки закриття модалок
     const closeButtons = [
         dom.closeRegisterModal, dom.closeEventModal, dom.closeProfileModal,
         dom.closeEditProfileModal, dom.closeEventDetailModal, dom.closeEditEventModal,
@@ -295,20 +293,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 });
 
-// === ФУНКЦІЇ ДЛЯ СПОВІЩЕНЬ ===
-
 async function setupNotifications(userId) {
-    // Входимо в кімнату Socket.IO
     socket.emit('join_notifications', { userId: userId });
     
-    // Завантажуємо початковий список
     await loadNotifications(userId);
     
-    // Слухаємо нові сповіщення
     socket.on('new_notification', async (notif) => {
-        utils.showToast(notif.message, 'info'); // Спливаюче повідомлення
-        await addNotificationToUI(notif); // Додаємо в список (await для аватарки)
-        updateBadgeCount(1); // Оновлюємо лічильник
+        utils.showToast(notif.message, 'info');
+        await addNotificationToUI(notif);
+        updateBadgeCount(1);
     });
 }
 
@@ -318,7 +311,7 @@ async function loadNotifications(userId) {
 
     try {
         const res = await fetch(`http://localhost:5000/api/notifications/${userId}`, {
-             headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+            headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
         });
         const notifs = await res.json();
         
@@ -329,7 +322,6 @@ async function loadNotifications(userId) {
         if (notifs.length === 0) {
             dom.notificationList.innerHTML = '<p class="empty-notif" style="padding:20px; text-align:center; color:#888;">Немає сповіщень</p>';
         } else {
-            // Використовуємо цикл for..of для async/await
             for (const n of notifs) {
                 await addNotificationToUI(n, false);
             }
@@ -341,26 +333,24 @@ async function addNotificationToUI(notif, prepend = true) {
     const item = document.createElement('div');
     item.className = `notif-item ${notif.is_read ? '' : 'unread'}`;
     
-    // --- Логіка іконки/аватарки ---
     let iconHtml = '';
     
     if (notif.type === 'follow' && notif.related_id) {
-        // Якщо це підписка, шукаємо аватар юзера
-        const users = await utils.getUsers(); // Беремо з кешу/сервера
+        const users = await utils.getUsers(); 
         const follower = users.find(u => u.id === notif.related_id);
         
         if (follower && follower.avatarBase64) {
-             iconHtml = `
+            iconHtml = `
                 <div class="notif-icon-area">
                     <img src="${follower.avatarBase64}" alt="User">
                 </div>
-             `;
+            `;
         } else {
-             iconHtml = `
+            iconHtml = `
                 <div class="notif-icon-area icon-only">
                     <i class="fas fa-user-plus"></i>
                 </div>
-             `;
+            `;
         }
     } else if (notif.type === 'new_event') {
         iconHtml = `
@@ -375,7 +365,6 @@ async function addNotificationToUI(notif, prepend = true) {
             </div>
         `;
     } else {
-        // Стандартна іконка
         iconHtml = `
             <div class="notif-icon-area icon-only">
                 <i class="fas fa-bell"></i>
@@ -383,16 +372,14 @@ async function addNotificationToUI(notif, prepend = true) {
         `;
     }
     
-    // --- HTML структура ---
     item.innerHTML = `
         ${iconHtml}
         <div class="notif-info">
-            <div class="notif-text">${notif.message}</div>
+            <div class="notif-text">${notif.message.replace('@', '')}</div>
             <div class="notif-time">${utils.formatEventDate(notif.created_at)}</div>
         </div>
     `;
     
-    // Клік по сповіщенню
     item.addEventListener('click', async () => {
         if (!notif.is_read) {
             await markNotificationRead(notif.id);
@@ -400,13 +387,12 @@ async function addNotificationToUI(notif, prepend = true) {
             updateBadgeCount(-1);
         }
         
-        // Перехід залежно від типу
         if (notif.type === 'new_event' || notif.type === 'join' || notif.type === 'reminder') {
-             const allEvents = await utils.getEvents(); 
-             const event = allEvents.find(e => e.eventId === notif.related_id);
-             if (event) events.openEventDetail(event);
+            const allEvents = await utils.getEvents(); 
+            const event = allEvents.find(e => e.eventId === notif.related_id);
+            if (event) events.openEventDetail(event);
         } else if (notif.type === 'follow') {
-             user.openOtherUserProfile(notif.related_id);
+            user.openOtherUserProfile(notif.related_id);
         }
     });
 
@@ -443,7 +429,6 @@ async function markAllNotificationsRead() {
         body: JSON.stringify({ userId: user.id })
     });
     
-    // Візуально оновлюємо
     document.querySelectorAll('.notif-item.unread').forEach(el => el.classList.remove('unread'));
     updateBadgeDisplay(0);
 }

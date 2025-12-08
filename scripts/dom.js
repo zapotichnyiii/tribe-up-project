@@ -116,6 +116,8 @@ export const otherUserProfileMeta = document.getElementById('otherUserProfileMet
 export const otherUserProfileInterests = document.getElementById('otherUserProfileInterests');
 export const otherUserProfileEvents = document.getElementById('otherUserProfileEvents');
 export const otherUserMessageBtn = document.getElementById('otherUserMessageBtn');
+export const otherUserFollowersBtn = document.getElementById('otherUserFollowersBtn');
+export const otherUserFollowingBtn = document.getElementById('otherUserFollowingBtn');
 
 // --- КАРУСЕЛЬ ТА ФІЛЬТРИ ---
 export const eventsHorizontalTrack = document.getElementById('eventsHorizontalTrack');
@@ -165,3 +167,16 @@ export const socialListTitle = document.getElementById('socialListTitle');
 export const otherUserFollowBtn = document.getElementById('otherUserFollowBtn');
 export const otherUserFollowersCount = document.getElementById('otherUserFollowersCount');
 export const otherUserFollowingCount = document.getElementById('otherUserFollowingCount');
+
+// --- ВІДНОВЛЕННЯ ПАРОЛЮ ---
+export const forgotPasswordLink = document.getElementById('forgotPasswordLink');
+export const forgotPasswordModal = document.getElementById('forgotPasswordModal');
+export const closeForgotPasswordModal = document.getElementById('closeForgotPasswordModal');
+export const forgotStep1 = document.getElementById('forgotStep1');
+export const forgotStep2 = document.getElementById('forgotStep2');
+export const forgotEmailInput = document.getElementById('forgotEmailInput');
+export const sendResetCodeBtn = document.getElementById('sendResetCodeBtn');
+export const forgotEmailDisplay = document.getElementById('forgotEmailDisplay');
+export const forgotCodeInput = document.getElementById('forgotCodeInput');
+export const forgotNewPassword = document.getElementById('forgotNewPassword');
+export const confirmResetBtn = document.getElementById('confirmResetBtn');

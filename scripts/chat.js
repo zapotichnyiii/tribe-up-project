@@ -68,7 +68,7 @@ function appendEventMessage(msg) {
     const div = document.createElement('div');
     div.className = 'chat-message';
     div.innerHTML = `
-        <div><span class="sender">@${msg.senderName}</span> <span class="time">${msg.time}</span></div>
+        <div><span class="sender">${msg.senderName}</span> <span class="time">${msg.time}</span></div>
         <div class="text">${msg.text}</div>
     `;
     messagesContainer.appendChild(div);
@@ -121,7 +121,7 @@ export async function loadPrivateChat(otherUserId) {
         const otherUser = users.find(u => u.id === otherUserId);
         const privateChatTitle = document.getElementById('privateChatTitle');
         if (privateChatTitle) {
-            privateChatTitle.textContent = otherUser ? `@${otherUser.username}` : 'Чат';
+            privateChatTitle.textContent = otherUser ? `${otherUser.username}` : 'Чат';
         }
         
         if (dom.privateChatModal) dom.privateChatModal.dataset.otherUserId = otherUserId;
@@ -203,7 +203,7 @@ export async function renderChatList() {
             chatItem.innerHTML = `
                 <img src="${otherUser.avatarBase64 || 'https://via.placeholder.com/40'}" alt="${otherUser.name}">
                 <div class="chat-info">
-                    <div class="username">@${otherUser.username}</div>
+                    <div class="username">${otherUser.username}</div>
                     <div class="last-message">${lastMessage.text}</div>
                 </div>
                 <div class="time">${lastMessage.time}</div>

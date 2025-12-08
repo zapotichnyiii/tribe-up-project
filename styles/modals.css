@@ -337,6 +337,35 @@ body.dark-theme #eventInterestsContainer {
     color: var(--main-secondary-color);
 }
 
+.mini-event-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.mini-event-card:hover {
+    border-color: var(--auth-accent-color);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+.mini-event-title {
+    font-weight: 600;
+    font-size: 0.95em;
+    color: var(--main-dark-color);
+}
+
+.mini-event-date {
+    font-size: 0.8em;
+    color: var(--main-secondary-color);
+}
+
 @media (max-width: 640px) {
     .interest-modal-layout {
         grid-template-columns: 1fr; 

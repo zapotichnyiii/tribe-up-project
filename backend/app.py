@@ -105,7 +105,6 @@ def save_new_interests(cur, interests_list):
     for interest in interests_list:
         cur.execute("INSERT INTO interests (name) VALUES (%s) ON CONFLICT (name) DO NOTHING", (interest,))
 
-# === ФУНКЦІЇ ДЛЯ СПОВІЩЕНЬ ===
 def create_notification(user_id, type, message, related_id=None):
     conn = get_db()
     cur = conn.cursor(cursor_factory=RealDictCursor)
@@ -116,7 +115,6 @@ def create_notification(user_id, type, message, related_id=None):
         """, (user_id, type, message, related_id))
         new_notif = cur.fetchone()
         conn.commit()
-        # Відправка через Socket.IO
         socketio.emit('new_notification', map_message(new_notif) if 'text' in new_notif else new_notif, room=f"user_{user_id}")
     except Exception as e:
         print(f"Notification Error: {e}")
@@ -128,7 +126,6 @@ def check_upcoming_events():
         try:
             conn = get_db()
             cur = conn.cursor(cursor_factory=RealDictCursor)
-            # Шукаємо події через 60 хв (проста логіка)
             now = datetime.now()
             start = now + timedelta(minutes=60)
             end = now + timedelta(minutes=61)
@@ -144,22 +141,17 @@ def check_upcoming_events():
             conn.close()
         except Exception as e: print(f"Scheduler: {e}")
         time.sleep(60)
-
-# Запуск фонового потоку
 threading.Thread(target=check_upcoming_events, daemon=True).start()
 
 @socketio.on('join_notifications')
 def on_join_notifications(data):
     if data.get('userId'): join_room(f"user_{data['userId']}")
 
-# --- SOCKET.IO ПОДІЇ (REAL-TIME) ---
-
 @socketio.on('join')
 def on_join(data):
     """Користувач заходить у кімнату (чат події або приватний)"""
     room = data['room']
     join_room(room)
-    # Можна розкоментувати для дебагу: print(f'User joined room: {room}')
 
 @socketio.on('leave')
 def on_leave(data):
@@ -173,23 +165,16 @@ def handle_event_message(data):
     conn = get_db()
     cur = conn.cursor(cursor_factory=RealDictCursor)
     try:
-        # 1. Зберегти в БД
         cur.execute("""
             INSERT INTO event_messages (event_id, sender_id, text)
             VALUES (%s, %s, %s) RETURNING *
         """, (data['eventId'], data['senderId'], data['text']))
         new_msg = cur.fetchone()
-        
-        # 2. Отримати ім'я автора
         cur.execute("SELECT username FROM users WHERE id = %s", (data['senderId'],))
         sender_name = cur.fetchone()['username']
         conn.commit()
-
-        # 3. Підготувати об'єкт для відправки
         msg_response = map_message(new_msg)
         msg_response['senderName'] = sender_name
-        
-        # 4. Відправити всім у кімнаті 'event_X'
         room = f"event_{data['eventId']}"
         emit('receive_message', msg_response, room=room)
         
@@ -204,19 +189,13 @@ def handle_private_message(data):
     conn = get_db()
     cur = conn.cursor(cursor_factory=RealDictCursor)
     try:
-        # 1. Зберегти
         cur.execute("""
             INSERT INTO private_messages (sender_id, receiver_id, text)
             VALUES (%s, %s, %s) RETURNING *
         """, (data['senderId'], data['receiverId'], data['text']))
         new_msg = cur.fetchone()
         conn.commit()
-
-        # 2. Підготувати
         msg_response = map_message(new_msg)
-
-        # 3. Відправити у кімнату 'private_minID_maxID'
-        # Генеруємо унікальний ID кімнати для пари юзерів (щоб 1-2 і 2-1 були однією кімнатою)
         u1, u2 = sorted([int(data['senderId']), int(data['receiverId'])])
         room = f"private_{u1}_{u2}"
         
@@ -369,7 +348,6 @@ def create_event():
     cur = conn.cursor(cursor_factory=RealDictCursor)
     try:
         save_new_interests(cur, data['interests'])
-        # Додано min_participants та status
         cur.execute("""
             INSERT INTO events (title, description, category, location, event_date, participants, min_participants, current_participants, creator_id, interests, status)
             VALUES (%s, %s, %s, %s, %s, %s, %s, 1, %s, %s, 'active') RETURNING *
@@ -468,7 +446,6 @@ def get_joined_events(user_id):
     conn.close()
     return jsonify(ids)
 
-# GET для історії чатів (залишається REST для завантаження історії)
 @app.route('/api/messages/event/<int:event_id>', methods=['GET'])
 def get_event_messages(event_id):
     conn = get_db()
@@ -523,7 +500,6 @@ def get_event_participants(event_id):
     conn = get_db()
     cur = conn.cursor(cursor_factory=RealDictCursor)
     try:
-        # Отримуємо дані користувачів, які записані на подію
         cur.execute("""
             SELECT u.id, u.name, u.username, u.avatar_base64 
             FROM users u
@@ -582,7 +558,7 @@ def follow_user(user_id):
         
         cur.execute("SELECT username FROM users WHERE id = %s", (follower_id,))
         name = cur.fetchone()[0]
-        create_notification(user_id, 'follow', f"@{name} підписався на вас!", follower_id)
+        create_notification(user_id, 'follow', f"{name} підписався на вас!", follower_id)
         return jsonify({'status': 'success'})
     finally: conn.close()
 
@@ -630,6 +606,69 @@ def read_notifications():
         conn.commit()
         return jsonify({'status': 'success'})
     finally: conn.close()
+
+@app.route('/api/auth/forgot-password', methods=['POST'])
+def forgot_password():
+    data = request.json
+    email = data.get('email')
+    
+    conn = get_db()
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    try:
+        cur.execute("SELECT * FROM users WHERE email = %s", (email,))
+        user = cur.fetchone()
+        
+        if not user:
+            return jsonify({'error': 'Користувача з такою поштою не знайдено'}), 404
+            
+        verification_code = str(random.randint(100000, 999999))
+        cur.execute("UPDATE users SET verification_code = %s WHERE id = %s", (verification_code, user['id']))
+        conn.commit()
+        
+        try:
+            msg = Message("Відновлення паролю TribeUp", recipients=[email])
+            msg.body = f"Привіт, {user['name']}!\n\nТвій код для відновлення паролю: {verification_code}\n\nНікому не повідомляй цей код."
+            mail.send(msg)
+        except Exception as e:
+            print(f"Mail Error: {e}")
+            return jsonify({'error': 'Не вдалося відправити лист'}), 500
+            
+        return jsonify({'message': 'Code sent', 'email': email})
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        conn.close()
+
+@app.route('/api/auth/reset-password', methods=['POST'])
+def reset_password():
+    data = request.json
+    email = data.get('email')
+    code = data.get('code')
+    new_password = data.get('newPassword')
+    
+    conn = get_db()
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    try:
+        cur.execute("SELECT * FROM users WHERE email = %s", (email,))
+        user = cur.fetchone()
+        
+        if not user:
+            return jsonify({'error': 'Користувача не знайдено'}), 404
+            
+        if user['verification_code'] != code:
+            return jsonify({'error': 'Невірний код підтвердження'}), 400
+            
+        hashed_password = generate_password_hash(new_password)
+        cur.execute("UPDATE users SET password = %s, verification_code = NULL WHERE id = %s", (hashed_password, user['id']))
+        conn.commit()
+        
+        return jsonify({'status': 'success', 'message': 'Пароль успішно змінено'})
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        conn.close()
 
 if __name__ == '__main__':
     socketio.run(app, debug=True, port=5000)

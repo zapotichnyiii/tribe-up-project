@@ -3,10 +3,325 @@ import * as utils from './utils.js';
 import { renderInterests } from './ui.js';
 import { loadEventChat } from './chat.js';
 
+let cachedEvents = [];
+let isShowingArchive = false;
+
 const getAuthHeaders = () => ({
     'Content-Type': 'application/json',
     'Authorization': `Bearer ${localStorage.getItem('token')}`
 });
+
+export function setCachedEvents(events, isArchive) {
+    cachedEvents = events;
+    isShowingArchive = isArchive;
+}
+
+export function initEventFilters() {
+    const inputs = [
+        dom.searchQueryInput,
+        dom.locationInput,
+        dom.categorySelect,
+        dom.dateInput,
+        dom.peopleSelect,
+        dom.distanceInput, 
+        dom.sortSelect,
+        dom.statusSelect,
+        dom.interestSearchInput
+    ];
+
+    inputs.forEach(input => {
+        if (input) {
+            input.addEventListener('input', () => renderEvents(cachedEvents, isShowingArchive));
+            input.addEventListener('change', () => renderEvents(cachedEvents, isShowingArchive));
+        }
+    });
+
+    if (dom.clearFiltersBtn) {
+        dom.clearFiltersBtn.addEventListener('click', () => {
+            inputs.forEach(input => {
+                if(input) input.value = '';
+            });
+            renderEvents(cachedEvents, isShowingArchive);
+        });
+    }
+
+    if (dom.searchBtn) {
+        dom.searchBtn.addEventListener('click', () => renderEvents(cachedEvents, isShowingArchive));
+    }
+}
+
+export function filterEvents(events) {
+    const query = dom.searchQueryInput?.value.toLowerCase().trim() || '';
+    const loc = dom.locationInput?.value.toLowerCase().trim() || '';
+    const cat = dom.categorySelect?.value || '';
+    const dateVal = dom.dateInput?.value || '';
+    const peopleVal = dom.peopleSelect?.value || '';
+    const interestVal = dom.interestSearchInput?.value.toLowerCase().trim() || '';
+    const statusVal = dom.statusSelect?.value || '';
+
+    return events.filter(e => {
+        const matchQuery = !query || e.title.toLowerCase().includes(query) || e.description.toLowerCase().includes(query);
+        const matchLoc = !loc || e.location.toLowerCase().includes(loc);
+        const matchCat = !cat || e.category === cat;
+        
+        let matchDate = true;
+        if (dateVal) {
+            const eDate = new Date(e.date).toISOString().split('T')[0];
+            matchDate = eDate === dateVal;
+        }
+
+        let matchPeople = true;
+        if (peopleVal) {
+            const [min, max] = peopleVal.split('-').map(Number);
+            if (peopleVal === '10+') {
+                matchPeople = e.participants >= 10;
+            } else {
+                matchPeople = e.participants >= min && e.participants <= max;
+            }
+        }
+
+        const matchInterest = !interestVal || e.interests.some(i => i.toLowerCase().includes(interestVal));
+        
+        let matchStatus = true;
+        if (statusVal) {
+            const isFull = e.currentParticipants >= e.participants;
+            if (statusVal === 'open') matchStatus = !isFull;
+            if (statusVal === 'full') matchStatus = isFull;
+        }
+
+        return matchQuery && matchLoc && matchCat && matchDate && matchPeople && matchInterest && matchStatus;
+    });
+}
+
+export function sortEvents(events) {
+    const sortVal = dom.sortSelect?.value || 'date-asc';
+    
+    return [...events].sort((a, b) => {
+        if (sortVal === 'date-asc') return new Date(a.date) - new Date(b.date);
+        if (sortVal === 'date-desc') return new Date(b.date) - new Date(a.date);
+        if (sortVal === 'participants-asc') return a.currentParticipants - b.currentParticipants;
+        if (sortVal === 'participants-desc') return b.currentParticipants - a.currentParticipants;
+        if (sortVal === 'title') return a.title.localeCompare(b.title);
+        return 0;
+    });
+}
+
+export async function renderEvents(events, isArchive = false) {
+    const track = dom.eventsHorizontalTrack;
+    const eventCount = dom.eventCount;
+    if (!track) return;
+
+    if (events) {
+        setCachedEvents(events, isArchive);
+    } else {
+        events = cachedEvents;
+    }
+
+    track.innerHTML = '';
+    
+    let processedEvents = filterEvents(events);
+    processedEvents = sortEvents(processedEvents);
+    
+    if (eventCount) eventCount.textContent = `(${processedEvents.length})`;
+
+    if (processedEvents.length === 0) {
+        track.innerHTML = isArchive 
+            ? '<p style="color: #888; width: 100%; text-align: center; padding: 20px;">Архів порожній або нічого не знайдено.</p>' 
+            : '<p style="color: #888; width: 100%; text-align: center; padding: 20px;">Подій не знайдено.</p>';
+        return;
+    }
+
+    const currentUser = utils.getCurrentUser();
+    
+    let usersMap = {};
+    try {
+        const users = await utils.getUsers();
+        users.forEach(u => usersMap[u.id] = u);
+    } catch(e) { console.error(e); }
+
+    processedEvents.forEach(event => {
+        let statusBadge = '';
+        if (isArchive) {
+            statusBadge = '<span style="color: #64748b; font-size: 0.7em; margin-left: 8px; border: 1px solid #ccc; padding: 2px 6px; border-radius: 4px;">Завершено</span>';
+        } else if (event.minParticipants > 0) {
+            if (event.currentParticipants >= event.minParticipants) {
+                statusBadge = '<span style="color: #10b981; font-size: 0.7em; margin-left: 8px; font-weight: bold;">✓ Відбудеться</span>';
+            } else {
+                const needed = event.minParticipants - event.currentParticipants;
+                statusBadge = `<span style="color: #f59e0b; font-size: 0.7em; margin-left: 8px;">Ще ${needed} до підтвердження</span>`;
+            }
+        }
+
+        const card = document.createElement('div');
+        card.className = 'event-card-horizontal';
+        card.dataset.eventId = event.eventId;
+        if (isArchive) card.style.opacity = '0.7';
+        
+        const interestsHtml = event.interests.map(i => `<span class="interest-tag selected">${i}</span>`).join('');
+        
+        const creator = usersMap[event.creatorId];
+        const creatorName = creator ? creator.username : `ID: ${event.creatorId}`;
+        const creatorAvatar = (creator && creator.avatarBase64) ? creator.avatarBase64 : 'https://via.placeholder.com/24';
+
+        const creatorHtml = `
+            <div class="creator-info-v4 creator-chip" data-user-id="${event.creatorId}">
+                <img src="${creatorAvatar}" alt="${creatorName}">
+                <span>${creatorName}</span>
+            </div>
+        `;
+
+        let buttonHtml = '';
+        if (currentUser && currentUser.id === event.creatorId) {
+            buttonHtml = `<button class="card-action-button card-action-organizer" disabled style="background: #f1f5f9; color: #6b21a8; cursor: default;"><i class="fas fa-crown"></i> Ви організатор</button>`;
+        } else if (!isArchive) {
+            buttonHtml = `<button class="card-action-button join-btn-v4" data-event-id="${event.eventId}"><i class="fas fa-plus"></i> Приєднатися</button>`;
+        }
+
+        card.innerHTML = `
+            <div class="card-content-v4">
+                <h3 class="card-title-v4">${event.title} ${statusBadge}</h3>
+                <ul class="card-meta-list-v4">
+                    <li class="meta-item-v4"><i class="fas fa-calendar-alt"></i><span>${utils.formatEventDate(event.date)}</span></li>
+                    <li class="meta-item-v4"><i class="fas fa-map-marker-alt"></i><span>${event.location}</span></li>
+                </ul>
+                <div class="card-interests-v4">${interestsHtml}</div>
+                <div class="card-footer-v4">
+                    ${creatorHtml}
+                    <span class="card-participants-v4">
+                        <i class="fas fa-users"></i> ${event.currentParticipants}/${event.participants}
+                    </span>
+                </div>
+            </div>
+            ${buttonHtml}
+        `;
+        track.appendChild(card);
+    });
+}
+
+export function updateScrollButtons() {
+    const track = dom.eventsHorizontalTrack;
+    if (!track || !dom.scrollLeftBtn) return;
+    dom.scrollLeftBtn.disabled = track.scrollLeft <= 10;
+}
+
+export async function openEventDetail(event) {
+    const user = utils.getCurrentUser();
+    if (!user) {
+        utils.showToast('Увійдіть, щоб переглянути деталі', 'error');
+        return;
+    }
+    
+    dom.eventDetailModal.dataset.currentEventId = event.eventId;
+    localStorage.setItem('currentEvent', JSON.stringify(event));
+    
+    document.getElementById('eventDetailTitle').textContent = event.title;
+    document.getElementById('eventDetailDescription').textContent = event.description;
+    document.getElementById('eventDetailInterests').innerHTML = event.interests.map(i => `<span class="interest-tag selected">${i}</span>`).join('');
+    document.getElementById('eventDetailParticipantsCount').textContent = `${event.currentParticipants}/${event.participants} учасників`;
+
+    const participantsContainer = document.getElementById('eventDetailParticipants');
+    if (participantsContainer) {
+        participantsContainer.innerHTML = '<p style="color:#888; font-size:0.9em;">Завантаження...</p>';
+        try {
+            const res = await fetch(`http://localhost:5000/api/events/${event.eventId}/participants`);
+            const participants = await res.json();
+            
+            if (participants.length === 0) {
+                participantsContainer.innerHTML = '<p style="color:#888;">Поки ніхто не приєднався</p>';
+            } else {
+                participantsContainer.innerHTML = '';
+                participants.forEach(p => {
+                    const pEl = document.createElement('div');
+                    pEl.style.cssText = 'display: flex; align-items: center; gap: 10px; padding: 5px; cursor: pointer;';
+                    pEl.innerHTML = `
+                        <img src="${p.avatarBase64 || 'https://via.placeholder.com/40'}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;">
+                        <span style="font-size: 0.9em; font-weight: 500;">${p.name} (${p.username})</span>
+                    `;
+                    pEl.addEventListener('click', () => {
+                        utils.closeModal(dom.eventDetailModal);
+                        import('./user.js').then(module => module.openOtherUserProfile(p.id));
+                    });
+                    participantsContainer.appendChild(pEl);
+                });
+            }
+        } catch (e) {
+            participantsContainer.innerHTML = '<p style="color:red;">Помилка завантаження</p>';
+        }
+    }
+
+    const mapContainer = document.getElementById('eventMap');
+    if (mapContainer) {
+        mapContainer.innerHTML = '';
+        if (utils.map) { utils.map.off(); utils.map.remove(); utils.setMap(null); }
+
+        const address = encodeURIComponent(event.location);
+        try {
+            const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${address}&format=json&limit=1`);
+            const data = await response.json();
+            
+            if (data && data.length > 0) {
+                const { lat, lon } = data[0];
+                const newMap = L.map(mapContainer).setView([lat, lon], 15);
+                utils.setMap(newMap);
+                const isDark = document.body.classList.contains('dark-theme');
+                const tileUrl = isDark ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png' : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+                L.tileLayer(tileUrl, { attribution: '© OpenStreetMap' }).addTo(newMap);
+                L.marker([lat, lon]).addTo(newMap).bindPopup(event.location).openPopup();
+                setTimeout(() => newMap.invalidateSize(), 300);
+            } else {
+                mapContainer.innerHTML = '<div style="padding:20px; text-align:center; color:#888;">Не вдалося знайти місце</div>';
+            }
+        } catch (e) {
+            mapContainer.innerHTML = '<div style="padding:20px; text-align:center; color:#888;">Помилка карти</div>';
+        }
+    }
+
+    const joinBtn = document.getElementById('joinEventBtn');
+    const leaveBtn = document.getElementById('leaveEventBtn');
+    const deleteBtn = document.getElementById('deleteEventBtn');
+    const editBtn = document.getElementById('editEventBtn');
+    
+    const joinedEvents = await utils.getJoinedEvents();
+    const isJoined = joinedEvents[user.id] && joinedEvents[user.id].includes(event.eventId);
+
+    if (user.id === event.creatorId) {
+        joinBtn.style.display = 'none';
+        leaveBtn.style.display = 'none';
+        deleteBtn.style.display = 'inline-block';
+        editBtn.style.display = 'inline-block';
+        
+        const newDeleteBtn = deleteBtn.cloneNode(true);
+        deleteBtn.parentNode.replaceChild(newDeleteBtn, deleteBtn);
+        newDeleteBtn.addEventListener('click', () => handleDeleteEvent(event.eventId));
+
+        const newEditBtn = editBtn.cloneNode(true);
+        editBtn.parentNode.replaceChild(newEditBtn, editBtn);
+        newEditBtn.addEventListener('click', () => openEditEventModal(event));
+
+    } else {
+        deleteBtn.style.display = 'none';
+        editBtn.style.display = 'none';
+        
+        if (isJoined) {
+            joinBtn.style.display = 'none';
+            leaveBtn.style.display = 'inline-block';
+            
+            const newLeaveBtn = leaveBtn.cloneNode(true);
+            leaveBtn.parentNode.replaceChild(newLeaveBtn, leaveBtn);
+            newLeaveBtn.addEventListener('click', () => handleLeaveEvent(event, () => openEventDetail(event)));
+        } else {
+            joinBtn.style.display = 'inline-block';
+            leaveBtn.style.display = 'none';
+            
+            const newJoinBtn = joinBtn.cloneNode(true);
+            joinBtn.parentNode.replaceChild(newJoinBtn, joinBtn);
+            newJoinBtn.addEventListener('click', () => handleJoinEvent(event, () => openEventDetail(event)));
+        }
+    }
+
+    loadEventChat(event.eventId);
+    utils.openModal(dom.eventDetailModal);
+}
 
 export async function handleJoinEvent(event, callback) {
     const user = utils.getCurrentUser();
@@ -173,214 +488,4 @@ export function handleAddEditEventInterest() {
         container.appendChild(span);
         input.value = '';
     }
-}
-
-// === RENDER ===
-export function filterEvents(events) {
-    const query = dom.searchQueryInput?.value.toLowerCase().trim() || '';
-    const loc = dom.locationInput?.value.toLowerCase().trim() || '';
-    const cat = dom.categorySelect?.value || '';
-    
-    return events.filter(e => {
-        const matchesQuery = !query || e.title.toLowerCase().includes(query);
-        const matchesLoc = !loc || e.location.toLowerCase().includes(loc);
-        const matchesCat = !cat || e.category === cat;
-        return matchesQuery && matchesLoc && matchesCat;
-    });
-}
-
-export function renderEvents(events, isArchive = false) {
-    const track = dom.eventsHorizontalTrack;
-    const eventCount = dom.eventCount;
-    if (!track) return;
-
-    track.innerHTML = '';
-    const filteredEvents = filterEvents(events).sort((a, b) => b.eventId - a.eventId);
-    if (eventCount) eventCount.textContent = `(${filteredEvents.length})`;
-
-    if (filteredEvents.length === 0) {
-        track.innerHTML = isArchive 
-            ? '<p style="color: #888; width: 100%; text-align: center; padding: 20px;">Архів порожній.</p>' 
-            : '<p style="color: #888; width: 100%; text-align: center; padding: 20px;">Подій немає.</p>';
-        return;
-    }
-
-    const currentUser = utils.getCurrentUser();
-
-    filteredEvents.forEach(event => {
-        let statusBadge = '';
-        if (isArchive) {
-            statusBadge = '<span style="color: #64748b; font-size: 0.7em; margin-left: 8px; border: 1px solid #ccc; padding: 2px 6px; border-radius: 4px;">Завершено</span>';
-        } else if (event.minParticipants > 0) {
-            if (event.currentParticipants >= event.minParticipants) {
-                statusBadge = '<span style="color: #10b981; font-size: 0.7em; margin-left: 8px; font-weight: bold;">✓ Відбудеться</span>';
-            } else {
-                const needed = event.minParticipants - event.currentParticipants;
-                statusBadge = `<span style="color: #f59e0b; font-size: 0.7em; margin-left: 8px;">Ще ${needed} до підтвердження</span>`;
-            }
-        }
-
-        const card = document.createElement('div');
-        card.className = 'event-card-horizontal';
-        card.dataset.eventId = event.eventId;
-        if (isArchive) card.style.opacity = '0.7';
-        
-        const interestsHtml = event.interests.map(i => `<span class="interest-tag selected">${i}</span>`).join('');
-        
-        let buttonHtml = '';
-        if (currentUser && currentUser.id === event.creatorId) {
-            buttonHtml = `<button class="card-action-button card-action-organizer" disabled style="background: #f1f5f9; color: #6b21a8; cursor: default;"><i class="fas fa-crown"></i> Ви організатор</button>`;
-        } else if (!isArchive) {
-            buttonHtml = `<button class="card-action-button join-btn-v4" data-event-id="${event.eventId}"><i class="fas fa-plus"></i> Приєднатися</button>`;
-        }
-
-        card.innerHTML = `
-            <div class="card-content-v4">
-                <h3 class="card-title-v4">${event.title} ${statusBadge}</h3>
-                <ul class="card-meta-list-v4">
-                    <li class="meta-item-v4"><i class="fas fa-calendar-alt"></i><span>${utils.formatEventDate(event.date)}</span></li>
-                    <li class="meta-item-v4"><i class="fas fa-map-marker-alt"></i><span>${event.location}</span></li>
-                </ul>
-                <div class="card-interests-v4">${interestsHtml}</div>
-                <div class="card-footer-v4">
-                    <div class="creator-info-v4" data-user-id="${event.creatorId}">
-                        <span>ID організатора: ${event.creatorId}</span>
-                    </div>
-                    <span class="card-participants-v4">
-                        <i class="fas fa-users"></i> ${event.currentParticipants}/${event.participants}
-                    </span>
-                </div>
-            </div>
-            ${buttonHtml}
-        `;
-        track.appendChild(card);
-    });
-}
-
-export function updateScrollButtons() {
-    const track = dom.eventsHorizontalTrack;
-    if (!track || !dom.scrollLeftBtn) return;
-    dom.scrollLeftBtn.disabled = track.scrollLeft <= 10;
-}
-
-export async function openEventDetail(event) {
-    const user = utils.getCurrentUser();
-    if (!user) {
-        utils.showToast('Увійдіть, щоб переглянути деталі', 'error');
-        return;
-    }
-    
-    dom.eventDetailModal.dataset.currentEventId = event.eventId;
-    localStorage.setItem('currentEvent', JSON.stringify(event));
-    
-    document.getElementById('eventDetailTitle').textContent = event.title;
-    document.getElementById('eventDetailDescription').textContent = event.description;
-    document.getElementById('eventDetailInterests').innerHTML = event.interests.map(i => `<span class="interest-tag selected">${i}</span>`).join('');
-    document.getElementById('eventDetailParticipantsCount').textContent = `${event.currentParticipants}/${event.participants} учасників`;
-
-    // --- УЧАСНИКИ ---
-    const participantsContainer = document.getElementById('eventDetailParticipants');
-    if (participantsContainer) {
-        participantsContainer.innerHTML = '<p style="color:#888; font-size:0.9em;">Завантаження...</p>';
-        try {
-            const res = await fetch(`http://localhost:5000/api/events/${event.eventId}/participants`);
-            const participants = await res.json();
-            
-            if (participants.length === 0) {
-                participantsContainer.innerHTML = '<p style="color:#888;">Поки ніхто не приєднався</p>';
-            } else {
-                participantsContainer.innerHTML = '';
-                participants.forEach(p => {
-                    const pEl = document.createElement('div');
-                    pEl.style.cssText = 'display: flex; align-items: center; gap: 10px; padding: 5px; cursor: pointer;';
-                    pEl.innerHTML = `
-                        <img src="${p.avatarBase64 || 'https://via.placeholder.com/40'}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;">
-                        <span style="font-size: 0.9em; font-weight: 500;">${p.name} (@${p.username})</span>
-                    `;
-                    pEl.addEventListener('click', () => {
-                        utils.closeModal(dom.eventDetailModal);
-                        import('./user.js').then(module => module.openOtherUserProfile(p.id));
-                    });
-                    participantsContainer.appendChild(pEl);
-                });
-            }
-        } catch (e) {
-            participantsContainer.innerHTML = '<p style="color:red;">Помилка завантаження</p>';
-        }
-    }
-
-    // --- КАРТА ---
-    const mapContainer = document.getElementById('eventMap');
-    if (mapContainer) {
-        mapContainer.innerHTML = '';
-        if (utils.map) { utils.map.off(); utils.map.remove(); utils.setMap(null); }
-
-        const address = encodeURIComponent(event.location);
-        try {
-            const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${address}&format=json&limit=1`);
-            const data = await response.json();
-            
-            if (data && data.length > 0) {
-                const { lat, lon } = data[0];
-                const newMap = L.map(mapContainer).setView([lat, lon], 15);
-                utils.setMap(newMap);
-                const isDark = document.body.classList.contains('dark-theme');
-                const tileUrl = isDark ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png' : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-                L.tileLayer(tileUrl, { attribution: '© OpenStreetMap' }).addTo(newMap);
-                L.marker([lat, lon]).addTo(newMap).bindPopup(event.location).openPopup();
-                setTimeout(() => newMap.invalidateSize(), 300);
-            } else {
-                mapContainer.innerHTML = '<div style="padding:20px; text-align:center; color:#888;">Не вдалося знайти місце</div>';
-            }
-        } catch (e) {
-            mapContainer.innerHTML = '<div style="padding:20px; text-align:center; color:#888;">Помилка карти</div>';
-        }
-    }
-
-    // --- КНОПКИ ---
-    const joinBtn = document.getElementById('joinEventBtn');
-    const leaveBtn = document.getElementById('leaveEventBtn');
-    const deleteBtn = document.getElementById('deleteEventBtn');
-    const editBtn = document.getElementById('editEventBtn');
-    
-    const joinedEvents = await utils.getJoinedEvents();
-    const isJoined = joinedEvents[user.id] && joinedEvents[user.id].includes(event.eventId);
-
-    if (user.id === event.creatorId) {
-        joinBtn.style.display = 'none';
-        leaveBtn.style.display = 'none';
-        deleteBtn.style.display = 'inline-block';
-        editBtn.style.display = 'inline-block';
-        
-        const newDeleteBtn = deleteBtn.cloneNode(true);
-        deleteBtn.parentNode.replaceChild(newDeleteBtn, deleteBtn);
-        newDeleteBtn.addEventListener('click', () => handleDeleteEvent(event.eventId));
-
-        const newEditBtn = editBtn.cloneNode(true);
-        editBtn.parentNode.replaceChild(newEditBtn, editBtn);
-        newEditBtn.addEventListener('click', () => openEditEventModal(event));
-
-    } else {
-        deleteBtn.style.display = 'none';
-        editBtn.style.display = 'none';
-        
-        if (isJoined) {
-            joinBtn.style.display = 'none';
-            leaveBtn.style.display = 'inline-block';
-            
-            const newLeaveBtn = leaveBtn.cloneNode(true);
-            leaveBtn.parentNode.replaceChild(newLeaveBtn, leaveBtn);
-            newLeaveBtn.addEventListener('click', () => handleLeaveEvent(event, () => openEventDetail(event)));
-        } else {
-            joinBtn.style.display = 'inline-block';
-            leaveBtn.style.display = 'none';
-            
-            const newJoinBtn = joinBtn.cloneNode(true);
-            joinBtn.parentNode.replaceChild(newJoinBtn, joinBtn);
-            newJoinBtn.addEventListener('click', () => handleJoinEvent(event, () => openEventDetail(event)));
-        }
-    }
-
-    loadEventChat(event.eventId);
-    utils.openModal(dom.eventDetailModal);
 }

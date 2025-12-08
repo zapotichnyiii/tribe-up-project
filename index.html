@@ -7,6 +7,11 @@
     <meta name="keywords" content="TribeUp, події, інтереси, друзі, спільнота">
     <meta name="author" content="TribeUp Team">
     <title>TribeUp — Знайди своїх людей</title>
+    <script>
+    if (localStorage.getItem('theme') === 'dark') {
+        document.body.classList.add('dark-theme');
+    }
+    </script>
     <link rel="stylesheet" href="/styles/adaptive.css">
     <link rel="stylesheet" href="/styles/auth_screen.css">
     <link rel="stylesheet" href="/styles/buttons.css">
@@ -75,7 +80,7 @@
                         </button>
 
                         <div class="auth-links">
-                            <a href="#" class="auth-link">Забули пароль?</a>
+                            <a href="#" class="auth-link" id="forgotPasswordLink">Забули пароль?</a>
                         </div>
                     </form>
                 </div>
@@ -527,7 +532,7 @@
                         <ul style="list-style: none; padding: 0; font-size: 1em; color: #64748b;">
                             <li style="margin-bottom: 12px;">
                                 <i class="fas fa-envelope" style="color: #1a2b44; margin-right: 8px;"></i>
-                                <a href="mailto:tribeupcontact@gmail.com" aria-label="Написати на пошту">tribeupcontact@gmail.com</a>
+                                <a href="mailto:tribeupcontact@gmail.com" aria-label="Написати на пошту">tribeup.welcome@gmail.com</a>
                             </li>
                             <li style="margin-bottom: 12px;">
                                 <i class="fas fa-phone" style="color: #1a2b44; margin-right: 8px;"></i>
@@ -604,7 +609,7 @@
                     <div class="footer-column">
                         <h3>Зв'язок</h3>
                         <ul class="footer-links">
-                            <li><a href="mailto:tribeupcontact@gmail.com" aria-label="Написати на пошту">tribeupcontact@gmail.com</a></li>
+                            <li><a href="mailto:tribeup.welcome@gmail.com" aria-label="Написати на пошту">tribeup.welcome@gmail.com</a></li>
                             <li><a href="tel:+380686971357" aria-label="Зателефонувати">+380 68 697 1357</a></li>
                         </ul>
                     </div>
@@ -934,8 +939,12 @@
             <p id="otherUserProfileUsername" style="text-align: center; color: gray;"></p>
             
             <div style="display:flex; gap:15px; justify-content:center; margin:10px 0;">
-                <div><b id="otherUserFollowersCount">0</b> підписників</div>
-                <div><b id="otherUserFollowingCount">0</b> підписок</div>
+                <div id="otherUserFollowersBtn" style="cursor: pointer; transition: opacity 0.2s;">
+                    <b id="otherUserFollowersCount">0</b> підписників
+                </div>
+                <div id="otherUserFollowingBtn" style="cursor: pointer; transition: opacity 0.2s;">
+                    <b id="otherUserFollowingCount">0</b> підписок
+                </div>
             </div>
             
             <p id="otherUserProfileMeta" style="text-align: center; font-size: 0.9rem; color: var(--main-secondary-color); margin-bottom: 12px;"></p>
@@ -977,6 +986,34 @@
                     <div class="interest-modal-grid" id="interestModalPeopleGrid">
                         </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="forgotPasswordModal" role="dialog">
+        <div class="modal-content" style="max-width: 400px;">
+            <button class="modal-close" id="closeForgotPasswordModal">×</button>
+            
+            <div id="forgotStep1">
+                <h2 style="text-align: center; margin-bottom: 15px;">Відновлення доступу</h2>
+                <p style="text-align: center; margin-bottom: 20px; color: var(--main-secondary-color);">Введіть пошту, прив'язану до акаунту</p>
+                <div class="form-group">
+                    <input type="email" id="forgotEmailInput" class="form-control" placeholder="Ваша пошта" required>
+                </div>
+                <button id="sendResetCodeBtn" class="btn btn-accent" style="width: 100%;">Надіслати код</button>
+            </div>
+
+            <div id="forgotStep2" style="display: none;">
+                <h2 style="text-align: center; margin-bottom: 15px;">Зміна паролю</h2>
+                <p style="text-align: center; margin-bottom: 20px;">Код надіслано на <b id="forgotEmailDisplay"></b></p>
+                
+                <div class="form-group">
+                    <input type="text" id="forgotCodeInput" class="form-control" placeholder="Код з листа (6 цифр)" maxlength="6" style="text-align: center; letter-spacing: 2px;">
+                </div>
+                <div class="form-group">
+                    <input type="password" id="forgotNewPassword" class="form-control" placeholder="Новий пароль">
+                </div>
+                <button id="confirmResetBtn" class="btn btn-accent" style="width: 100%;">Змінити пароль</button>
             </div>
         </div>
     </div>
