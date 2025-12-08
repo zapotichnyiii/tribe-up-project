@@ -373,26 +373,9 @@
 
 <section id="events">
     <div class="container" style="position: relative;">
-        <div class="section-header-controls">
-            <h2 class="section-title-modern">
-                Нові події
-                <span id="eventCount" class="event-count-badge"></span>
-            </h2>
-
-            <div class="controls-right-group">
-                <button id="toggleArchiveBtn" class="btn btn-outline btn-sm">
-                    <i class="fas fa-history"></i> Архів
-                </button>
-                <div class="carousel-nav">
-                    <button class="scroll-btn left" id="scrollLeftBtn" aria-label="Прокрутити вліво">
-                        <i class="fas fa-arrow-left"></i>
-                    </button>
-                    <button class="scroll-btn right" id="scrollRightBtn" aria-label="Прокрутити вправо">
-                        <i class="fas fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
+        <h2 class="section-title">
+            Події
+        </h2>
 
         <div class="events-filter-bar">
             <div class="filter-primary">
@@ -452,6 +435,20 @@
                 <button id="clearFiltersBtn" style="display:none;"></button>
             </div>
         </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 15px; margin-bottom: 15px; align-items: center;">
+            <button id="toggleArchiveBtn" class="btn btn-outline btn-sm">
+                <i class="fas fa-history"></i> Архів
+            </button>
+            <div class="carousel-nav">
+                <button class="scroll-btn left" id="scrollLeftBtn" aria-label="Прокрутити вліво">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <button class="scroll-btn right" id="scrollRightBtn" aria-label="Прокрутити вправо">
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
         
         <div class="events-horizontal">
             <div id="eventsHorizontalTrack" class="events-track" role="region" aria-label="Список подій"></div>
@@ -494,57 +491,57 @@
             </div>
         </section>
 
-    <section id="contact">
-    <div class="container">
-        <h2 class="section-title">Зв’яжіться з нами</h2>
-        
-        <div class="contact-unified-card">
+<section id="contact">
+        <div class="container">
+            <h2 class="section-title">Зв’яжіться з нами</h2>
             
-            <div class="contact-content-side">
-                <div class="contact-group">
-                    <h3><i class="fas fa-address-card"></i> Наші контакти</h3>
-                    <ul class="modern-contact-list">
-                        <li>
-                            <a href="mailto:tribeup.welcome@gmail.com">
-                                <span class="icon-wrap"><i class="fas fa-envelope"></i></span>
-                                <div class="text-wrap">
-                                    <span class="label">Пишіть нам</span>
-                                    <span class="value">tribeup.welcome@gmail.com</span>
-                                </div>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="tel:+380686971357">
-                                <span class="icon-wrap"><i class="fas fa-phone-alt"></i></span>
-                                <div class="text-wrap">
-                                    <span class="label">Телефонуйте</span>
-                                    <span class="value">+380 68 697 1357</span>
-                                </div>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-
-                <div class="contact-divider"></div>
-
-                <div class="location-group">
-                    <h3><i class="fas fa-map-marked-alt"></i> Де ми?</h3>
-                    <p>
-                        Ми — команда зі <strong>Львова</strong>, міста кави та натхнення. 
-                        TribeUp народжується тут, щоб об'єднувати людей по всій Україні.
-                    </p>
-                    <div class="location-badge">
-                        <i class="fas fa-location-arrow"></i> Львів, Україна · Засновано у 2025
+            <div class="contact-layout">
+                
+                <div class="card contact-card-left">
+                    <div class="contact-content-centered">
+                        <div class="contact-group">
+                            <h3><i class="fas fa-address-card"></i> Наші контакти</h3>
+                            <ul class="modern-contact-list">
+                                <li>
+                                    <a href="mailto:tribeup.welcome@gmail.com">
+                                        <span class="icon-wrap"><i class="fas fa-envelope"></i></span>
+                                        <div class="text-wrap">
+                                            <span class="label">Пишіть нам</span>
+                                            <span class="value">tribeup.welcome@gmail.com</span>
+                                        </div>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="tel:+380686971357">
+                                        <span class="icon-wrap"><i class="fas fa-phone-alt"></i></span>
+                                        <div class="text-wrap">
+                                            <span class="label">Телефонуйте</span>
+                                            <span class="value">+380 68 697 1357</span>
+                                        </div>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="contact-map-side">
-                <div id="contactMap"></div>
+                <div class="card contact-card-right">
+                    <div class="contact-content-centered">
+                        <div class="location-group">
+                            <h3><i class="fas fa-map-marked-alt"></i> Де ми?</h3>
+                            <p>
+                                Ми — команда зі <strong>Львова</strong>. Це місто кави, дощу, старовинної архітектури та неймовірного натхнення. <br><br>
+                                Саме тут, серед бруківки та затишних кав’ярень, народжується TribeUp, щоб об'єднувати людей по всій Україні.
+                            </p>
+                            <div class="location-badge">
+                                <i class="fas fa-location-arrow"></i> Львів, Україна · Засновано у 2025
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
             </div>
-            
         </div>
-    </div>
     </section>
 
         <footer>

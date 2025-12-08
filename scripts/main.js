@@ -6,12 +6,15 @@ import * as events from './events.js';
 import * as user from './user.js';
 import * as chat from './chat.js';
 
+// Підключення до Socket.IO
 const socket = io('http://localhost:5000');
 
 document.addEventListener('DOMContentLoaded', async () => {
+    // Завантажуємо глобальні інтереси при старті
     await utils.fetchGlobalInterests();
     
-    events.initEventFilters()
+    // Ініціалізація фільтрів та UI
+    events.initEventFilters();
     ui.updateAllInterestContainers();
     ui.loadTheme();
     ui.handleBackToTop();
@@ -19,14 +22,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     ui.initEventSteps();
 
     const currentUser = utils.getCurrentUser();
-    let showingArchive = false;
-
-    const allEvents = await utils.getEvents('active');
     
     if (currentUser) {
         ui.showMainApp(currentUser);
-        events.renderEvents(allEvents, false);
         
+        // Оновлюємо дані користувача в localStorage, щоб вони були актуальні
         utils.getUsers().then(users => {
             const freshUser = users.find(u => u.id === currentUser.id);
             if (freshUser) {
@@ -35,11 +35,18 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
 
+        // ЗАПУСК ПОЛІНГУ (АВТООНОВЛЕННЯ)
+        // Це забезпечить миттєве відображення подій та людей з кешу
+        events.startEventPolling();
+        user.startUserPolling();
+        
+        // Завантажуємо соціальні зв'язки та сповіщення
         await user.fetchMySocials();
         setupNotifications(currentUser.id);
         
-        await user.renderPeople();
-        await user.renderPeopleInterestFilter();
+        // Ініціалізація списку людей (хоча startUserPolling це теж зробить, це для певності)
+        user.renderPeople();
+        user.renderPeopleInterestFilter();
     } else {
         ui.showAuthScreen();
         auth.initAuthTabs();
@@ -48,13 +55,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         utils.setupFormValidation(dom.registerForm, auth.registerValidations);
     }
 
+    // Налаштування валідації форм
     utils.setupFormValidation(dom.createEventForm, events.createEventValidations);
     utils.setupFormValidation(dom.editProfileForm, user.editProfileValidations);
     utils.setupFormValidation(dom.editEventForm, events.editEventValidations);
     
+    // --- ГЛОБАЛЬНІ СЛУХАЧІ ПОДІЙ ---
+
+    // Клік по тегу інтересу (пошук)
     document.body.addEventListener('click', (e) => {
         const tag = e.target.closest('.interest-tag');
         if (tag) {
+            // Перевіряємо, чи цей тег не в контейнері вибору (де він просто виділяється)
             const selectionContainer = e.target.closest('#registerForm, #createEventModal, #editEventModal, #editProfileModal, #peopleInterestFilter');
             if (!selectionContainer) {
                 const interest = tag.dataset.interest || tag.textContent;
@@ -65,6 +77,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }
 
+        // Закриття дропдауну сповіщень при кліку поза ним
         if (dom.notificationDropdown && dom.notificationDropdown.style.display === 'block') {
             if (!e.target.closest('.notification-wrapper')) {
                 dom.notificationDropdown.style.display = 'none';
@@ -73,12 +86,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
+    // Тема, Авторизація, Інтереси
     if (dom.themeToggle) dom.themeToggle.addEventListener('click', ui.toggleTheme);
     if (dom.loginFormInitial) dom.loginFormInitial.addEventListener('submit', auth.handleLoginSubmit);
     if (dom.registerForm) dom.registerForm.addEventListener('submit', auth.handleRegisterSubmit);
     if (dom.addCustomInterestBtn) dom.addCustomInterestBtn.addEventListener('click', auth.handleAddCustomInterest);
     if (dom.verifyBtn) dom.verifyBtn.addEventListener('click', auth.handleVerifySubmit);
     
+    // Профіль
     if (dom.profileDisplay) dom.profileDisplay.addEventListener('click', user.openUserProfile);
     if (dom.profileLogoutBtn) {
         dom.profileLogoutBtn.addEventListener('click', () => {
@@ -88,11 +103,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
+    // Редагування профілю
     const editProfileBtn = document.getElementById('editProfileBtn');
     if (editProfileBtn) editProfileBtn.addEventListener('click', user.openEditProfileModal);
     if (dom.editProfileForm) dom.editProfileForm.addEventListener('submit', user.handleEditProfileSubmit);
     if (dom.addEditCustomInterestBtn) dom.addEditCustomInterestBtn.addEventListener('click', user.handleAddEditCustomInterest);
 
+    // Створення події
     if (dom.createEventBtn) {
         dom.createEventBtn.addEventListener('click', () => {
             ui.updateAllInterestContainers(); 
@@ -101,29 +118,40 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
     
-    if (dom.searchEventsBtn) dom.searchEventsBtn.addEventListener('click', () => utils.scrollToSection('search'));
+    // Пошук подій (скрол до секції)
+    if (dom.searchEventsBtn) dom.searchEventsBtn.addEventListener('click', () => utils.scrollToSection('events'));
+    
+    // Сабміт форми створення події
     if (dom.createEventForm) dom.createEventForm.addEventListener('submit', async (e) => { events.handleCreateEventSubmit(e); });
     
+    // Редагування події
     if (dom.editEventForm) dom.editEventForm.addEventListener('submit', events.handleEditEventSubmit);
     if (dom.addEditEventCustomInterestBtn) dom.addEditEventCustomInterestBtn.addEventListener('click', events.handleAddEditEventInterest);
     if (dom.addEventCustomInterestBtn) dom.addEventCustomInterestBtn.addEventListener('click', ui.handleAddEventInterest);
 
+    // --- КНОПКА АРХІВУ (Оновлена логіка) ---
     if (dom.toggleArchiveBtn) {
-        dom.toggleArchiveBtn.addEventListener('click', async () => {
+        let showingArchive = false;
+        dom.toggleArchiveBtn.addEventListener('click', () => {
             showingArchive = !showingArchive;
-            const status = showingArchive ? 'finished' : 'active';
             dom.toggleArchiveBtn.innerHTML = showingArchive ? '<i class="fas fa-calendar-alt"></i> Актуальні' : '<i class="fas fa-history"></i> Архів';
-            const title = document.querySelector('.section-title-modern');
-            if (title && title.firstChild) title.firstChild.textContent = showingArchive ? 'Архів подій ' : 'Нові події ';
-            const eventsData = await utils.getEvents(status);
-            events.renderEvents(eventsData, showingArchive);
+            
+            const title = document.querySelector('.section-title-modern') || document.querySelector('.section-title');
+            if (title && title.childNodes[0]) {
+                title.childNodes[0].textContent = showingArchive ? 'Архів подій ' : 'Нові події ';
+            }
+            
+            // Викликаємо функцію з events.js для перемикання режиму і оновлення кешу
+            events.toggleArchiveMode(showingArchive);
         });
     }
 
+    // Пошук людей
     if (dom.userSearchInput) dom.userSearchInput.addEventListener('input', user.handleUserSearch);
     if (dom.cityFilterInput) dom.cityFilterInput.addEventListener('input', () => user.renderPeople());
     if (dom.peopleInterestFilter) dom.peopleInterestFilter.addEventListener('click', user.handlePeopleInterestClick);
 
+    // Кліки в сітці людей (Підписатися, Написати, Профіль)
     if (dom.peopleGrid) {
         dom.peopleGrid.addEventListener('click', (e) => {
             const followBtn = e.target.closest('.follow-btn');
@@ -150,19 +178,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
+    // Списки підписників/підписок
     if (dom.myFollowersBtn) {
         dom.myFollowersBtn.addEventListener('click', () => {
-            const currentUser = utils.getCurrentUser();
-            if(currentUser) user.openSocialList('followers', currentUser.id);
+            const u = utils.getCurrentUser();
+            if(u) user.openSocialList('followers', u.id);
         });
     }
     if (dom.myFollowingBtn) {
         dom.myFollowingBtn.addEventListener('click', () => {
-            const currentUser = utils.getCurrentUser();
-            if(currentUser) user.openSocialList('following', currentUser.id);
+            const u = utils.getCurrentUser();
+            if(u) user.openSocialList('following', u.id);
         });
     }
-
     if (dom.otherUserFollowersBtn) {
         dom.otherUserFollowersBtn.addEventListener('click', () => {
             const uid = dom.otherUserFollowersBtn.dataset.userId;
@@ -175,9 +203,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (uid) user.openSocialList('following', uid);
         });
     }
-
     if (dom.closeSocialListModal) dom.closeSocialListModal.addEventListener('click', () => utils.closeModal(dom.socialListModal));
 
+    // Сповіщення
     if (dom.notificationBtn) {
         dom.notificationBtn.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -187,11 +215,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             else dom.notificationBtn.classList.remove('active');
         });
     }
-
     if (dom.markAllReadBtn) {
         dom.markAllReadBtn.addEventListener('click', markAllNotificationsRead);
     }
 
+    // Чати
     if (dom.chatListBtn) {
         dom.chatListBtn.addEventListener('click', () => {
             chat.renderChatList();
@@ -213,9 +241,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (eventId) chat.sendChatMessage(eventId);
         });
     }
-    const chatInput = document.getElementById('contactInput');
-    if (chatInput) {
-        chatInput.addEventListener('keypress', (e) => {
+    const eventChatInput = document.getElementById('contactInput');
+    if (eventChatInput) {
+        eventChatInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 const eventId = parseInt(dom.eventDetailModal.dataset.currentEventId);
                 if (eventId) chat.sendChatMessage(eventId);
@@ -234,6 +262,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
+    // --- КЛІКИ НА КАРТКАХ ПОДІЙ (Карусель) ---
     if (dom.eventsHorizontalTrack) {
         dom.eventsHorizontalTrack.addEventListener('scroll', events.updateScrollButtons);
         dom.eventsHorizontalTrack.addEventListener('click', async (e) => {
@@ -243,37 +272,33 @@ document.addEventListener('DOMContentLoaded', async () => {
             
             if (joinBtn) {
                 const eventId = parseInt(joinBtn.dataset.eventId);
-                const status = showingArchive ? 'finished' : 'active';
-                const freshEvents = await utils.getEvents(status);
-                const event = freshEvents.find(e => e.eventId === eventId);
-                
-                if (event) {
-                    await events.handleJoinEvent(event, async () => {
-                        const updatedEvents = await utils.getEvents(status);
-                        events.renderEvents(updatedEvents, showingArchive);
-                        if (dom.eventDetailModal.style.display === 'flex') events.openEventDetail(event);
-                    });
-                }
+                // Оскільки у нас тепер кеш в events.js, нам треба отримати подію.
+                // Передаємо об'єкт з ID, а events.js розбереться (або оновимо кеш)
+                await events.handleJoinEvent({ eventId: eventId });
             } else if (creatorInfo) {
                 e.stopPropagation();
                 const userId = parseInt(creatorInfo.dataset.userId);
                 if (userId) user.openOtherUserProfile(userId);
             } else if (card) {
                 const eventId = parseInt(card.dataset.eventId);
-                const status = showingArchive ? 'finished' : 'active';
-                const freshEvents = await utils.getEvents(status);
-                const event = freshEvents.find(e => e.eventId === eventId);
+                // Шукаємо подію, щоб відкрити деталі.
+                // Оскільки всі події зараз завантажені (для рендеру), ми можемо взяти їх з API або кешу.
+                // Тут найпростіше взяти свіжий список (це швидко з localStorage/сервера)
+                const allEvents = await utils.getEvents(); 
+                const event = allEvents.find(e => e.eventId === eventId);
                 if (event) events.openEventDetail(event);
             }
         });
     }
     
+    // Стрілки каруселі
     if (dom.scrollLeftBtn) dom.scrollLeftBtn.addEventListener('click', () => dom.eventsHorizontalTrack.scrollBy({ left: 420, behavior: 'smooth' }));
     if (dom.scrollRightBtn) dom.scrollRightBtn.addEventListener('click', () => dom.eventsHorizontalTrack.scrollBy({ left: 420, behavior: 'smooth' }));
 
-    const chatList = document.getElementById('chatList');
-    if (chatList) {
-        chatList.addEventListener('click', (e) => {
+    // Список чатів
+    const chatListEl = document.getElementById('chatList');
+    if (chatListEl) {
+        chatListEl.addEventListener('click', (e) => {
             const chatItem = e.target.closest('.chat-item');
             if (!chatItem) return;
             const userId = parseInt(chatItem.dataset.userId);
@@ -283,6 +308,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
+    // Закриття модалок
     const closeButtons = [
         dom.closeRegisterModal, dom.closeEventModal, dom.closeProfileModal,
         dom.closeEditProfileModal, dom.closeEventDetailModal, dom.closeEditEventModal,
@@ -295,6 +321,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 });
 
+// --- СИСТЕМА СПОВІЩЕНЬ ---
+
 async function setupNotifications(userId) {
     socket.emit('join_notifications', { userId: userId });
     
@@ -304,17 +332,24 @@ async function setupNotifications(userId) {
         utils.showToast(notif.message, 'info');
         await addNotificationToUI(notif);
         updateBadgeCount(1);
+        
+        // --- ВАЖЛИВО: Оновлюємо список подій, якщо хтось створив нову ---
+        if (notif.type === 'new_event') {
+            events.refreshEventsCache();
+        }
+        // ----------------------------------------------------------------
     });
 
     socket.on('chat_alert', (msg) => {
-    const isChatOpen = dom.privateChatModal && dom.privateChatModal.classList.contains('open');
-    const talkingToSender = dom.privateChatModal && (dom.privateChatModal.dataset.otherUserId == msg.senderId);
-    if (isChatOpen && talkingToSender) {
-        return;
-    }
-    utils.showToast(`Нове повідомлення від ${msg.senderName}`, 'info');
-    updateChatBadge(1);
-});
+        const isChatOpen = dom.privateChatModal && dom.privateChatModal.classList.contains('open');
+        const talkingToSender = dom.privateChatModal && (dom.privateChatModal.dataset.otherUserId == msg.senderId);
+        
+        if (isChatOpen && talkingToSender) {
+            return; // Не показуємо тост, якщо чат відкритий
+        }
+        utils.showToast(`Нове повідомлення від ${msg.senderName}`, 'info');
+        updateChatBadge(1);
+    });
 }
 
 async function loadNotifications(userId) {

@@ -5,31 +5,7 @@
     overflow: hidden;
 }
 
-.section-header-controls {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    max-width: 1200px;
-    margin: 0 auto 2rem auto; 
-    padding: 0 10px;
-    position: relative;
-    min-height: 44px;
-}
-
-.section-title-modern {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    width: 100%;
-    text-align: center;
-    font-size: 2.2em;
-    color: var(--main-dark-color);
-    font-weight: 700;
-    margin: 0;
-    padding: 0 10px;
-}
-
+/* Очищено старі стилі заголовків */
 .event-count-badge {
     font-size: 0.6em;
     color: var(--main-secondary-color);
@@ -93,15 +69,10 @@
     overflow-x: auto;
     scroll-behavior: smooth;
     scroll-snap-type: x mandatory;
-    padding: 0 calc((100vw - 1200px) / 2 + 10px) 2rem calc((100vw - 1200px) / 2 + 10px);
+    /* Виправлено відступи: тепер контент вирівняний по лівому краю */
+    padding: 10px 5px 20px 5px; 
     -ms-overflow-style: none;
     scrollbar-width: none;
-}
-@media (min-width: 1220px) {
-    .events-track { padding: 0 calc((100vw - 1200px) / 2 + 10px) 2rem calc((100vw - 1200px) / 2 + 10px); }
-}
-@media (max-width: 1220px) {
-    .events-track { padding: 0 1.5rem 2rem 1.5rem; }
 }
 .events-track::-webkit-scrollbar { display: none; }
 
@@ -269,25 +240,11 @@
 }
 
 @media (max-width: 768px) {
-    .section-header-controls {
-        flex-direction: column;
-        align-items: center;
-        gap: 1rem;
-        justify-content: center;
-        min-height: auto;
-    }
     .carousel-nav {
         display: none;
     }
     .event-card-horizontal {
         flex: 0 0 320px; 
-    }
-    .section-title-modern {
-        position: static;
-        transform: none;
-        width: auto;
-        text-align: center;
-        font-size: 1.8em;
     }
     .card-title-v4 {
         font-size: 1.5em; 
@@ -440,39 +397,7 @@ body.dark-theme .filter-item select {
     color: var(--dark-text-primary);
 }
 
-/* Корекція заголовка секції */
-.section-header-controls {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    position: relative;
-}
-
-.section-title-modern {
-    position: static; /* Прибираємо абсолютне позиціонування */
-    transform: none;
-    text-align: left;
-    margin: 0;
-    font-size: 2rem;
-}
-
-.controls-right-group {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-}
-
 @media (max-width: 900px) {
-    .section-header-controls {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 15px;
-    }
-    .controls-right-group {
-        width: 100%;
-        justify-content: space-between;
-    }
     .events-filter-bar {
         flex-direction: column;
         align-items: stretch;

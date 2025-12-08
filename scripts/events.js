@@ -3,7 +3,9 @@ import * as utils from './utils.js';
 import { renderInterests } from './ui.js';
 import { loadEventChat } from './chat.js';
 
-let cachedEvents = [];
+// --- ГЛОБАЛЬНИЙ КЕШ (Як у секції Люди) ---
+let allEventsCache = []; 
+let usersCache = new Map(); 
 let isShowingArchive = false;
 
 const getAuthHeaders = () => ({
@@ -11,9 +13,50 @@ const getAuthHeaders = () => ({
     'Authorization': `Bearer ${localStorage.getItem('token')}`
 });
 
-export function setCachedEvents(events, isArchive) {
-    cachedEvents = events;
-    isShowingArchive = isArchive;
+// --- ПОЛІНГ (Автооновлення) ---
+export function startEventPolling() {
+    // Перше завантаження одразу
+    refreshEventsCache();
+    // Далі кожні 5 секунд
+    setInterval(() => {
+        refreshEventsCache();
+    }, 5000);
+}
+
+// Функція для оновлення даних з сервера "тихо"
+export async function refreshEventsCache() {
+    try {
+        // 1. Вантажимо юзерів (щоб мати аватарки/імена)
+        const users = await utils.getUsers();
+        usersCache = new Map(users.map(u => [u.id, u]));
+
+        // 2. Вантажимо події (активні або архів, залежно від режиму)
+        const status = isShowingArchive ? 'finished' : 'active';
+        const events = await utils.getEvents(status);
+        
+        // Перевіряємо, чи змінилися дані, щоб дарма не перемальовувати DOM
+        // (Проста перевірка по довжині або ID першого елемента)
+        const needsUpdate = JSON.stringify(events.map(e => e.eventId)) !== JSON.stringify(allEventsCache.map(e => e.eventId)) 
+                            || allEventsCache.length !== events.length;
+
+        allEventsCache = events;
+
+        // Якщо дані змінилися або це перше завантаження, або користувач щось шукає -> рендеримо
+        // Але якщо користувач активно друкує (input у фокусі), можна не перебивати, 
+        // хоча при локальному фільтрі це буде непомітно.
+        if (needsUpdate || dom.eventsHorizontalTrack.innerHTML === '') {
+            renderEventsLocal();
+        }
+    } catch (e) {
+        console.error("Polling error:", e);
+    }
+}
+
+// Зміна режиму Архів/Актуальні
+export function toggleArchiveMode(showArchive) {
+    isShowingArchive = showArchive;
+    dom.eventsHorizontalTrack.innerHTML = '<p style="padding:20px; text-align:center;">Завантаження...</p>';
+    refreshEventsCache(); // Примусове оновлення
 }
 
 export function initEventFilters() {
@@ -29,28 +72,29 @@ export function initEventFilters() {
         dom.interestSearchInput
     ];
 
+    // МИТТЄВА реакція на кожну зміну (без debounce)
     inputs.forEach(input => {
         if (input) {
-            input.addEventListener('input', () => renderEvents(cachedEvents, isShowingArchive));
-            input.addEventListener('change', () => renderEvents(cachedEvents, isShowingArchive));
+            input.addEventListener('input', renderEventsLocal);
+            input.addEventListener('change', renderEventsLocal);
         }
     });
 
     if (dom.clearFiltersBtn) {
         dom.clearFiltersBtn.addEventListener('click', () => {
-            inputs.forEach(input => {
-                if(input) input.value = '';
-            });
-            renderEvents(cachedEvents, isShowingArchive);
+            inputs.forEach(input => { if(input) input.value = ''; });
+            renderEventsLocal();
         });
     }
-
+    
+    // Кнопка пошуку тепер просто скидає фокус, бо пошук і так працює
     if (dom.searchBtn) {
-        dom.searchBtn.addEventListener('click', () => renderEvents(cachedEvents, isShowingArchive));
+        dom.searchBtn.addEventListener('click', renderEventsLocal);
     }
 }
 
-export function filterEvents(events) {
+// Локальна фільтрація (працює миттєво по кешу)
+function filterEventsLocal(events) {
     const query = dom.searchQueryInput?.value.toLowerCase().trim() || '';
     const loc = dom.locationInput?.value.toLowerCase().trim() || '';
     const cat = dom.categorySelect?.value || '';
@@ -93,9 +137,8 @@ export function filterEvents(events) {
     });
 }
 
-export function sortEvents(events) {
+function sortEventsLocal(events) {
     const sortVal = dom.sortSelect?.value || 'date-asc';
-    
     return [...events].sort((a, b) => {
         if (sortVal === 'date-asc') return new Date(a.date) - new Date(b.date);
         if (sortVal === 'date-desc') return new Date(b.date) - new Date(a.date);
@@ -106,44 +149,38 @@ export function sortEvents(events) {
     });
 }
 
-export async function renderEvents(events, isArchive = false) {
+// Головна функція рендеру (синхронна, тому миттєва)
+export function renderEventsLocal() {
     const track = dom.eventsHorizontalTrack;
     const eventCount = dom.eventCount;
     if (!track) return;
 
-    if (events) {
-        setCachedEvents(events, isArchive);
-    } else {
-        events = cachedEvents;
-    }
-
-    track.innerHTML = '';
-    
-    let processedEvents = filterEvents(events);
-    processedEvents = sortEvents(processedEvents);
+    // 1. Фільтруємо та сортуємо дані з пам'яті
+    let processedEvents = filterEventsLocal(allEventsCache);
+    processedEvents = sortEventsLocal(processedEvents);
     
     if (eventCount) eventCount.textContent = `(${processedEvents.length})`;
 
+    // 2. Очищаємо трек
+    track.innerHTML = '';
+
     if (processedEvents.length === 0) {
-        track.innerHTML = isArchive 
-            ? '<p style="color: #888; width: 100%; text-align: center; padding: 20px;">Архів порожній або нічого не знайдено.</p>' 
+        track.innerHTML = isShowingArchive 
+            ? '<p style="color: #888; width: 100%; text-align: center; padding: 20px;">Архів порожній.</p>' 
             : '<p style="color: #888; width: 100%; text-align: center; padding: 20px;">Подій не знайдено.</p>';
         return;
     }
 
     const currentUser = utils.getCurrentUser();
     
-    let usersMap = {};
-    try {
-        const users = await utils.getUsers();
-        users.forEach(u => usersMap[u.id] = u);
-    } catch(e) { console.error(e); }
+    // 3. Створюємо фрагмент (оптимізація)
+    const fragment = document.createDocumentFragment();
 
-processedEvents.forEach(event => {
+    processedEvents.forEach(event => {
         let statusText = '';
         let statusColor = ''; 
 
-        if (isArchive) {
+        if (isShowingArchive) {
             statusText = '(Завершено)';
             statusColor = '#64748b';
         } else if (event.minParticipants > 0) {
@@ -157,24 +194,25 @@ processedEvents.forEach(event => {
             }
         }
 
+        // Беремо дані творця з MAP (швидко)
+        const creator = usersCache.get(event.creatorId);
+        const creatorName = creator ? creator.username : 'Невідомий';
+        const creatorAvatar = creator?.avatarBase64 || 'https://via.placeholder.com/24';
+
         const card = document.createElement('div');
         card.className = 'event-card-horizontal';
         card.dataset.eventId = event.eventId;
-        if (isArchive) card.style.opacity = '0.7';
+        if (isShowingArchive) card.style.opacity = '0.7';
         
         const interestsHtml = event.interests.map(i => `<span class="interest-tag selected">${i}</span>`).join('');
         
-        let usersMap = {};
-
-        const creatorName = `ID: ${event.creatorId}`; 
-        const creatorAvatar = 'https://via.placeholder.com/24';
-
         let buttonHtml = '';
         if (currentUser && currentUser.id === event.creatorId) {
             buttonHtml = `<button class="card-action-button card-action-organizer" disabled style="background: #f1f5f9; color: #6b21a8; cursor: default;"><i class="fas fa-crown"></i> Ви організатор</button>`;
-        } else if (!isArchive) {
+        } else if (!isShowingArchive) {
             buttonHtml = `<button class="card-action-button join-btn-v4" data-event-id="${event.eventId}"><i class="fas fa-plus"></i> Приєднатися</button>`;
         }
+
         card.innerHTML = `
             <div class="card-content-v4">
                 <h3 class="card-title-v4" style="margin-bottom: 0.5rem;">${event.title}</h3>
@@ -188,8 +226,8 @@ processedEvents.forEach(event => {
                 
                 <div class="card-footer-v4" style="margin-top: auto; padding-top: 15px;">
                     <div class="creator-info-v4 creator-chip" data-user-id="${event.creatorId}">
-                        <i class="fas fa-user-circle" style="font-size: 1.2em;"></i>
-                        <span>Організатор</span>
+                        <img src="${creatorAvatar}" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover;">
+                        <span>${creatorName}</span>
                     </div>
                     
                     <div style="text-align: right;">
@@ -204,21 +242,12 @@ processedEvents.forEach(event => {
             </div>
             ${buttonHtml}
         `;
-        utils.getUsers().then(users => {
-            const creator = users.find(u => u.id === event.creatorId);
-            if (creator) {
-                const chip = card.querySelector('.creator-chip');
-                if (chip) {
-                    chip.innerHTML = `
-                        <img src="${creator.avatarBase64 || 'https://via.placeholder.com/24'}" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover;">
-                        <span>${creator.username}</span>
-                    `;
-                }
-            }
-        });
 
-        track.appendChild(card);
+        fragment.appendChild(card);
     });
+
+    track.appendChild(fragment);
+    updateScrollButtons();
 }
 
 export function updateScrollButtons() {
@@ -227,6 +256,17 @@ export function updateScrollButtons() {
     dom.scrollLeftBtn.disabled = track.scrollLeft <= 10;
 }
 
+// Ця функція сумісності, щоб старий код main.js не ламався, 
+// але вона просто викликає оновлення кешу
+export async function renderEvents(events, isArchive) {
+    if (events) allEventsCache = events;
+    if (typeof isArchive !== 'undefined') isShowingArchive = isArchive;
+    renderEventsLocal();
+}
+
+// ... Далі йде решта коду (openEventDetail і т.д.), вона не змінюється ...
+// Але для коректності скопіюйте сюди решту функцій з попереднього файлу, 
+// починаючи з export async function openEventDetail(event) ...
 export async function openEventDetail(event) {
     const user = utils.getCurrentUser();
     if (!user) {
@@ -359,6 +399,8 @@ export async function handleJoinEvent(event, callback) {
             body: JSON.stringify({ userId: user.id, eventId: event.eventId })
         });
         if (res.ok) {
+            // Одразу оновлюємо кеш, щоб відобразити зміни
+            await refreshEventsCache();
             if (callback) callback();
             return true;
         } else {
@@ -379,6 +421,7 @@ export async function handleLeaveEvent(event, callback) {
         });
         if (res.ok) {
             utils.showToast('Ви покинули подію', 'info');
+            await refreshEventsCache();
             if (callback) callback();
         }
     } catch (e) { console.error(e); }
@@ -394,8 +437,7 @@ export async function handleDeleteEvent(eventId) {
         if (res.ok) {
             utils.showToast('Подію видалено', 'success');
             utils.closeModal(dom.eventDetailModal);
-            const updatedEvents = await utils.getEvents();
-            renderEvents(updatedEvents);
+            refreshEventsCache();
         }
     } catch (e) { utils.showToast('Помилка видалення', 'error'); }
 }
@@ -433,9 +475,9 @@ export async function handleCreateEventSubmit(e) {
         if (res.ok) {
             utils.closeModal(dom.createEventModal);
             dom.createEventForm.reset();
-            const updatedEvents = await utils.getEvents();
-            renderEvents(updatedEvents);
             utils.showToast('Подію створено!', 'success');
+            // Оновлюємо список миттєво
+            refreshEventsCache();
         } else {
             utils.showToast('Помилка створення', 'error');
         }
@@ -489,8 +531,7 @@ export async function handleEditEventSubmit(e) {
         if (res.ok) {
             utils.showToast('Подію оновлено', 'success');
             utils.closeModal(dom.editEventModal);
-            const updatedEvents = await utils.getEvents();
-            renderEvents(updatedEvents);
+            refreshEventsCache();
         } else {
             utils.showToast('Помилка оновлення', 'error');
         }
