@@ -425,43 +425,6 @@ export const createEventValidations = [
     { inputId: 'eventTitle', errorId: 'eventTitleError', validationFn: v => v.length >= 3, errorMessage: 'Назва: від 3 символів' }
 ];
 
-export async function handleCreateEventSubmit(e) {
-    e.preventDefault();
-    const user = utils.getCurrentUser();
-    if (!user) return;
-
-    const selectedInterests = Array.from(dom.eventInterestsContainer?.querySelectorAll('.interest-tag.selected') || []).map(tag => tag.dataset.interest);
-    
-    const newEvent = {
-        title: dom.eventTitle?.value.trim(),
-        description: dom.eventDescription?.value.trim(),
-        category: dom.eventCategory?.value,
-        location: dom.eventLocation?.value.trim(),
-        date: dom.eventDate?.value,
-        participants: parseInt(dom.eventParticipants?.value),
-        minParticipants: parseInt(document.getElementById('eventMinParticipants')?.value) || 0,
-        creatorId: user.id,
-        interests: selectedInterests
-    };
-
-    try {
-        const res = await fetch('http://localhost:5000/api/events', {
-            method: 'POST',
-            headers: getAuthHeaders(),
-            body: JSON.stringify(newEvent)
-        });
-
-        if (res.ok) {
-            utils.closeModal(dom.createEventModal);
-            dom.createEventForm.reset();
-            utils.showToast('Подію створено!', 'success');
-            refreshEventsCache();
-        } else {
-            utils.showToast('Помилка створення', 'error');
-        }
-    } catch (e) { utils.showToast('Помилка з\'єднання', 'error'); }
-}
-
 export const editEventValidations = [
     { inputId: 'editEventTitle', errorId: 'editEventTitleError', validationFn: v => v.length >= 3, errorMessage: 'Назва: від 3 символів' }
 ];

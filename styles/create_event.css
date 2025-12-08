@@ -1,0 +1,217 @@
+/* Hero Header для сторінки створення */
+.create-event-page {
+    padding-top: 80px; /* Відступ під фіксований хедер */
+    min-height: 100vh;
+    background-color: var(--main-background-color);
+}
+
+.page-header {
+    background: linear-gradient(135deg, var(--main-primary-color), var(--auth-accent-color));
+    padding: 60px 0 40px;
+    color: white;
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.page-header h1 {
+    color: white;
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+}
+
+.page-header p {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1.1rem;
+}
+
+/* Лейаут сторінки */
+.create-layout {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 30px;
+    align-items: start;
+    padding-bottom: 60px;
+}
+
+/* Картка форми */
+.form-card-wrapper {
+    background: var(--main-card-background);
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    border: 1px solid #e2e8f0;
+}
+
+body.dark-theme .form-card-wrapper {
+    background: var(--dark-card-bg);
+    border-color: var(--dark-border);
+}
+
+/* Progress Bar (Wizard) */
+.progress-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+    position: relative;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.progress-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+    z-index: 2;
+    opacity: 0.6;
+    transition: all 0.3s;
+}
+
+.progress-step.active {
+    opacity: 1;
+}
+
+.step-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #e2e8f0;
+    color: var(--main-secondary-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    transition: all 0.3s;
+}
+
+.progress-step.active .step-circle {
+    background: var(--auth-accent-color);
+    color: white;
+    box-shadow: 0 4px 10px rgba(107, 33, 168, 0.3);
+}
+
+.progress-line {
+    flex: 1;
+    height: 2px;
+    background: #e2e8f0;
+    margin: 0 10px;
+    margin-bottom: 24px; /* Вирівнювання по центру кружечків */
+}
+
+/* Форма */
+.form-step {
+    display: none;
+    animation: fadeIn 0.4s ease;
+}
+.form-step.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.form-step h3 {
+    margin-bottom: 25px;
+    font-size: 1.5rem;
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 15px;
+}
+body.dark-theme .form-step h3 {
+    border-color: var(--dark-border);
+}
+
+.form-actions {
+    display: flex;
+    margin-top: 30px;
+}
+.form-actions.right { justify-content: flex-end; }
+.form-actions.space-between { justify-content: space-between; }
+
+.form-row {
+    display: flex;
+    gap: 20px;
+}
+.form-row .form-group {
+    flex: 1;
+}
+
+/* Сайдбар (Підказки) */
+.sidebar-tips {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.tip-card {
+    background: #f8fafc;
+    border-radius: 16px;
+    padding: 20px;
+    border-left: 4px solid var(--auth-accent-color);
+}
+body.dark-theme .tip-card {
+    background: var(--dark-card-bg);
+}
+
+.tip-icon {
+    font-size: 1.5rem;
+    color: var(--auth-accent-color);
+    margin-bottom: 10px;
+}
+
+.tip-card h4 {
+    margin-bottom: 8px;
+    font-size: 1.1rem;
+}
+.tip-card p {
+    font-size: 0.9rem;
+    color: var(--main-secondary-color);
+}
+
+.preview-card {
+    background: var(--main-card-background);
+    border: 1px solid #e2e8f0;
+    padding: 20px;
+    border-radius: 16px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+body.dark-theme .preview-card {
+    background: var(--dark-card-bg);
+    border-color: var(--dark-border);
+}
+
+.mini-preview {
+    margin-top: 15px;
+    padding: 15px;
+    background: #f1f5f9;
+    border-radius: 12px;
+}
+body.dark-theme .mini-preview {
+    background: #1e293b;
+}
+
+.preview-title {
+    font-weight: 700;
+    font-size: 1.1rem;
+    margin-bottom: 5px;
+    color: var(--main-dark-color);
+}
+.preview-date {
+    font-size: 0.85rem;
+    color: var(--main-secondary-color);
+}
+
+/* Адаптивність */
+@media (max-width: 900px) {
+    .create-layout {
+        grid-template-columns: 1fr;
+    }
+    .sidebar-tips {
+        order: -1; /* Підказки зверху або приховати */
+        display: none; 
+    }
+}

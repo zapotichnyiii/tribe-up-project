@@ -161,22 +161,6 @@ export async function openInterestSearchModal(interest) {
 export let currentEventStep = 1;
 const stepTitles = ["Основна інформація", "Логістика", "Інтереси"];
 
-export function showEventStep(step) {
-    currentEventStep = step;
-    dom.eventSteps.forEach((stepEl, index) => {
-        stepEl.classList.toggle('active', (index + 1) === currentEventStep);
-    });
-    if (dom.eventStepIndicator) dom.eventStepIndicator.textContent = `Крок ${currentEventStep} з ${dom.eventSteps.length}`;
-    if (dom.modalStepTitle) dom.modalStepTitle.textContent = stepTitles[currentEventStep - 1];
-}
-
-export function initEventSteps() {
-    if (dom.eventStepNext1) dom.eventStepNext1.addEventListener('click', () => showEventStep(2));
-    if (dom.eventStepNext2) dom.eventStepNext2.addEventListener('click', () => showEventStep(3));
-    if (dom.eventStepBack2) dom.eventStepBack2.addEventListener('click', () => showEventStep(1));
-    if (dom.eventStepBack3) dom.eventStepBack3.addEventListener('click', () => showEventStep(2));
-}
-
 export function handleAddEventInterest() {
     const interest = dom.eventCustomInterestInput.value.trim();
     if (interest && interest.length <= 20) {

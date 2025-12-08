@@ -108,22 +108,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (editProfileBtn) editProfileBtn.addEventListener('click', user.openEditProfileModal);
     if (dom.editProfileForm) dom.editProfileForm.addEventListener('submit', user.handleEditProfileSubmit);
     if (dom.addEditCustomInterestBtn) dom.addEditCustomInterestBtn.addEventListener('click', user.handleAddEditCustomInterest);
-
-    // Створення події
-    if (dom.createEventBtn) {
-        dom.createEventBtn.addEventListener('click', () => {
-            ui.updateAllInterestContainers(); 
-            ui.showEventStep(1);
-            utils.openModal(dom.createEventModal);
-        });
-    }
     
     // Пошук подій (скрол до секції)
     if (dom.searchEventsBtn) dom.searchEventsBtn.addEventListener('click', () => utils.scrollToSection('events'));
-    
-    // Сабміт форми створення події
-    if (dom.createEventForm) dom.createEventForm.addEventListener('submit', async (e) => { events.handleCreateEventSubmit(e); });
-    
+
     // Редагування події
     if (dom.editEventForm) dom.editEventForm.addEventListener('submit', events.handleEditEventSubmit);
     if (dom.addEditEventCustomInterestBtn) dom.addEditEventCustomInterestBtn.addEventListener('click', events.handleAddEditEventInterest);

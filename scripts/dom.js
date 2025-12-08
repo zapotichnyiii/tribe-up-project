@@ -9,32 +9,28 @@ export const peopleHorizontalTrack = document.getElementById('peopleHorizontalTr
 export const peopleScrollLeftBtn = document.getElementById('peopleScrollLeftBtn');
 export const peopleScrollRightBtn = document.getElementById('peopleScrollRightBtn');
 
-// --- СТВОРЕННЯ ПОДІЇ ---
-export const createEventBtn = document.getElementById('createEventBtn');
-export const createEventModal = document.getElementById('createEventModal');
-export const closeEventModal = document.getElementById('closeEventModal');
-export const createEventForm = document.getElementById('createEventForm');
-
-// Поля форми створення
-export const eventTitle = document.getElementById('eventTitle');
-export const eventDescription = document.getElementById('eventDescription');
-export const eventCategory = document.getElementById('eventCategory');
-export const eventLocation = document.getElementById('eventLocation');
-export const eventDate = document.getElementById('eventDate');
-export const eventParticipants = document.getElementById('eventParticipants');
-export const eventMinParticipants = document.getElementById('eventMinParticipants');
-export const eventInterestsContainer = document.getElementById('eventInterestsContainer');
-export const addEventCustomInterestBtn = document.getElementById('addEventCustomInterestBtn');
-export const eventCustomInterestInput = document.getElementById('eventCustomInterestInput');
-
-// Навігація в модалці створення
-export const eventStepNext1 = document.getElementById('eventStepNext1');
-export const eventStepNext2 = document.getElementById('eventStepNext2');
-export const eventStepBack2 = document.getElementById('eventStepBack2');
-export const eventStepBack3 = document.getElementById('eventStepBack3');
-export const eventStepIndicator = document.getElementById('eventStepIndicator');
-export const modalStepTitle = document.getElementById('createEventTitle');
-export const eventSteps = document.querySelectorAll('#createEventModal .modal-step');
+// --- СТВОРЕННЯ ПОДІЇ (Видалено: перенесено на окрему сторінку create_event.html) ---
+// export const createEventBtn = document.getElementById('createEventBtn'); // Замінено на посилання <a> в HTML
+// export const createEventModal = document.getElementById('createEventModal');
+// export const closeEventModal = document.getElementById('closeEventModal');
+// export const createEventForm = document.getElementById('createEventForm');
+// export const eventTitle = document.getElementById('eventTitle');
+// export const eventDescription = document.getElementById('eventDescription');
+// export const eventCategory = document.getElementById('eventCategory');
+// export const eventLocation = document.getElementById('eventLocation');
+// export const eventDate = document.getElementById('eventDate');
+// export const eventParticipants = document.getElementById('eventParticipants');
+// export const eventMinParticipants = document.getElementById('eventMinParticipants');
+// export const eventInterestsContainer = document.getElementById('eventInterestsContainer');
+// export const addEventCustomInterestBtn = document.getElementById('addEventCustomInterestBtn');
+// export const eventCustomInterestInput = document.getElementById('eventCustomInterestInput');
+// export const eventStepNext1 = document.getElementById('eventStepNext1');
+// export const eventStepNext2 = document.getElementById('eventStepNext2');
+// export const eventStepBack2 = document.getElementById('eventStepBack2');
+// export const eventStepBack3 = document.getElementById('eventStepBack3');
+// export const eventStepIndicator = document.getElementById('eventStepIndicator');
+// export const modalStepTitle = document.getElementById('createEventTitle');
+// export const eventSteps = document.querySelectorAll('#createEventModal .modal-step');
 
 // --- РЕЄСТРАЦІЯ ---
 export const registerModal = document.getElementById('registerModal');

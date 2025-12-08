@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Створити подію — TribeUp</title>
+    <link rel="stylesheet" href="/styles/adaptive.css">
+    <link rel="stylesheet" href="/styles/buttons.css">
+    <link rel="stylesheet" href="/styles/cards_and_tags.css">
+    <link rel="stylesheet" href="/styles/dark_theme.css">
+    <link rel="stylesheet" href="/styles/footer.css">
+    <link rel="stylesheet" href="/styles/forms_and_filters.css">
+    <link rel="stylesheet" href="/styles/general_styles.css">
+    <link rel="stylesheet" href="/styles/header.css">
+    <link rel="stylesheet" href="/styles/typografic.css">
+    <link rel="stylesheet" href="/styles/create_event.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+</head>
+<body>
+
+    <header>
+        <div class="container">
+            <nav class="navbar">
+                <a href="/" class="logo main-logo">TribeUp</a>
+                <div class="navbar-right">
+                    <div class="profile-area" id="profileArea" style="cursor: pointer;" onclick="window.location.href='/'">
+                        <div class="profile-display" id="profileDisplay" style="display: flex; align-items: center; gap: 8px;">
+                            <img id="profileAvatar" src="" alt="Avatar" class="profile-avatar-rect">
+                            <span id="profileUsername" class="profile-name"></span>
+                        </div>
+                    </div>
+                    <button class="theme-toggle" id="themeToggle"><i class="fas fa-moon"></i></button>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main class="create-event-page">
+        <div class="page-header">
+            <div class="container">
+                <h1>Створити нову подію</h1>
+                <p>Зберіть людей навколо того, що любите</p>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="create-layout">
+                
+                <div class="form-card-wrapper">
+                    
+                    <div class="progress-container">
+                        <div class="progress-step active" data-step="1">
+                            <div class="step-circle">1</div>
+                            <span>Деталі</span>
+                        </div>
+                        <div class="progress-line"></div>
+                        <div class="progress-step" data-step="2">
+                            <div class="step-circle">2</div>
+                            <span>Логістика</span>
+                        </div>
+                        <div class="progress-line"></div>
+                        <div class="progress-step" data-step="3">
+                            <div class="step-circle">3</div>
+                            <span>Інтереси</span>
+                        </div>
+                    </div>
+
+                    <form id="fullPageCreateEventForm" class="modern-form">
+                        
+                        <div class="form-step active" id="step1">
+                            <h3>Основна інформація</h3>
+                            <div class="form-group">
+                                <label class="form-label" for="eventTitle">Назва події</label>
+                                <div class="input-with-icon">
+                                    <i class="fas fa-heading"></i>
+                                    <input type="text" class="form-control" id="eventTitle" placeholder="Коротка та влучна назва" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="eventDescription">Опис</label>
+                                <textarea class="form-control" id="eventDescription" rows="6" placeholder="Розкажіть детальніше: програма, дрес-код, що брати з собою..." required></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="eventCategory">Категорія</label>
+                                <div class="input-with-icon">
+                                    <i class="fas fa-list"></i>
+                                    <select class="form-select" id="eventCategory" required>
+                                        <option value="">Оберіть категорію</option>
+                                        <option value="sports">Спорт</option>
+                                        <option value="games">Ігри</option>
+                                        <option value="arts">Мистецтво</option>
+                                        <option value="food">Їжа та напої</option>
+                                        <option value="outdoors">На природі</option>
+                                        <option value="learning">Навчання</option>
+                                        <option value="social">Соціальні</option>
+                                        <option value="music">Музика</option>
+                                        <option value="travel">Подорожі</option>
+                                        <option value="boardgames">Настільні ігри</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-actions right">
+                                <button type="button" class="btn btn-accent next-step-btn">Далі <i class="fas fa-arrow-right"></i></button>
+                            </div>
+                        </div>
+
+                        <div class="form-step" id="step2">
+                            <h3>Де і коли?</h3>
+                            <div class="form-group">
+                                <label class="form-label" for="eventLocation">Місце проведення</label>
+                                <div class="input-with-icon">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <input type="text" class="form-control" id="eventLocation" placeholder="Адреса, парк або заклад" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="eventDate">Дата та час</label>
+                                <input type="datetime-local" class="form-control" id="eventDate" required>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label" for="eventParticipants">Макс. учасників</label>
+                                    <div class="input-with-icon">
+                                        <i class="fas fa-users"></i>
+                                        <input type="number" class="form-control" id="eventParticipants" min="2" max="100" placeholder="10" required>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="eventMinParticipants">Мін. учасників</label>
+                                    <div class="input-with-icon">
+                                        <i class="fas fa-user-check"></i>
+                                        <input type="number" class="form-control" id="eventMinParticipants" min="1" max="100" placeholder="3">
+                                    </div>
+                                    <small style="color: var(--main-secondary-color); font-size: 0.8em;">Для підтвердження події</small>
+                                </div>
+                            </div>
+                            <div class="form-actions space-between">
+                                <button type="button" class="btn btn-outline prev-step-btn"><i class="fas fa-arrow-left"></i> Назад</button>
+                                <button type="button" class="btn btn-accent next-step-btn">Далі <i class="fas fa-arrow-right"></i></button>
+                            </div>
+                        </div>
+
+                        <div class="form-step" id="step3">
+                            <h3>Теги та інтереси</h3>
+                            <p style="margin-bottom: 15px; color: var(--main-secondary-color);">Оберіть теги, щоб правильні люди знайшли вашу подію.</p>
+                            
+                            <div class="interests-wrapper">
+                                <div class="interests" id="eventInterestsContainer"></div>
+                            </div>
+
+                            <div class="form-group custom-interest-group" style="margin-top: 20px;">
+                                <label class="form-label">Додати власний тег</label>
+                                <div class="custom-input-group">
+                                    <input type="text" class="form-control" id="eventCustomInterestInput" placeholder="Наприклад: Каякінг">
+                                    <button type="button" class="btn" id="addEventCustomInterestBtn"><i class="fas fa-plus"></i></button>
+                                </div>
+                            </div>
+
+                            <div class="form-actions space-between" style="margin-top: 30px;">
+                                <button type="button" class="btn btn-outline prev-step-btn"><i class="fas fa-arrow-left"></i> Назад</button>
+                                <button type="submit" class="btn btn-accent"><i class="fas fa-check-circle"></i> Опублікувати подію</button>
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+
+                <div class="sidebar-tips">
+                    <div class="tip-card">
+                        <div class="tip-icon"><i class="fas fa-lightbulb"></i></div>
+                        <h4>Порада #1</h4>
+                        <p>Додайте яскраву назву та детальний опис. Чим більше деталей, тим більше довіри до організатора.</p>
+                    </div>
+                    <div class="tip-card">
+                        <div class="tip-icon"><i class="fas fa-map-marked-alt"></i></div>
+                        <h4>Локація</h4>
+                        <p>Вказуйте точну адресу, щоб учасники могли легко знайти місце на карті.</p>
+                    </div>
+                    <div class="preview-card">
+                        <h4>Попередній перегляд</h4>
+                        <div class="mini-preview">
+                            <div class="preview-title" id="previewTitle">Назва події...</div>
+                            <div class="preview-date" id="previewDate"><i class="fas fa-calendar"></i> Дата</div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-bottom">
+                <p>© 2025 TribeUp. Всі права захищені.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script type="module" src="/scripts/create_event_page.js"></script>
+</body>
+</html>

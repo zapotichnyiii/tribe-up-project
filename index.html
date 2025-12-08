@@ -284,10 +284,10 @@
                 </div>
 
                 <div class="hero-buttons">
-                    <button class="btn btn-accent" id="createEventBtn">
+                    <a href="/create_event.html" class="btn btn-accent" id="createEventLink">
                         <i class="fas fa-plus-circle"></i>
                         Створи подію
-                    </button>
+                    </a>
                     <button class="btn btn-outline" id="searchEventsBtn">
                         <i class="fas fa-search"></i>
                         Знайти події
@@ -610,108 +610,6 @@
         <button class="back-to-top" aria-label="Повернутися до верху">
             <i class="fas fa-chevron-up"></i>
         </button>
-    </div>
-
-<div class="modal" id="createEventModal" role="dialog" aria-labelledby="createEventTitle">
-        <div class="modal-content" style="max-width: 620px;"> <button class="modal-close" id="closeEventModal" aria-label="Закрити модалку">×</button>
-            
-            <div class="step-indicator" id="eventStepIndicator">Крок 1 з 3</div>
-            
-            <h2 id="createEventTitle" class="modal-step-title">Основна інформація</h2>
-            
-            <form id="createEventForm" aria-label="Форма створення події">
-                
-                <div class="modal-step active" id="eventStep1">
-                    <div class="form-group">
-                        <label class="form-label" for="eventTitle">Назва події</label>
-                        <input type="text" class="form-control" id="eventTitle" placeholder="Наприклад: Велопрогулянка парком" required aria-required="true">
-                        <span class="error-message" id="eventTitleError"></span>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label" for="eventDescription">Опис</label>
-                        <textarea class="form-control" id="eventDescription" rows="4" placeholder="Коротко опишіть, що планується" required aria-required="true"></textarea>
-                        <span class="error-message" id="eventDescriptionError"></span>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label" for="eventCategory">Категорія</label>
-                        <select class="form-select" id="eventCategory" required aria-required="true">
-                            <option value="">Оберіть категорію</option>
-                            <option value="sports">Спорт</option>
-                            <option value="games">Ігри</option>
-                            <option value="arts">Мистецтво</option>
-                            <option value="food">Їжа та напої</option>
-                            <option value="outdoors">На природі</option>
-                            <option value="learning">Навчання</option>
-                            <option value="social">Соціальні</option>
-                            <option value="music">Музика</option>
-                            <option value="photo">Фотографія</option>
-                            <option value="dance">Танці</option>
-                            <option value="cinema">Кіно</option>
-                            <option value="travel">Подорожі</option>
-                            <option value="yoga">Йога</option>
-                            <option value="boardgames">Настільні ігри</option>
-                            <option value="coding">Програмування</option>
-                            <option value="fest">Фестивалі</option>
-                            <option value="quest">Квести</option>
-                            <option value="volunteer">Волонтерство</option>
-                            <option value="fashion">Мода</option>
-                        </select>
-                        <span class="error-message" id="eventCategoryError"></span>
-                    </div>
-                    <div class="step-nav">
-                        <button type="button" class="btn btn-accent" id="eventStepNext1">Далі <i class="fas fa-arrow-right"></i></button>
-                    </div>
-                </div>
-
-                <div class="modal-step" id="eventStep2">
-                    <div class="form-group">
-                        <label class="form-label" for="eventLocation">Місце</label>
-                        <input type="text" class="form-control" id="eventLocation" placeholder="Адреса або назва місця" required aria-required="true">
-                        <span class="error-message" id="eventLocationError"></span>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label" for="eventDate">Дата та час</label>
-                        <input type="datetime-local" class="form-control" id="eventDate" required aria-required="true">
-                        <span class="error-message" id="eventDateError"></span>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label" for="eventParticipants">Макс. учасників</label>
-                        <input type="number" class="form-control" id="eventParticipants" min="2" max="100" placeholder="Наприклад: 10" required aria-required="true">
-                        <span class="error-message" id="eventParticipantsError"></span>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label" for="eventMinParticipants">Мін. учасників (для підтвердження)</label>
-                        <input type="number" class="form-control" id="eventMinParticipants" min="1" max="100" placeholder="Наприклад: 3" required>
-                    </div>
-                    <div class="step-nav">
-                        <button type="button" class="btn btn-outline" id="eventStepBack2"><i class="fas fa-arrow-left"></i> Назад</button>
-                        <button type="button" class="btn btn-accent" id="eventStepNext2">Далі <i class="fas fa-arrow-right"></i></button>
-                    </div>
-                </div>
-
-                <div class="modal-step" id="eventStep3">
-                    <div class="form-group">
-                        <label class="form-label">Оберіть інтереси, що пасують події</label>
-                        <div class="interests" id="eventInterestsContainer" role="listbox" aria-label="Список інтересів" style="max-height: 200px; overflow-y: auto; padding: 10px; background: #f8fafc; border-radius: 8px;">
-                            </div>
-                        <span class="error-message" id="eventInterestsError"></span>
-                    </div>
-                    <div class="form-group custom-interest-group">
-                        <label class="form-label" for="eventCustomInterestInput">Додати свій інтерес</label>
-                        <div class="custom-input-group">
-                            <input type="text" class="form-control" id="eventCustomInterestInput" placeholder="Наприклад: Ролики" aria-label="Додати власний інтерес">
-                            <button type="button" class="btn" id="addEventCustomInterestBtn" aria-label="Додати інтерес">
-                                <i class="fas fa-plus"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="step-nav">
-                        <button type="button" class="btn btn-outline" id="eventStepBack3"><i class="fas fa-arrow-left"></i> Назад</button>
-                        <button type="submit" class="btn btn-accent" aria-label="Створити подію"><i class="fas fa-check"></i> Створити подію</button>
-                    </div>
-                </div>
-            </form>
-        </div>
     </div>
 
     <div class="modal" id="editEventModal" role="dialog" aria-labelledby="editEventTitle">
