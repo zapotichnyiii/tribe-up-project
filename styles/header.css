@@ -97,8 +97,10 @@ header:not(.scrolled) .logo {
     flex-shrink: 0;
 }
 
+/* Оновлені стилі для групи кнопок (включаючи дзвіночок) */
 .chat-list-btn,
-.theme-toggle {
+.theme-toggle,
+.notification-bell-btn {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -113,10 +115,12 @@ header:not(.scrolled) .logo {
     cursor: pointer;
     transition: all 0.3s ease;
     flex-shrink: 0;
+    position: relative;
 }
 
 .chat-list-btn:hover,
-.theme-toggle:hover {
+.theme-toggle:hover,
+.notification-bell-btn:hover {
     background: rgba(255, 255, 255, 0.2);
     border-color: rgba(255, 255, 255, 0.4);
     color: white;
@@ -164,19 +168,6 @@ header:not(.scrolled) .logo {
     transition: color 0.3s ease;
 }
 
-.profile-icon {
-    font-size: 1.3rem;
-    padding: 0.5rem;
-    text-decoration: none;
-    cursor: pointer;
-    border-radius: 50%;
-    transition: all 0.3s ease;
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    flex-shrink: 0;
-}
-
 .menu-toggle {
     display: none;
     background: none;
@@ -193,6 +184,7 @@ header:not(.scrolled) .logo {
     flex-shrink: 0;
 }
 
+/* Стилі для прокрученого хедера */
 header.scrolled .logo {
     background: linear-gradient(135deg, var(--main-primary-color), var(--auth-accent-color));
     -webkit-background-clip: text;
@@ -210,14 +202,16 @@ header.scrolled .nav-links a:hover {
 }
 
 header.scrolled .chat-list-btn,
-header.scrolled .theme-toggle {
+header.scrolled .theme-toggle,
+header.scrolled .notification-bell-btn {
     background: rgba(26, 43, 68, 0.1);
     border-color: rgba(26, 43, 68, 0.2);
     color: var(--main-dark-color);
 }
 
 header.scrolled .chat-list-btn:hover,
-header.scrolled .theme-toggle:hover {
+header.scrolled .theme-toggle:hover,
+header.scrolled .notification-bell-btn:hover {
     background: var(--auth-accent-color);
     border-color: var(--auth-accent-color);
     color: white;
@@ -241,43 +235,13 @@ header.scrolled .profile-area:hover .profile-name {
     color: white;
 }
 
-/* Кнопка дзвіночка (окремий клас, щоб не конфліктував з чатом) */
-.notification-bell-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 44px;
-    height: 44px;
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 50%;
-    color: var(--main-dark-color);
-    font-size: 1.1rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    position: relative;
-    margin-right: 10px;
-}
-
-body.dark-theme .notification-bell-btn {
-    color: rgba(255, 255, 255, 0.9);
-    background: rgba(255, 255, 255, 0.05);
-}
-
-.notification-bell-btn:hover, .notification-bell-btn.active {
-    background: var(--auth-accent-color);
-    color: white;
-    transform: translateY(-2px);
-}
-
-/* Випадаюче меню сповіщень */
+/* --- Оновлений дизайн випадаючого списку сповіщень --- */
 .notification-dropdown {
     display: none;
     position: absolute;
     top: 60px;
     right: 0; 
-    width: 320px;
+    width: 360px; /* Трохи ширше для кращого вигляду */
     background: var(--main-card-background);
     border-radius: 16px;
     box-shadow: 0 10px 40px rgba(0,0,0,0.15);
@@ -290,6 +254,7 @@ body.dark-theme .notification-bell-btn {
 body.dark-theme .notification-dropdown {
     background: var(--dark-card-bg);
     border-color: var(--dark-border);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
 }
 
 @keyframes slideDown {
@@ -298,7 +263,7 @@ body.dark-theme .notification-dropdown {
 }
 
 .dropdown-header {
-    padding: 15px;
+    padding: 15px 20px;
     border-bottom: 1px solid #e2e8f0;
     display: flex;
     justify-content: space-between;
@@ -310,6 +275,92 @@ body.dark-theme .dropdown-header { border-bottom-color: var(--dark-border); }
 .dropdown-header b { font-size: 1rem; }
 .text-btn { background: none; border: none; color: var(--auth-accent-color); font-size: 0.8rem; cursor: pointer; font-weight: 600; }
 
+/* Стилі для елементів сповіщень */
+.notif-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 15px 20px;
+    border-bottom: 1px solid #f1f5f9;
+    cursor: pointer;
+    transition: background 0.2s;
+    position: relative;
+}
+
+.notif-item:hover {
+    background: rgba(0,0,0,0.02);
+}
+
+body.dark-theme .notif-item {
+    border-bottom-color: var(--dark-border);
+}
+body.dark-theme .notif-item:hover {
+    background: rgba(255,255,255,0.05);
+}
+
+/* Стиль для непрочитаних */
+.notif-item.unread {
+    background: rgba(107, 33, 168, 0.05);
+}
+.notif-item.unread::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: var(--auth-accent-color);
+}
+
+/* Іконка або аватарка */
+.notif-icon-area {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.notif-icon-area img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.notif-icon-area.icon-only {
+    background: #e2e8f0;
+    color: var(--main-secondary-color);
+}
+.notif-item.unread .notif-icon-area.icon-only {
+    background: var(--auth-accent-color);
+    color: white;
+}
+
+/* Текстова частина */
+.notif-info {
+    flex: 1;
+}
+
+.notif-text {
+    font-size: 0.9rem;
+    color: var(--main-dark-color);
+    line-height: 1.4;
+    margin-bottom: 4px;
+}
+
+body.dark-theme .notif-text {
+    color: var(--dark-text-primary);
+}
+
+.notif-time {
+    font-size: 0.75rem;
+    color: var(--main-secondary-color);
+}
+
+/* Адаптивність */
 @media (max-width: 768px) {
     .navbar {
         padding: 0.75rem 0;
@@ -380,7 +431,8 @@ body.dark-theme .dropdown-header { border-bottom-color: var(--dark-border); }
     }
     
     .chat-list-btn,
-    .theme-toggle {
+    .theme-toggle,
+    .notification-bell-btn {
         width: 40px;
         height: 40px;
         font-size: 1rem;
@@ -398,5 +450,10 @@ body.dark-theme .dropdown-header { border-bottom-color: var(--dark-border); }
     
     .profile-area {
         padding: 0.3rem;
+    }
+    
+    .notification-dropdown {
+        width: 300px;
+        right: -50px; /* Трохи зсунути на мобільних */
     }
 }

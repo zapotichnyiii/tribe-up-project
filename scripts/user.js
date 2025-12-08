@@ -7,13 +7,9 @@ const getAuthHeaders = () => ({
     'Authorization': `Bearer ${localStorage.getItem('token')}`
 });
 
-// Глобальний масив для збереження ID користувачів, на яких підписаний поточний юзер
 export let myFollowingIds = [];
 export let selectedPeopleInterests = [];
 
-// === СОЦІАЛЬНІ ФУНКЦІЇ (НОВІ) ===
-
-// Завантаження списків підписок/підписників поточного користувача
 export async function fetchMySocials() {
     const user = utils.getCurrentUser();
     if (!user) return;
@@ -21,23 +17,19 @@ export async function fetchMySocials() {
         const res = await fetch(`http://localhost:5000/api/users/${user.id}/social`);
         const data = await res.json();
         
-        // Зберігаємо ID тих, на кого ми підписані, для швидкої перевірки
         myFollowingIds = data.following.map(u => u.id);
         
-        // Оновлюємо лічильники в модалці власного профілю
         if (dom.myFollowersBtn) dom.myFollowersBtn.innerHTML = `<b>${data.followers.length}</b> підписників`;
         if (dom.myFollowingBtn) dom.myFollowingBtn.innerHTML = `<b>${data.following.length}</b> підписок`;
     } catch (e) { console.error('Error fetching socials:', e); }
 }
 
-// Логіка підписки/відписки
 export async function toggleFollow(targetUserId, btnElement) {
     const user = utils.getCurrentUser();
     if (!user) return utils.showToast('Увійдіть, щоб підписатися', 'info');
     
     const isFollowing = myFollowingIds.includes(targetUserId);
     const endpoint = isFollowing ? 'unfollow' : 'follow';
-    
     try {
         const res = await fetch(`http://localhost:5000/api/users/${targetUserId}/${endpoint}`, {
             method: 'POST',
@@ -47,9 +39,7 @@ export async function toggleFollow(targetUserId, btnElement) {
 
         if (res.ok) {
             if (isFollowing) {
-                // Видаляємо з локального списку
                 myFollowingIds = myFollowingIds.filter(id => id !== targetUserId);
-                // Оновлюємо кнопку
                 if(btnElement) {
                     btnElement.textContent = 'Підписатися';
                     btnElement.classList.remove('btn-outline');
@@ -57,9 +47,7 @@ export async function toggleFollow(targetUserId, btnElement) {
                 }
                 utils.showToast('Відписано', 'info');
             } else {
-                // Додаємо в локальний список
                 myFollowingIds.push(targetUserId);
-                // Оновлюємо кнопку
                 if(btnElement) {
                     btnElement.textContent = 'Відписатися';
                     btnElement.classList.remove('btn-accent');
@@ -67,12 +55,11 @@ export async function toggleFollow(targetUserId, btnElement) {
                 }
                 utils.showToast('Підписано!', 'success');
             }
-            
-            // Оновлюємо кеш підписок
+
             fetchMySocials();
             
-            // Якщо відкрита модалка чужого профілю, оновлюємо там лічильники
-            if (dom.otherUserProfileModal.classList.contains('open') || dom.otherUserProfileModal.style.display === 'flex') {
+            const currentModalUser = parseInt(dom.otherUserMessageBtn?.dataset.userId);
+            if ((dom.otherUserProfileModal.classList.contains('open') || dom.otherUserProfileModal.style.display === 'flex') && currentModalUser === targetUserId) {
                 updateOtherUserProfileStats(targetUserId);
             }
         } else {
@@ -82,7 +69,6 @@ export async function toggleFollow(targetUserId, btnElement) {
     } catch (e) { console.error(e); utils.showToast('Помилка сервера', 'error'); }
 }
 
-// Допоміжна функція для оновлення статистики в модалці іншого юзера
 async function updateOtherUserProfileStats(userId) {
     try {
         const res = await fetch(`http://localhost:5000/api/users/${userId}/social`);
@@ -92,12 +78,10 @@ async function updateOtherUserProfileStats(userId) {
     } catch(e) {}
 }
 
-// Відкриття списку підписників або підписок у модалці
 export async function openSocialList(type) {
     const user = utils.getCurrentUser();
     if (!user) return;
     
-    // Встановлюємо заголовок
     dom.socialListTitle.textContent = type === 'followers' ? 'Підписники' : 'Підписки';
     dom.socialListContainer.innerHTML = '<p style="text-align: center; padding: 20px;">Завантаження...</p>';
     
@@ -118,8 +102,11 @@ export async function openSocialList(type) {
         list.forEach(u => {
             const div = document.createElement('div');
             div.style.cssText = 'padding: 10px; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: background 0.2s;';
+            
+            const avatarSrc = u.avatar_base64 || u.avatarBase64 || 'https://via.placeholder.com/40';
+
             div.innerHTML = `
-                <img src="${u.avatarBase64 || 'https://via.placeholder.com/40'}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+                <img src="${avatarSrc}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
                 <div>
                     <div style="font-weight: 600;">@${u.username}</div>
                     <div style="font-size: 0.8em; color: gray;">${u.name}</div>
@@ -139,8 +126,6 @@ export async function openSocialList(type) {
         dom.socialListContainer.innerHTML = '<p style="text-align:center; color:red;">Помилка завантаження</p>';
     }
 }
-
-// === ІСНУЮЧІ ФУНКЦІЇ ===
 
 export async function renderPeopleInterestFilter() {
     const users = await utils.getUsers();
@@ -174,11 +159,9 @@ export function handlePeopleInterestClick(e) {
     renderPeople();
 }
 
-// ОНОВЛЕНА функція renderPeople (додані кнопки підписки)
 export async function renderPeople(customUsersList = null) {
     if (!dom.peopleGrid) return;
     
-    // Оновлюємо наші підписки перед рендером
     await fetchMySocials();
     
     const currentUser = utils.getCurrentUser();
@@ -220,7 +203,6 @@ export async function renderPeople(customUsersList = null) {
         card.className = 'card people-card';
         card.dataset.userId = person.id;
         
-        // Показуємо тільки перші 3 інтереси, щоб картка не була занадто великою
         const interestsHtml = person.interests.slice(0, 3).map(i => `<span class="interest-tag selected">${i}</span>`).join('');
         
         card.innerHTML = `
@@ -294,18 +276,19 @@ export async function openOtherUserProfile(userId) {
         } else {
             dom.otherUserFollowBtn.style.display = 'block';
             
-            // Оновлюємо стан кнопки
+            // Завантажуємо актуальний стан підписок
             await fetchMySocials(); 
             const isFollowing = myFollowingIds.includes(user.id);
             
             dom.otherUserFollowBtn.textContent = isFollowing ? 'Відписатися' : 'Підписатися';
             dom.otherUserFollowBtn.className = isFollowing ? 'btn btn-outline' : 'btn btn-accent';
             
-            // Видаляємо старі обробники подій (клонуванням) і додаємо новий
-            const newBtn = dom.otherUserFollowBtn.cloneNode(true);
-            dom.otherUserFollowBtn.parentNode.replaceChild(newBtn, dom.otherUserFollowBtn);
-            
-            newBtn.addEventListener('click', () => toggleFollow(user.id, newBtn));
+            // ВИПРАВЛЕНО: Використовуємо .onclick замість replaceChild,
+            // щоб не втратити посилання на DOM елемент (dom.otherUserFollowBtn).
+            dom.otherUserFollowBtn.onclick = (e) => {
+                e.preventDefault();
+                toggleFollow(user.id, dom.otherUserFollowBtn);
+            };
         }
     }
 

@@ -305,9 +305,9 @@ async function setupNotifications(userId) {
     await loadNotifications(userId);
     
     // Слухаємо нові сповіщення
-    socket.on('new_notification', (notif) => {
+    socket.on('new_notification', async (notif) => {
         utils.showToast(notif.message, 'info'); // Спливаюче повідомлення
-        addNotificationToUI(notif); // Додаємо в список
+        await addNotificationToUI(notif); // Додаємо в список (await для аватарки)
         updateBadgeCount(1); // Оновлюємо лічильник
     });
 }
@@ -327,19 +327,69 @@ async function loadNotifications(userId) {
         
         dom.notificationList.innerHTML = '';
         if (notifs.length === 0) {
-            dom.notificationList.innerHTML = '<p class="empty-notif">Немає сповіщень</p>';
+            dom.notificationList.innerHTML = '<p class="empty-notif" style="padding:20px; text-align:center; color:#888;">Немає сповіщень</p>';
         } else {
-            notifs.forEach(n => addNotificationToUI(n, false));
+            // Використовуємо цикл for..of для async/await
+            for (const n of notifs) {
+                await addNotificationToUI(n, false);
+            }
         }
     } catch (e) { console.error(e); }
 }
 
-function addNotificationToUI(notif, prepend = true) {
+async function addNotificationToUI(notif, prepend = true) {
     const item = document.createElement('div');
     item.className = `notif-item ${notif.is_read ? '' : 'unread'}`;
+    
+    // --- Логіка іконки/аватарки ---
+    let iconHtml = '';
+    
+    if (notif.type === 'follow' && notif.related_id) {
+        // Якщо це підписка, шукаємо аватар юзера
+        const users = await utils.getUsers(); // Беремо з кешу/сервера
+        const follower = users.find(u => u.id === notif.related_id);
+        
+        if (follower && follower.avatarBase64) {
+             iconHtml = `
+                <div class="notif-icon-area">
+                    <img src="${follower.avatarBase64}" alt="User">
+                </div>
+             `;
+        } else {
+             iconHtml = `
+                <div class="notif-icon-area icon-only">
+                    <i class="fas fa-user-plus"></i>
+                </div>
+             `;
+        }
+    } else if (notif.type === 'new_event') {
+        iconHtml = `
+            <div class="notif-icon-area icon-only" style="background: #e0f2fe; color: #0284c7;">
+                <i class="fas fa-calendar-plus"></i>
+            </div>
+        `;
+    } else if (notif.type === 'reminder') {
+        iconHtml = `
+            <div class="notif-icon-area icon-only" style="background: #fef3c7; color: #d97706;">
+                <i class="fas fa-clock"></i>
+            </div>
+        `;
+    } else {
+        // Стандартна іконка
+        iconHtml = `
+            <div class="notif-icon-area icon-only">
+                <i class="fas fa-bell"></i>
+            </div>
+        `;
+    }
+    
+    // --- HTML структура ---
     item.innerHTML = `
-        <div class="notif-text">${notif.message}</div>
-        <div class="notif-time">${utils.formatEventDate(notif.created_at)}</div>
+        ${iconHtml}
+        <div class="notif-info">
+            <div class="notif-text">${notif.message}</div>
+            <div class="notif-time">${utils.formatEventDate(notif.created_at)}</div>
+        </div>
     `;
     
     // Клік по сповіщенню
