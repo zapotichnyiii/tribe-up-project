@@ -374,3 +374,238 @@ body.dark-theme #eventInterestsContainer {
         max-height: 30vh; 
     }
 }
+
+#editProfileModal .modern-modal-content {
+    max-width: 650px;
+    padding: 0;
+    overflow-y: auto; 
+    border-radius: 20px;
+    background: var(--main-card-background);
+    max-height: 90vh; 
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-header-decoration {
+    background: linear-gradient(135deg, var(--main-primary-color), var(--auth-accent-color));
+    padding: 25px 30px;
+    color: white;
+    position: relative;
+}
+
+.modal-header-decoration h2 {
+    color: white;
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.modal-header-decoration p {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.9rem;
+    margin: 5px 0 0 0;
+}
+
+.edit-profile-grid {
+    display: grid;
+    grid-template-columns: 220px 1fr; 
+    gap: 0;
+}
+
+/* Секція аватара (ліва) */
+.profile-avatar-section {
+    background: #f8fafc;
+    padding: 30px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-right: 1px solid #e2e8f0;
+}
+
+body.dark-theme .profile-avatar-section {
+    background: var(--dark-bg);
+    border-right-color: var(--dark-border);
+}
+
+.avatar-upload-wrapper {
+    position: relative;
+    width: 140px;
+    height: 140px;
+    margin-bottom: 15px;
+}
+
+#editProfileAvatarPreview {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid white;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+/* Оверлей для завантаження фото */
+.avatar-upload-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    opacity: 0;
+    cursor: pointer;
+    transition: opacity 0.3s ease;
+    border: 4px solid transparent;
+}
+
+.avatar-upload-wrapper:hover .avatar-upload-overlay {
+    opacity: 1;
+}
+
+.avatar-upload-overlay i {
+    font-size: 1.5rem;
+    margin-bottom: 5px;
+}
+
+.avatar-upload-overlay span {
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+#editProfilePhoto {
+    display: none; /* Ховаємо стандартний інпут */
+}
+
+.avatar-hint {
+    font-size: 0.8rem;
+    color: var(--main-secondary-color);
+    text-align: center;
+}
+
+/* Секція полів (права) */
+.profile-fields-section {
+    padding: 30px;
+}
+
+.form-group.compact {
+    margin-bottom: 15px;
+}
+
+.form-label-sm {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--main-dark-color);
+    margin-bottom: 5px;
+}
+
+body.dark-theme .form-label-sm {
+    color: var(--dark-text-secondary);
+}
+
+.input-with-icon {
+    position: relative;
+}
+
+.input-with-icon i {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--main-secondary-color);
+    font-size: 0.9rem;
+}
+
+.input-with-icon input {
+    padding-left: 35px;
+}
+
+.form-row-split {
+    display: flex;
+    gap: 15px;
+}
+
+.form-row-split .form-group {
+    flex: 1;
+}
+
+/* Контейнер інтересів */
+.interests-container-styled {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 8px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background: #f8fafc;
+    min-height: 40px;
+    margin-bottom: 8px;
+}
+
+body.dark-theme .interests-container-styled {
+    background: var(--dark-input-bg);
+    border-color: var(--dark-border);
+}
+
+/* Міні-форма додавання інтересу */
+.add-interest-mini {
+    display: flex;
+    gap: 5px;
+}
+
+.add-interest-mini input {
+    flex: 1;
+    padding: 6px 10px;
+    font-size: 0.85rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--main-dark-color);
+}
+
+body.dark-theme .add-interest-mini input {
+    border-color: var(--dark-border);
+    color: var(--dark-text-primary);
+}
+
+.btn-icon-only {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--auth-accent-color);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-icon-only:hover {
+    background: var(--main-primary-color);
+}
+
+.btn-block {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+}
+
+@media (max-width: 650px) {
+    .edit-profile-grid {
+        grid-template-columns: 1fr;
+    }
+    .profile-avatar-section {
+        padding: 20px;
+        border-right: none;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    .profile-fields-section {
+        padding: 20px;
+    }
+}

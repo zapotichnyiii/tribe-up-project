@@ -400,6 +400,7 @@ export const editProfileValidations = [{ inputId: 'editProfileName', errorId: 'e
 export async function openEditProfileModal() {
     const currentUser = utils.getCurrentUser();
     if (!currentUser) return;
+    
     const users = await utils.getUsers();
     const user = users.find(u => u.id === currentUser.id);
     if (!user) return;
@@ -408,7 +409,21 @@ export async function openEditProfileModal() {
     if(dom.editProfileUsername) dom.editProfileUsername.value = user.username;
     if(dom.editProfileAge) dom.editProfileAge.value = user.age;
     if(dom.editProfileLocation) dom.editProfileLocation.value = user.location;
+    if (dom.editProfileAvatarPreview) {
+        dom.editProfileAvatarPreview.src = user.avatarBase64 || 'https://via.placeholder.com/150';
+    }
+    
+    if (dom.editProfilePhoto) {
+        dom.editProfilePhoto.onchange = (evt) => {
+            const [file] = dom.editProfilePhoto.files;
+            if (file) {
+                dom.editProfileAvatarPreview.src = URL.createObjectURL(file);
+            }
+        };
+    }
+
     if(dom.editProfileInterestsContainer) renderInterests(dom.editProfileInterestsContainer, user.interests, () => {});
+    
     utils.closeModal(dom.profileModal);
     utils.openModal(dom.editProfileModal);
 }

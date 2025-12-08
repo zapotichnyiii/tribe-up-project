@@ -28,6 +28,7 @@
     <link rel="stylesheet" href="/styles/people.css">
     <link rel="stylesheet" href="/styles/toast.css">
     <link rel="stylesheet" href="/styles/typografic.css">
+    <link rel="stylesheet" href="/styles/section_contact.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -172,7 +173,7 @@
                             <input type="checkbox" id="registerConsent" required aria-required="true" name="consent">
                             <label for="registerConsent">
                                 Я підтверджую, що мені виповнилося 16 років, і я погоджуюся на 
-                                <a href="#" class="auth-link" target="_blank">обробку моїх особистих даних</a>.
+                                <a href="https://zakon.rada.gov.ua/laws/show/2297-17#Text" class="auth-link" target="_blank">обробку моїх особистих даних</a>.
                             </label>
                             <span class="error-message" id="registerConsentError"></span>
                         </div>
@@ -523,63 +524,58 @@
             </div>
         </section>
 
-        <section id="contact">
-            <div class="container">
-                <h2 class="section-title">Зв’яжіться з нами</h2>
-                <div class="grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
-                    <div class="card" style="border-radius: 8px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                        <h3 style="font-size: 1.5em; margin-bottom: 16px; color: #1a2b44;">Наші контакти</h3>
-                        <ul style="list-style: none; padding: 0; font-size: 1em; color: #64748b;">
-                            <li style="margin-bottom: 12px;">
-                                <i class="fas fa-envelope" style="color: #1a2b44; margin-right: 8px;"></i>
-                                <a href="mailto:tribeupcontact@gmail.com" aria-label="Написати на пошту">tribeup.welcome@gmail.com</a>
-                            </li>
-                            <li style="margin-bottom: 12px;">
-                                <i class="fas fa-phone" style="color: #1a2b44; margin-right: 8px;"></i>
-                                <a href="tel:+380686971357" aria-label="Зателефонувати">+380 68 697 1357</a>
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="card" style="border-radius: 8px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                        <h3 style="font-size: 1.5em; margin-bottom: 16px; color: #1a2b44;">Напишіть нам</h3>
-                        <form id="contactForm" style="display: flex; flex-direction: column; gap: 12px;" aria-label="Форма зворотного зв’язку">
-                            <div class="form-group">
-                                <label class="form-label" for="contactName">Ваше ім’я</label>
-                                <input type="text" class="form-control" id="contactName" placeholder="Ваше ім’я" required aria-required="true">
-                                <span class="error-message" id="contactNameError"></span>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label" for="contactEmail">Електронна пошта</label>
-                                <input type="email" class="form-control" id="contactEmail" placeholder="Електронна пошта" required aria-required="true">
-                                <span class="error-message" id="contactEmailError"></span>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label" for="contactMessage">Повідомлення</label>
-                                <textarea class="form-control" id="contactMessage" rows="4" placeholder="Ваше повідомлення..." required aria-required="true"></textarea>
-                                <span class="error-message" id="contactMessageError"></span>
-                            </div>
-                            <button type="submit" class="btn btn-accent" aria-label="Надіслати повідомлення">Надіслати</button>
-                        </form>
-                    </div>
-                    <div class="card" style="border-radius: 8px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                        <h3 style="font-size: 1.5em; margin-bottom: 16px; color: #1a2b44;">Де ми?</h3>
+    <section id="contact">
+    <div class="container">
+        <h2 class="section-title">Зв’яжіться з нами</h2>
+        
+        <div class="contact-unified-card">
+            
+            <div class="contact-content-side">
+                <div class="contact-group">
+                    <h3><i class="fas fa-address-card"></i> Наші контакти</h3>
+                    <ul class="modern-contact-list">
+                        <li>
+                            <a href="mailto:tribeup.welcome@gmail.com">
+                                <span class="icon-wrap"><i class="fas fa-envelope"></i></span>
+                                <div class="text-wrap">
+                                    <span class="label">Пишіть нам</span>
+                                    <span class="value">tribeup.welcome@gmail.com</span>
+                                </div>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="tel:+380686971357">
+                                <span class="icon-wrap"><i class="fas fa-phone-alt"></i></span>
+                                <div class="text-wrap">
+                                    <span class="label">Телефонуйте</span>
+                                    <span class="value">+380 68 697 1357</span>
+                                </div>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="contact-divider"></div>
+
+                <div class="location-group">
+                    <h3><i class="fas fa-map-marked-alt"></i> Де ми?</h3>
                     <p>
-                    Ми — команда ентузіастів зі <strong>Львова</strong>, міста кави, левів і неймовірної атмосфери. 
-                    Наша платформа народилася з бажання об'єднати людей, які люблять життя, події та нові знайомства. 
-                    Тут кожен може знайти подію за смаком — від прогулянок історичними вуличками до сучасних техно-вечірок.
+                        Ми — команда зі <strong>Львова</strong>, міста кави та натхнення. 
+                        TribeUp народжується тут, щоб об'єднувати людей по всій Україні.
                     </p>
-                    <p>
-                    <strong>Львів — це не просто місце на карті, це стан душі.</strong> 
-                    І ми допомагаємо тобі знайти тих, хто поділяє твої інтереси саме тут, у серці Галичини.
-                    </p>
-    <p class="highlight">
-        <i class="fas fa-map-marker-alt"></i> Львів, Україна · Засновано у 2025
-    </p>
-                        <div id="contactMap" style="height: 200px; border-radius: 8px;"></div>
+                    <div class="location-badge">
+                        <i class="fas fa-location-arrow"></i> Львів, Україна · Засновано у 2025
                     </div>
                 </div>
             </div>
-        </section>
+
+            <div class="contact-map-side">
+                <div id="contactMap"></div>
+            </div>
+            
+        </div>
+    </div>
+    </section>
 
         <footer>
             <div class="container">
@@ -600,10 +596,21 @@
                     <div class="footer-column">
                         <h3>Допомога</h3>
                         <ul class="footer-links">
-                            <li><a href="#" aria-label="Переглянути FAQ">FAQ</a></li>
-                            <li><a href="#" aria-label="Інформація про безпеку">Безпека</a></li>
-                            <li><a href="#" aria-label="Умови використання">Умови</a></li>
-                            <li><a href="#" aria-label="Політика приватності">Приватність</a></li>
+                            <li>
+                                <a href="#contact" onclick="utils.scrollToSection('contact')" aria-label="Переглянути FAQ">FAQ</a>
+                            </li>
+                            <li>
+                                <a href="https://cyberpolice.gov.ua/" target="_blank" rel="noopener noreferrer" aria-label="Інформація про безпеку"> Безпека <i class="fas fa-external-link-alt" style="font-size: 0.7em; margin-left: 4px;"></i>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="https://zakon.rada.gov.ua/laws/show/675-19#Text" target="_blank" rel="noopener noreferrer" aria-label="Умови використання"> Умови <i class="fas fa-external-link-alt" style="font-size: 0.7em; margin-left: 4px;"></i>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="https://zakon.rada.gov.ua/laws/show/2297-17#Text" target="_blank" rel="noopener noreferrer" aria-label="Політика приватності">Приватність <i class="fas fa-external-link-alt" style="font-size: 0.7em; margin-left: 4px;"></i>
+                                </a>
+                            </li>
                         </ul>
                     </div>
                     <div class="footer-column">
@@ -868,45 +875,77 @@
     </div>
 
     <div class="modal" id="editProfileModal" role="dialog" aria-labelledby="editProfileTitle">
-        <div class="modal-content" style="max-width: 300px; padding: 15px;">
+        <div class="modal-content modern-modal-content">
             <button class="modal-close" id="closeEditProfileModal" aria-label="Закрити модалку">×</button>
-            <h2 id="editProfileTitle" style="margin: 0 0 12px; font-size: 1.1em; text-align: center;">Редагувати профіль</h2>
-            <form id="editProfileForm" style="display: flex; flex-direction: column; gap: 8px;" aria-label="Форма редагування профілю">
-                <div style="text-align: center;">
-                    <img id="editProfileAvatarPreview" src="" alt="Попередній перегляд аватара" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid #1a2b44; margin-bottom: 6px;" loading="lazy">
-                    <input type="file" id="editProfilePhoto" accept="image/*" style="font-size: 0.75em; width: 100%;" aria-label="Завантажити нове фото">
-                </div>
-                <div>
-                    <label style="font-size: 0.8em; font-weight: 600;">Ім'я</label>
-                    <input type="text" id="editProfileName" required style="width: 100%; padding: 5px; border: 1px solid #e2e8f0; border-radius: 4px; font-size: 0.85em;" aria-required="true">
-                    <span class="error-message" id="editProfileNameError"></span>
-                </div>
-                <div>
-                    <label style="font-size: 0.8em; font-weight: 600;">Нікнейм</label>
-                    <input type="text" id="editProfileUsername" required style="width: 100%; padding: 5px; border: 1px solid #e2e8f0; border-radius: 4px; font-size: 0.85em;" aria-required="true">
-                    <span class="error-message" id="editProfileUsernameError"></span>
-                    <small style="color: #64748b; font-size: 0.7rem;">Лише латинські літери, цифри, _, .</small>
-                </div>
-                <div>
-                    <label style="font-size: 0.8em; font-weight: 600;">Вік</label>
-                    <input type="number" id="editProfileAge" min="16" max="100" required style="width: 100%; padding: 5px; border: 1px solid #e2e8f0; border-radius: 4px; font-size: 0.85em;" aria-required="true">
-                    <span class="error-message" id="editProfileAgeError"></span>
-                </div>
-                <div>
-                    <label style="font-size: 0.8em; font-weight: 600;">Місто</label>
-                    <input type="text" id="editProfileLocation" required style="width: 100%; padding: 5px; border: 1px solid #e2e8f0; border-radius: 4px; font-size: 0.85em;" aria-required="true">
-                    <span class="error-message" id="editProfileLocationError"></span>
-                </div>
-                <div>
-                    <label style="font-size: 0.8em; font-weight: 600;">Інтереси</label>
-                    <div id="editProfileInterestsContainer" style="display: flex; flex-wrap: wrap; gap: 3px; margin: 3px 0; min-height: 24px; padding: 3px; border: 1px solid #e2e8f0; border-radius: 4px; background: #f8fafc; font-size: 0.75em;" role="listbox" aria-label="Список інтересів"></div>
-                    <span class="error-message" id="editProfileInterestsError"></span>
-                    <div style="display: flex; gap: 3px; margin-top: 3px;">
-                        <input type="text" id="editCustomInterestInput" placeholder="Додати..." style="flex: 1; padding: 3px; font-size: 0.75em; border: 1px solid #e2e8f0; border-radius: 3px;" aria-label="Додати власний інтерес">
-                        <button type="button" id="addEditCustomInterestBtn" style="padding: 3px 6px; font-size: 0.7em;" class="btn btn-sm" aria-label="Додати інтерес">Додати</button>
+            
+            <div class="modal-header-decoration">
+                <h2 id="editProfileTitle">Редагувати профіль</h2>
+                <p>Оновіть інформацію про себе</p>
+            </div>
+
+            <form id="editProfileForm" class="edit-profile-grid" aria-label="Форма редагування профілю">
+                
+                <div class="profile-avatar-section">
+                    <div class="avatar-upload-wrapper">
+                        <img id="editProfileAvatarPreview" src="" alt="Аватар" loading="lazy">
+                        <label for="editProfilePhoto" class="avatar-upload-overlay">
+                            <i class="fas fa-camera"></i>
+                            <span>Змінити</span>
+                        </label>
+                        <input type="file" id="editProfilePhoto" accept="image/*" aria-label="Завантажити нове фото">
                     </div>
+                    <p class="avatar-hint">Натисніть на фото, щоб змінити</p>
                 </div>
-                <button type="submit" class="btn btn-accent" style="margin-top: 3px; padding: 6px; font-weight: 600; font-size: 0.9em;" aria-label="Зберегти зміни">Зберегти</button>
+
+                <div class="profile-fields-section">
+                    <div class="form-group compact">
+                        <label class="form-label-sm">Ім'я</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-user"></i>
+                            <input type="text" id="editProfileName" required class="form-control" placeholder="Ваше ім'я">
+                        </div>
+                        <span class="error-message" id="editProfileNameError"></span>
+                    </div>
+
+                    <div class="form-group compact">
+                        <label class="form-label-sm">Нікнейм</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-at"></i>
+                            <input type="text" id="editProfileUsername" required class="form-control" placeholder="nickname">
+                        </div>
+                        <span class="error-message" id="editProfileUsernameError"></span>
+                    </div>
+
+                    <div class="form-row-split">
+                        <div class="form-group compact">
+                            <label class="form-label-sm">Вік</label>
+                            <input type="number" id="editProfileAge" min="16" max="100" required class="form-control">
+                            <span class="error-message" id="editProfileAgeError"></span>
+                        </div>
+                        <div class="form-group compact">
+                            <label class="form-label-sm">Місто</label>
+                            <input type="text" id="editProfileLocation" required class="form-control">
+                            <span class="error-message" id="editProfileLocationError"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-group compact">
+                        <label class="form-label-sm">Інтереси</label>
+                        <div id="editProfileInterestsContainer" class="interests-container-styled" role="listbox"></div>
+                        <span class="error-message" id="editProfileInterestsError"></span>
+                        
+                        <div class="add-interest-mini">
+                            <input type="text" id="editCustomInterestInput" placeholder="Додати ще..." aria-label="Додати власний інтерес">
+                            <button type="button" id="addEditCustomInterestBtn" class="btn-icon-only" aria-label="Додати">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-accent btn-block" style="margin-top: 15px;">
+                        Зберегти зміни
+                    </button>
+                </div>
             </form>
         </div>
     </div>

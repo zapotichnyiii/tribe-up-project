@@ -1,0 +1,168 @@
+/* --- НОВА СЕКЦІЯ КОНТАКТІВ (UNIFIED) --- */
+
+.contact-unified-card {
+    background: var(--main-card-background);
+    border-radius: 24px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08);
+    overflow: hidden; /* Важливо, щоб карта не вилазила за кути */
+    display: flex;
+    flex-direction: row;
+    min-height: 500px;
+    border: 1px solid #e2e8f0;
+    margin-top: 20px;
+}
+
+body.dark-theme .contact-unified-card {
+    border-color: var(--dark-border);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+}
+
+/* Ліва колонка: Інформація */
+.contact-content-side {
+    flex: 1;
+    padding: 50px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    z-index: 2;
+    background: var(--main-card-background);
+}
+
+.contact-group h3, 
+.location-group h3 {
+    font-size: 1.4rem;
+    margin-bottom: 25px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--main-dark-color);
+}
+
+.contact-group h3 i, 
+.location-group h3 i {
+    color: var(--auth-accent-color);
+}
+
+/* Список контактів (оновлений дизайн кнопок) */
+.modern-contact-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.modern-contact-list a {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    text-decoration: none;
+    padding: 15px 20px;
+    border-radius: 16px;
+    background: #f8fafc;
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
+}
+
+body.dark-theme .modern-contact-list a {
+    background: var(--dark-input-bg);
+}
+
+.modern-contact-list a:hover {
+    background: white;
+    border-color: var(--auth-accent-color);
+    box-shadow: 0 8px 20px rgba(107, 33, 168, 0.1);
+    transform: translateY(-2px);
+}
+
+body.dark-theme .modern-contact-list a:hover {
+    background: var(--dark-btn-hover);
+}
+
+.icon-wrap {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, var(--main-primary-color), var(--auth-accent-color));
+    color: white;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.text-wrap {
+    display: flex;
+    flex-direction: column;
+}
+
+.text-wrap .label {
+    font-size: 0.8rem;
+    color: var(--main-secondary-color);
+    margin-bottom: 2px;
+    font-weight: 500;
+}
+
+.text-wrap .value {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--main-dark-color);
+}
+
+/* Розділювач */
+.contact-divider {
+    height: 1px;
+    background: #e2e8f0;
+    margin: 40px 0;
+    width: 100%;
+}
+body.dark-theme .contact-divider { background: var(--dark-border); }
+
+/* Локація */
+.location-group p {
+    color: var(--main-secondary-color);
+    line-height: 1.6;
+    margin-bottom: 20px;
+    font-size: 1rem;
+}
+
+.location-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(107, 33, 168, 0.08);
+    color: var(--auth-accent-color);
+    padding: 10px 20px;
+    border-radius: 30px;
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+/* Права колонка: Карта */
+.contact-map-side {
+    flex: 1.2; /* Карта займає трохи більше місця (близько 55%) */
+    position: relative;
+    min-height: 100%;
+}
+
+#contactMap {
+    width: 100%;
+    height: 100% !important; /* Примусово розтягуємо на всю висоту контейнера */
+    border-radius: 0;
+}
+
+/* Адаптивність */
+@media (max-width: 900px) {
+    .contact-unified-card {
+        flex-direction: column;
+    }
+    
+    .contact-map-side {
+        height: 350px; /* На мобільних карта має фіксовану висоту */
+        flex: none;
+    }
+    
+    .contact-content-side {
+        padding: 30px;
+    }
+}
