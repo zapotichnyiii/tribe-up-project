@@ -12,19 +12,24 @@ from flask_mail import Mail, Message
 import random
 import threading
 import time
-from threading import Thread # <-- ДОДАНО: Для асинхронної відправки пошти
+from threading import Thread
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'super_secret_key_for_tribeup_123'
 CORS(app)
 socketio = SocketIO(app, cors_allowed_origins="*")
 
+# ==========================================================
+# ВИПРАВЛЕНА КОНФІГУРАЦІЯ FLASK-MAIL ДЛЯ ХОСТИНГУ
+# ==========================================================
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
-app.config['MAIL_PORT'] = 587
-app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_PORT'] = 465              # <-- ЗМІНА: Використовуємо порт SSL
+app.config['MAIL_USE_TLS'] = False         # <-- ЗМІНА: Вимикаємо TLS
+app.config['MAIL_USE_SSL'] = True          # <-- ДОДАНО: Вмикаємо SSL
 app.config['MAIL_USERNAME'] = 'tribeup.welcome@gmail.com'  
 app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')    
 app.config['MAIL_DEFAULT_SENDER'] = 'TribeUp Team <tribeup.welcome@gmail.com>'
+# ==========================================================
 
 mail = Mail(app)
 
@@ -255,7 +260,7 @@ def register():
         new_user = map_user(cur.fetchone())
         conn.commit()
         
-        # --- ВИПРАВЛЕНО: АСИНХРОННА ВІДПРАВКА ПОШТИ В ОКРЕМОМУ ПОТОЦІ ---
+        # --- АСИНХРОННА ВІДПРАВКА ПОШТИ В ОКРЕМОМУ ПОТОЦІ ---
         try:
             msg = Message("Ваш код підтвердження TribeUp", recipients=[new_user['email']])
             msg.body = f"Привіт, {new_user['name']}!\n\nТвій код підтвердження: {verification_code}\n\nВведи його на сайті, щоб завершити реєстрацію."
@@ -264,8 +269,6 @@ def register():
             sender = Thread(target=send_async_email, args=(app, msg))
             sender.start()
         except Exception as e:
-            # Ця помилка виникне, якщо, наприклад, не змогли створити об'єкт Message.
-            # Помилки відправки SMTP будуть у фоновому потоці.
             print(f"Mail Setup Error: {e}") 
         # -----------------------------------------------------------------
             
@@ -320,7 +323,8 @@ def login():
         
         if user and check_password_hash(user['password'], data['password']):
             if not user['is_verified']:
-                return jsonify({'error': 'Пошта не підтверджена. Перевірте email.'}), 403
+                # ЗМІНА: Повертаємо userId, щоб фронтенд міг запустити модалку підтвердження
+                return jsonify({'error': 'Пошта не підтверджена. Введіть код.', 'userId': user['id']}), 403 
                 
             user_data = map_user(user)
             token = jwt.encode({'user_id': user['id'], 'exp': datetime.utcnow() + timedelta(days=7)}, app.config['SECRET_KEY'], algorithm="HS256")
@@ -517,13 +521,15 @@ def leave_event():
         cur.execute("UPDATE events SET current_participants = current_participants - 1 WHERE id = %s", (data['eventId'],))
         conn.commit()
         return jsonify({'status': 'success'})
+    except Exception: return jsonify({'error': 'Error'}), 400
     finally: conn.close()
 
 @app.route('/api/users', methods=['GET'])
 def get_users_list():
     conn = get_db()
     cur = conn.cursor(cursor_factory=RealDictCursor)
-    cur.execute("SELECT * FROM users")
+    # ЗМІНА: Фільтруємо лише підтверджених користувачів
+    cur.execute("SELECT * FROM users WHERE is_verified = TRUE")
     users = [map_user(row) for row in cur.fetchall()]
     conn.close()
     return jsonify(users)
@@ -622,10 +628,11 @@ def search_users():
     cur = conn.cursor(cursor_factory=RealDictCursor)
     try:
         search_pattern = f"%{query}%"
+        # ЗМІНА: Фільтруємо лише підтверджених користувачів
         cur.execute("""
             SELECT id, name, username, avatar_base64, age, location, interests 
             FROM users 
-            WHERE username ILIKE %s OR name ILIKE %s
+            WHERE is_verified = TRUE AND (username ILIKE %s OR name ILIKE %s)
             LIMIT 20
         """, (search_pattern, search_pattern))
         
@@ -668,9 +675,10 @@ def get_user_social(user_id):
     conn = get_db()
     cur = conn.cursor(cursor_factory=RealDictCursor)
     try:
-        cur.execute("SELECT u.id, u.username, u.name, u.avatar_base64 FROM users u JOIN followers f ON u.id = f.follower_id WHERE f.followed_id = %s", (user_id,))
+        # ЗМІНА: Фільтруємо лише підтверджених користувачів
+        cur.execute("SELECT u.id, u.username, u.name, u.avatar_base64 FROM users u JOIN followers f ON u.id = f.follower_id WHERE f.followed_id = %s AND u.is_verified = TRUE", (user_id,))
         followers = [dict(row) for row in cur.fetchall()]
-        cur.execute("SELECT u.id, u.username, u.name, u.avatar_base64 FROM users u JOIN followers f ON u.id = f.followed_id WHERE f.follower_id = %s", (user_id,))
+        cur.execute("SELECT u.id, u.username, u.name, u.avatar_base64 FROM users u JOIN followers f ON u.id = f.followed_id WHERE f.follower_id = %s AND u.is_verified = TRUE", (user_id,))
         following = [dict(row) for row in cur.fetchall()]
         return jsonify({'followers': followers, 'following': following})
     finally: conn.close()
@@ -716,7 +724,7 @@ def forgot_password():
         cur.execute("UPDATE users SET verification_code = %s WHERE id = %s", (verification_code, user['id']))
         conn.commit()
         
-        # --- ВИПРАВЛЕНО: АСИНХРОННА ВІДПРАВКА ПОШТИ В ОКРЕМОМУ ПОТОЦІ ---
+        # --- АСИНХРОННА ВІДПРАВКА ПОШТИ В ОКРЕМОМУ ПОТОЦІ ---
         try:
             msg = Message("Відновлення паролю TribeUp", recipients=[email])
             msg.body = f"Привіт, {user['name']}!\n\nТвій код для відновлення паролю: {verification_code}\n\nНікому не повідомляй цей код."

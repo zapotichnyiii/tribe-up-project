@@ -52,7 +52,20 @@ export async function handleLoginSubmit(e) {
             location.reload();
         } else {
             const err = await response.json();
-            utils.showToast(err.error || 'Помилка входу', 'error');
+            
+            // ЗМІНА: ЛОГІКА ПОВТОРНОГО ПІДТВЕРДЖЕННЯ ЧЕРЕЗ ФОРМУ ВХОДУ
+            if (err.userId && err.error && err.error.includes('Пошта не підтверджена')) {
+                pendingUserId = err.userId;
+                utils.openModal(dom.verifyModal);
+                
+                if (dom.verifyCodeInput) {
+                    dom.verifyCodeInput.value = '';
+                    dom.verifyCodeInput.focus();
+                }
+                utils.showToast('Введіть код підтвердження, який ми надіслали вам.', 'info');
+            } else {
+                 utils.showToast(err.error || 'Помилка входу', 'error');
+            }
         }
     } catch (error) {
         utils.showToast('Помилка сервера', 'error');
