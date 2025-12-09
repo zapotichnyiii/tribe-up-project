@@ -19,11 +19,6 @@ export const HEADER_HTML = `
                     </div>
                 </div>
                 
-                <button class="chat-list-btn" id="chatListBtn" aria-label="Повідомлення" style="position: relative;">
-                    <i class="fas fa-comments"></i>
-                    <span id="chatBadge" style="display:none; position:absolute; top:-5px; right:-5px; background: var(--auth-accent-color); color:white; font-size:10px; padding:2px 5px; border-radius:50%; border: 2px solid white;">0</span>
-                </button>
-
                 <div class="profile-area" id="profileArea" style="cursor: pointer;">
                     <div class="profile-display" id="profileDisplay" style="display: flex; align-items: center; gap: 8px;">
                         <img id="profileAvatar" src="" alt="Avatar" class="profile-avatar-rect">
@@ -159,26 +154,6 @@ export const ALL_MODALS_HTML = `
             <div class="form-group custom-interest-group"><div class="custom-input-group"><input type="text" class="form-control" id="editEventCustomInterestInput" placeholder="Додати інтерес"><button type="button" class="btn btn-outline" id="addEditEventCustomInterestBtn">Додати</button></div></div>
             <button type="submit" class="btn btn-accent">Зберегти</button>
         </form>
-    </div>
-</div>
-
-<div class="modal" id="chatListModal" role="dialog">
-    <div class="modal-content">
-        <button class="modal-close" id="closeChatListModal">×</button>
-        <h2>Особисті чати</h2>
-        <div id="chatList" style="margin-top: 16px;"></div>
-    </div>
-</div>
-
-<div class="modal" id="privateChatModal" role="dialog">
-    <div class="modal-content">
-        <button class="modal-close" id="closePrivateChatModal">×</button>
-        <h2 id="privateChatTitle" style="margin-bottom: 16px;"></h2>
-        <div id="privateChatMessages" style="max-height: 400px; overflow-y: auto; margin-bottom: 12px;"></div>
-        <div id="privateChatContainer" class="custom-input-group">
-            <input type="text" id="privateChatInput" class="form-control" placeholder="Напишіть повідомлення...">
-            <button class="btn btn-accent btn-sm" id="sendPrivateMessage">Надіслати</button>
-        </div>
     </div>
 </div>
 

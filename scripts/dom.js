@@ -67,14 +67,7 @@ export let themeToggle = null;
 export let backToTopBtn = null;
 export let toggleArchiveBtn = null;
 
-export let chatListModal = null;
-export let closeChatListModal = null;
 export let chatListBtn = null;
-export let privateChatModal = null;
-export let closePrivateChatModal = null;
-export let privateChatMessages = null;
-export let privateChatInput = null;
-export let sendPrivateMessageBtn = null;
 export let chatBadge = null;
 
 export let otherUserProfileModal = null;
@@ -218,14 +211,7 @@ export function refreshElements() {
     backToTopBtn = document.querySelector('.back-to-top');
     toggleArchiveBtn = document.getElementById('toggleArchiveBtn');
 
-    chatListModal = document.getElementById('chatListModal');
-    closeChatListModal = document.getElementById('closeChatListModal');
     chatListBtn = document.getElementById('chatListBtn') || document.querySelector('.chat-list-btn');
-    privateChatModal = document.getElementById('privateChatModal');
-    closePrivateChatModal = document.getElementById('closePrivateChatModal');
-    privateChatMessages = document.getElementById('privateChatMessages');
-    privateChatInput = document.getElementById('privateChatInput');
-    sendPrivateMessageBtn = document.getElementById('sendPrivateMessage');
     chatBadge = document.getElementById('chatBadge');
 
     otherUserProfileModal = document.getElementById('otherUserProfileModal');
