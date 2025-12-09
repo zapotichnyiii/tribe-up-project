@@ -22,8 +22,8 @@ app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USERNAME'] = 'tribeup.welcome@gmail.com'  
-app.config['MAIL_PASSWORD'] = 'gvolzjlyokrcffnl'     
-app.config['MAIL_DEFAULT_SENDER'] = 'TribeUp Team <tvoja.poshta@gmail.com>'
+app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')    
+app.config['MAIL_DEFAULT_SENDER'] = 'TribeUp Team <tribeup.welcome@gmail.com>'
 
 mail = Mail(app)
 
