@@ -88,46 +88,6 @@
     border: none;
 }
 
-.chat-list-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 44px; 
-    height: 44px; 
-    background: var(--main-card-background);
-    border: 1px solid #e2e8f0; 
-    border-radius: 50%; 
-    color: var(--main-dark-color);
-    font-size: 1.1rem;          
-    cursor: pointer;
-    transition: var(--transition);
-    box-shadow: var(--soft-shadow);
-}
-
-.chat-list-btn:hover {
-    background: var(--auth-accent-color);
-    color: white;
-    border-color: var(--auth-accent-color);
-    transform: translateY(-2px);
-}
-
-body.dark-theme .chat-list-btn {
-    background: var(--dark-card-bg);
-    border-color: var(--dark-border);
-    color: var(--dark-text-color);
-}
-
-body.dark-theme .chat-list-btn:hover {
-    background: var(--dark-accent);
-    color: white;
-    border-color: var(--dark-accent);
-}
-
-.chat-list-btn:focus {
-    outline: 2px solid var(--auth-accent-color);
-    outline-offset: 2px;
-}
-
 .back-to-top {
     position: fixed;
     bottom: 20px;
