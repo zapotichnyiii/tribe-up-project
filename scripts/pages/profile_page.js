@@ -3,7 +3,7 @@ import * as ui from '../ui.js';
 import * as userLib from '../user.js';
 import { initSharedComponents } from '../shared.js';
 
-const socket = io('http://localhost:5000');
+const socket = io('https://tribe-up-backend.onrender.com');
 
 // Елементи DOM
 const els = {
@@ -134,7 +134,7 @@ function populateEditForm(user) {
 async function loadSocialStats() {
     await userLib.fetchMySocials(); 
     try {
-        const res = await fetch(`http://localhost:5000/api/users/${currentUser.id}/social`);
+        const res = await fetch(`https://tribe-up-backend.onrender.com/api/users/${currentUser.id}/social`);
         const data = await res.json();
         els.followersCount.textContent = data.followers.length;
         els.followingCount.textContent = data.following.length;
@@ -283,7 +283,7 @@ async function handleProfileUpdate(e) {
     if (updatedData.name.length < 2) return utils.showToast('Ім\'я надто коротке', 'error');
 
     try {
-        const res = await fetch(`http://localhost:5000/api/users/${currentUser.id}`, {
+        const res = await fetch(`https://tribe-up-backend.onrender.com/api/users/${currentUser.id}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',

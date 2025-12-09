@@ -137,7 +137,7 @@ async function setupNotifications(userId) {
 
 async function loadNotifications(userId) {
     try {
-        const res = await fetch(`http://localhost:5000/api/notifications/${userId}`, {
+        const res = await fetch(`https://tribe-up-backend.onrender.com/api/notifications/${userId}`, {
             headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
         });
         const notifs = await res.json();
@@ -204,7 +204,7 @@ async function addNotificationToUI(notif, prepend = true) {
 }
 
 async function markNotificationRead(id) {
-    await fetch('http://localhost:5000/api/notifications/read', {
+    await fetch('https://tribe-up-backend.onrender.com/api/notifications/read', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
         body: JSON.stringify({ id: id })
@@ -212,7 +212,7 @@ async function markNotificationRead(id) {
 }
 
 async function markAllNotificationsRead(userId) {
-    await fetch('http://localhost:5000/api/notifications/read', {
+    await fetch('https://tribe-up-backend.onrender.com/api/notifications/read', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
         body: JSON.stringify({ userId: userId })

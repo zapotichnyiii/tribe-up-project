@@ -40,7 +40,7 @@ export async function handleLoginSubmit(e) {
     const password = document.getElementById('loginPasswordInitial')?.value;
     
     try {
-        const response = await fetch('http://localhost:5000/api/auth/login', {
+        const response = await fetch('https://tribe-up-backend.onrender.com/api/auth/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password })
@@ -92,7 +92,7 @@ export async function handleRegisterSubmit(e) {
     };
 
     try {
-        const response = await fetch('http://localhost:5000/api/auth/register', {
+        const response = await fetch('https://tribe-up-backend.onrender.com/api/auth/register', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(newUserPayload)
@@ -132,7 +132,7 @@ export async function handleVerifySubmit() {
     }
 
     try {
-        const res = await fetch('http://localhost:5000/api/auth/verify', {
+        const res = await fetch('https://tribe-up-backend.onrender.com/api/auth/verify', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ userId: pendingUserId, code: code })
@@ -226,7 +226,7 @@ export function initForgotPassword() {
             }
 
             try {
-                const res = await fetch('http://localhost:5000/api/auth/forgot-password', {
+                const res = await fetch('https://tribe-up-backend.onrender.com/api/auth/forgot-password', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email })
@@ -258,7 +258,7 @@ export function initForgotPassword() {
             if (newPassword.length < 6) return utils.showToast('Пароль занадто короткий', 'error');
 
             try {
-                const res = await fetch('http://localhost:5000/api/auth/reset-password', {
+                const res = await fetch('https://tribe-up-backend.onrender.com/api/auth/reset-password', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email, code, newPassword })

@@ -227,7 +227,7 @@ export async function handleJoinEvent(data) {
         return false;
     }
     try {
-        const res = await fetch('http://localhost:5000/api/events/join', {
+        const res = await fetch('https://tribe-up-backend.onrender.com/api/events/join', {
             method: 'POST',
             headers: getAuthHeaders(),
             body: JSON.stringify({ userId: user.id, eventId: data.eventId })
@@ -247,7 +247,7 @@ export async function handleLeaveEvent(data) {
     const user = utils.getCurrentUser();
     if (!user) return;
     try {
-        const res = await fetch('http://localhost:5000/api/events/leave', {
+        const res = await fetch('https://tribe-up-backend.onrender.com/api/events/leave', {
             method: 'POST',
             headers: getAuthHeaders(),
             body: JSON.stringify({ userId: user.id, eventId: data.eventId })

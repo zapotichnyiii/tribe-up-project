@@ -2,7 +2,7 @@ import * as utils from '../utils.js';
 import * as ui from '../ui.js';
 import { initSharedComponents } from '../shared.js';
 
-const socket = io('http://localhost:5000');
+const socket = io('https://tribe-up-backend.onrender.com');
 const urlParams = new URLSearchParams(window.location.search);
 const eventId = parseInt(urlParams.get('id'));
 
@@ -130,7 +130,7 @@ async function renderEventPage(event) {
 
 async function loadParticipants(id) {
     try {
-        const res = await fetch(`http://localhost:5000/api/events/${id}/participants`);
+        const res = await fetch(`https://tribe-up-backend.onrender.com/api/events/${id}/participants`);
         const participants = await res.json();
         
         els.participantsList.innerHTML = '';
@@ -212,7 +212,7 @@ async function renderActionButtons(event, isFull) {
 // ... (решта функцій handleJoin, handleLeave, setupCreatorActions, initMap без змін) ...
 async function handleJoin(eventId) {
     try {
-        const res = await fetch('http://localhost:5000/api/events/join', {
+        const res = await fetch('https://tribe-up-backend.onrender.com/api/events/join', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
             body: JSON.stringify({ userId: currentUser.id, eventId })
@@ -228,7 +228,7 @@ async function handleJoin(eventId) {
 
 async function handleLeave(eventId) {
     try {
-        const res = await fetch('http://localhost:5000/api/events/leave', {
+        const res = await fetch('https://tribe-up-backend.onrender.com/api/events/leave', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
             body: JSON.stringify({ userId: currentUser.id, eventId })
@@ -263,7 +263,7 @@ function setupCreatorActions(event) {
     els.deleteBtn.onclick = async () => {
         if(confirm('Видалити цю подію? Це незворотньо.')) {
             try {
-                const res = await fetch(`http://localhost:5000/api/events/${event.eventId}`, {
+                const res = await fetch(`https://tribe-up-backend.onrender.com/api/events/${event.eventId}`, {
                     method: 'DELETE',
                     headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
                 });
@@ -312,7 +312,7 @@ function initMap(location) {
 function setupChat() {
     if (!currentUser) return;
 
-    fetch(`http://localhost:5000/api/messages/event/${eventId}`)
+    fetch(`https://tribe-up-backend.onrender.com/api/messages/event/${eventId}`)
         .then(res => res.json())
         .then(messages => {
             els.chatWidget.innerHTML = '';
@@ -417,7 +417,7 @@ if (editForm) {
         };
 
         try {
-            const res = await fetch(`http://localhost:5000/api/events/${editForm.dataset.eventId}`, {
+            const res = await fetch(`https://tribe-up-backend.onrender.com/api/events/${editForm.dataset.eventId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
                 body: JSON.stringify(updatedData)

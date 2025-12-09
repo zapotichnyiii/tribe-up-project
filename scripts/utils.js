@@ -1,7 +1,8 @@
 export let map;
 export function setMap(newMap) { map = newMap; }
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = 'https://tribe-up-backend.onrender.com';
+
 
 // Тут тепер пусто, бо ми беремо з бази
 export let globalCustomInterests = [];

@@ -2,7 +2,7 @@ import * as utils from '../utils.js';
 import * as userLib from '../user.js'; 
 import { initSharedComponents } from '../shared.js';
 
-const socket = io('http://localhost:5000');
+const socket = io('https://tribe-up-backend.onrender.com');
 const urlParams = new URLSearchParams(window.location.search);
 const userId = parseInt(urlParams.get('id'));
 
@@ -95,7 +95,7 @@ function renderUserProfile(user) {
 
 async function loadUserStats(id) {
     try {
-        const res = await fetch(`http://localhost:5000/api/users/${id}/social`);
+        const res = await fetch(`https://tribe-up-backend.onrender.com/api/users/${id}/social`);
         const data = await res.json();
         els.followersCount.textContent = data.followers.length;
         els.followingCount.textContent = data.following.length;
@@ -111,7 +111,7 @@ async function loadUserEvents(id) {
         const allEvents = await utils.getEvents('active');
         
         // 2. Події, де юзер є учасником (API дозволяє отримати для будь-якого ID)
-        const resJoined = await fetch(`http://localhost:5000/api/my-joined-events/${id}`);
+        const resJoined = await fetch(`https://tribe-up-backend.onrender.com/api/my-joined-events/${id}`);
         const joinedIds = await resJoined.json();
 
         // 3. Фільтруємо: або творець, або учасник
