@@ -1,7 +1,7 @@
 import * as utils from '../utils.js';
 import { initSharedComponents } from '../shared.js';
 
-const socket = io('https://tribe-up-backend.onrender.com');
+const socket = io('API_URL');
 const urlParams = new URLSearchParams(window.location.search);
 let startChatUserId = urlParams.get('userId');
 
@@ -50,7 +50,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 async function loadChatList() {
     try {
-        const res = await fetch(`https://tribe-up-backend.onrender.com/api/my-chats/${currentUser.id}`);
+        const res = await fetch(`API_URL/api/my-chats/${currentUser.id}`);
         allChatsCache = await res.json();
         renderChatList(allChatsCache);
     } catch (e) {
@@ -139,7 +139,7 @@ async function loadMessages(userId) {
     els.messagesArea.innerHTML = '<div style="text-align:center; padding:20px;">Завантаження...</div>';
     
     try {
-        const res = await fetch(`https://tribe-up-backend.onrender.com/api/messages/private?user1=${currentUser.id}&user2=${userId}`);
+        const res = await fetch(`API_URL/api/messages/private?user1=${currentUser.id}&user2=${userId}`);
         const messages = await res.json();
         
         els.messagesArea.innerHTML = '';
@@ -317,7 +317,7 @@ async function loadUserStatus(userId) {
     els.partnerStatus.style.color = 'var(--main-secondary-color)';
 
     try {
-        const res = await fetch(`https://tribe-up-backend.onrender.com/api/users/${userId}/status`);
+        const res = await fetch(`API_URL/api/users/${userId}/status`);
         const data = await res.json();
 
         if (data.isOnline) {

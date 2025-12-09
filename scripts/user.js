@@ -39,7 +39,7 @@ export async function fetchMySocials() {
     const user = utils.getCurrentUser();
     if (!user) return;
     try {
-        const res = await fetch(`https://tribe-up-backend.onrender.com/api/users/${user.id}/social`);
+        const res = await fetch(`API_URL/api/users/${user.id}/social`);
         const data = await res.json();
         
         myFollowingIds = data.following.map(u => u.id);
@@ -55,7 +55,7 @@ export async function toggleFollow(targetUserId, btnElement) {
     const endpoint = isFollowing ? 'unfollow' : 'follow';
     
     try {
-        const res = await fetch(`https://tribe-up-backend.onrender.com/api/users/${targetUserId}/${endpoint}`, {
+        const res = await fetch(`API_URL/api/users/${targetUserId}/${endpoint}`, {
             method: 'POST',
             headers: getAuthHeaders(),
             body: JSON.stringify({ followerId: user.id })
@@ -259,7 +259,7 @@ export async function openSocialList(type, userId = null) {
     utils.openModal(dom.socialListModal);
     
     try {
-        const res = await fetch(`https://tribe-up-backend.onrender.com/api/users/${targetId}/social`);
+        const res = await fetch(`API_URL/api/users/${targetId}/social`);
         const data = await res.json();
         const list = type === 'followers' ? data.followers : data.following;
         

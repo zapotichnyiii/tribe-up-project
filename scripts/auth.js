@@ -1,8 +1,7 @@
 import * as dom from './dom.js';
 import * as utils from './utils.js';
-import * as ui from './ui.js'; // <--- ОСЬ ЦЕ БУЛО ПРОПУЩЕНО АБО НЕПРАВИЛЬНО
+import * as ui from './ui.js'; 
 
-// Змінна для збереження ID користувача
 let pendingUserId = null;
 
 export function initAuthTabs() {

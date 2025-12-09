@@ -6,7 +6,7 @@ import * as events from './events.js';
 import * as user from './user.js';
 
 // Підключення до Socket.IO
-const socket = io('https://tribe-up-backend.onrender.com'); // Замість localhost використовуємо хостинг
+const socket = io('API_URL'); 
 
 document.addEventListener('DOMContentLoaded', async () => {
     // 1. Ініціалізація базових компонентів
@@ -260,7 +260,7 @@ async function loadNotifications(userId) {
     if(!userId) return;
 
     try {
-        const res = await fetch(`https://tribe-up-backend.onrender.com/api/notifications/${userId}`, {
+        const res = await fetch(`API_URL/api/notifications/${userId}`, {
             headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
         });
         const notifs = await res.json();
@@ -336,7 +336,7 @@ async function addNotificationToUI(notif, prepend = true) {
 }
 
 async function markNotificationRead(id) {
-    await fetch('https://tribe-up-backend.onrender.com/api/notifications/read', {
+    await fetch('API_URL/api/notifications/read', {
         method: 'POST',
         headers: { 
             'Content-Type': 'application/json',
@@ -350,7 +350,7 @@ async function markAllNotificationsRead() {
     const user = utils.getCurrentUser();
     if(!user) return;
     
-    await fetch('https://tribe-up-backend.onrender.com/api/notifications/read', {
+    await fetch('API_URL/api/notifications/read', {
         method: 'POST',
         headers: { 
             'Content-Type': 'application/json',

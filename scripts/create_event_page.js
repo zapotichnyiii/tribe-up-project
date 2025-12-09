@@ -3,7 +3,7 @@ import * as ui from './ui.js';
 import { initSharedComponents } from './shared.js'; // ІМПОРТ СПІЛЬНОЇ ЛОГІКИ
 
 // Ініціалізація Socket.IO
-const socket = io('https://tribe-up-backend.onrender.com');
+const socket = io('API_URL');
 
 // Елементи форми (унікальні для цієї сторінки)
 const elements = {
@@ -234,7 +234,7 @@ async function handleFormSubmit(e) {
     };
 
     try {
-        const res = await fetch('https://tribe-up-backend.onrender.com/api/events', {
+        const res = await fetch('API_URL/api/events', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

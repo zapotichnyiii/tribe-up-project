@@ -1,7 +1,18 @@
 export let map;
 export function setMap(newMap) { map = newMap; }
 
-const API_URL = 'https://tribe-up-backend.onrender.com';
+let API_URL;
+
+// Перевіряємо, де відкритий сайт
+if (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost') {
+    // Якщо ми вдома (Localhost) -> стукаємо на локальний сервер
+    API_URL = 'http://127.0.0.1:5000';
+    console.log('Режим розробки: підключено до Localhost');
+} else {
+    // Якщо ми в інтернеті -> стукаємо на Render
+    API_URL = 'https://tribe-up-backend.onrender.com';
+    console.log('Режим продакшн: підключено до Render');
+}
 
 
 // Тут тепер пусто, бо ми беремо з бази

@@ -40,7 +40,7 @@ def get_db():
         conn = psycopg2.connect(
             dbname='tribeup_db',
             user='postgres',
-            password='ТУТ_ВАШ_ЛОКАЛЬНИЙ_ПАРОЛЬ', 
+            password='qazwsxedcasd123', 
             host='localhost',
             port=5432
         )

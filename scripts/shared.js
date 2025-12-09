@@ -37,7 +37,7 @@ export async function initSharedComponents(socketInstance) {
         // Запускаємо polling тільки якщо ми НЕ на сторінці чату (там своя логіка)
         // або можна залишити, якщо хочете оновлювати бейджі всюди
         if (!window.location.pathname.includes('chat.html')) {
-             user.startUserPolling();
+            user.startUserPolling();
         }
         
         setupNotifications(currentUser.id);
@@ -137,7 +137,7 @@ async function setupNotifications(userId) {
 
 async function loadNotifications(userId) {
     try {
-        const res = await fetch(`https://tribe-up-backend.onrender.com/api/notifications/${userId}`, {
+        const res = await fetch(`API_URL/api/notifications/${userId}`, {
             headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
         });
         const notifs = await res.json();
@@ -204,7 +204,7 @@ async function addNotificationToUI(notif, prepend = true) {
 }
 
 async function markNotificationRead(id) {
-    await fetch('https://tribe-up-backend.onrender.com/api/notifications/read', {
+    await fetch('API_URL/api/notifications/read', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
         body: JSON.stringify({ id: id })
@@ -212,7 +212,7 @@ async function markNotificationRead(id) {
 }
 
 async function markAllNotificationsRead(userId) {
-    await fetch('https://tribe-up-backend.onrender.com/api/notifications/read', {
+    await fetch('API_URL/api/notifications/read', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
         body: JSON.stringify({ userId: userId })
