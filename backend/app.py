@@ -32,7 +32,18 @@ online_users = {}
 DB_CONFIG = os.environ.get('DATABASE_URL')
 
 def get_db():
-    conn = psycopg2.connect(DB_CONFIG)
+    database_url = os.environ.get('DATABASE_URL')
+    
+    if database_url:
+        conn = psycopg2.connect(database_url)
+    else:
+        conn = psycopg2.connect(
+            dbname='tribeup_db',
+            user='postgres',
+            password='ТУТ_ВАШ_ЛОКАЛЬНИЙ_ПАРОЛЬ', 
+            host='localhost',
+            port=5432
+        )
     return conn
 
 def token_required(f):
