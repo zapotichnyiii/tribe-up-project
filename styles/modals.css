@@ -1,3 +1,6 @@
+/* styles/modals.css */
+
+/* --- БАЗОВІ СТИЛІ МОДАЛОК --- */
 .modal {
     display: none;
     position: fixed;
@@ -22,18 +25,22 @@
     background-color: var(--main-card-background);
     border-radius: var(--border-radius-large);
     width: 90%;
-    max-width: 580px;
-    max-height: 85vh;
-    overflow-y: auto;
+    max-width: 500px;
     padding: 1.8rem;
     position: relative;
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
     transform: scale(0.95);
     transition: var(--transition);
+    max-height: 90vh;
+    overflow-y: auto;
 }
 
 .modal.open .modal-content {
     transform: scale(1);
+}
+
+body.dark-theme .modal-content {
+    background-color: var(--dark-card-bg);
 }
 
 .modal-close {
@@ -59,11 +66,7 @@ body.dark-theme .modal-close {
     transform: rotate(90deg) scale(1.1);
 }
 
-.modal-close:focus {
-    outline: 2px solid var(--auth-accent-color);
-    outline-offset: 2px;
-}
-
+/* --- ДОПОМІЖНІ КЛАСИ --- */
 .custom-input-group {
     display: flex;
     gap: 6px;
@@ -84,12 +87,25 @@ body.dark-theme .modal-close {
     margin-top: 0;
 }
 
-.step-indicator {
-    text-align: center;
-    font-size: 0.9em;
-    font-weight: 600;
-    color: var(--main-secondary-color);
-    margin-bottom: 0.5rem;
+/* --- СПЕЦИФІЧНІ МОДАЛКИ (Ті, що залишилися) --- */
+
+/* Модалка списку (Підписники/Підписки) */
+.modal-content.small-modal {
+    max-width: 400px;
+    height: 500px;
+    display: flex;
+    flex-direction: column;
+}
+
+.social-list-scroll {
+    overflow-y: auto;
+    flex: 1;
+    margin-top: 10px;
+}
+
+/* Модалка пошуку за інтересами (Global Search) */
+#interestSearchModal .modal-content {
+    max-width: 700px;
 }
 
 .modal-step-title {
@@ -100,47 +116,8 @@ body.dark-theme .modal-close {
     margin-bottom: 1.5rem;
 }
 
-.modal-step {
-    display: none; 
-    flex-direction: column;
-    gap: 1rem;
-}
-
-.modal-step.active {
-    display: flex; 
-}
-
-.step-nav {
-    display: flex;
-    justify-content: space-between;
-    gap: 1rem;
-    margin-top: 1.5rem;
-    border-top: 1px solid #e2e8f0;
-    padding-top: 1.5rem;
-}
-
-.step-nav .btn {
-    flex: 1; 
-}
-
-#eventStep1 .step-nav {
-    justify-content: flex-end; 
-}
-#eventStep1 .step-nav .btn {
-    flex: 0 1 50%; 
-}
-
-body.dark-theme .step-indicator {
-    color: var(--dark-text-secondary);
-}
 body.dark-theme .modal-step-title {
     color: var(--dark-text-primary);
-}
-body.dark-theme .step-nav {
-    border-top-color: var(--dark-border);
-}
-body.dark-theme #eventInterestsContainer {
-    background: var(--dark-input-bg) !important;
 }
 
 .interest-modal-layout {
@@ -158,6 +135,11 @@ body.dark-theme #eventInterestsContainer {
     border-bottom: 1px solid #e2e8f0;
 }
 
+body.dark-theme .interest-modal-column h3 {
+    color: var(--dark-text-color);
+    border-bottom-color: var(--dark-border);
+}
+
 .interest-modal-grid {
     display: flex;
     flex-direction: column;
@@ -167,332 +149,65 @@ body.dark-theme #eventInterestsContainer {
     padding: 5px; 
 }
 
-.interest-modal-event-item {
+/* Елементи всередині пошуку інтересів */
+.interest-modal-event-item,
+.interest-modal-person-item {
     display: block;
     padding: 0.75rem;
-    border-radius: var(--border-radius-large);
+    border-radius: 8px;
     border: 1px solid #e2e8f0;
     background: var(--main-background-color);
-    transition: var(--transition);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     cursor: pointer;
-}
-.interest-modal-event-item:hover {
-    border-color: var(--auth-accent-color);
-    transform: translateY(-2px);
-    box-shadow: var(--soft-shadow);
-}
-.interest-modal-event-item .item-title {
-    font-weight: 600;
-    color: var(--main-dark-color);
-    font-size: 0.9em;
-    margin-bottom: 4px;
-}
-.interest-modal-event-item .item-meta {
-    font-size: 0.8em;
-    color: var(--main-secondary-color);
+    text-decoration: none;
 }
 
 .interest-modal-person-item {
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 0.5rem;
-    border-radius: var(--border-radius-large);
-    background: var(--main-background-color);
-    border: 1px solid transparent; 
-    transition: var(--transition);
-    cursor: pointer;
 }
+
+body.dark-theme .interest-modal-event-item,
+body.dark-theme .interest-modal-person-item {
+    background: var(--dark-input-bg);
+    border-color: var(--dark-border);
+}
+
+.interest-modal-event-item:hover,
 .interest-modal-person-item:hover {
     border-color: var(--auth-accent-color);
     transform: translateY(-2px);
-    box-shadow: var(--soft-shadow);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
 }
+
+.interest-modal-event-item .item-title,
+.interest-modal-person-item .item-title {
+    font-weight: 600;
+    color: var(--main-dark-color);
+    font-size: 0.9em;
+    margin-bottom: 4px;
+}
+
+.interest-modal-event-item .item-meta,
+.interest-modal-person-item .item-meta {
+    font-size: 0.8em;
+    color: var(--main-secondary-color);
+}
+
 .interest-modal-person-item img {
     width: 40px;
     height: 40px;
     border-radius: 50%;
     object-fit: cover;
 }
-.interest-modal-person-item .item-title {
-    font-weight: 600;
-    font-size: 0.9em;
-    color: var(--main-dark-color);
-}
-.interest-modal-person-item .item-meta {
-    font-size: 0.8em;
-    color: var(--main-secondary-color);
-}
 
-.mini-event-card {
-    background: white;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    padding: 10px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.mini-event-card:hover {
-    border-color: var(--auth-accent-color);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-}
-
-.mini-event-title {
-    font-weight: 600;
-    font-size: 0.95em;
-    color: var(--main-dark-color);
-}
-
-.mini-event-date {
-    font-size: 0.8em;
-    color: var(--main-secondary-color);
-}
-
+/* Адаптивність модалок */
 @media (max-width: 640px) {
     .interest-modal-layout {
         grid-template-columns: 1fr; 
     }
     .interest-modal-grid {
         max-height: 30vh; 
-    }
-}
-
-#editProfileModal .modern-modal-content {
-    max-width: 650px;
-    padding: 0;
-    overflow-y: auto; 
-    border-radius: 20px;
-    background: var(--main-card-background);
-    max-height: 90vh; 
-    display: flex;
-    flex-direction: column;
-}
-
-.modal-header-decoration {
-    background: linear-gradient(135deg, var(--main-primary-color), var(--auth-accent-color));
-    padding: 25px 30px;
-    color: white;
-    position: relative;
-}
-
-.modal-header-decoration h2 {
-    color: white;
-    margin: 0;
-    font-size: 1.5rem;
-}
-
-.modal-header-decoration p {
-    color: rgba(255, 255, 255, 0.8);
-    font-size: 0.9rem;
-    margin: 5px 0 0 0;
-}
-
-.edit-profile-grid {
-    display: grid;
-    grid-template-columns: 220px 1fr; 
-    gap: 0;
-}
-
-/* Секція аватара (ліва) */
-.profile-avatar-section {
-    background: #f8fafc;
-    padding: 30px 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    border-right: 1px solid #e2e8f0;
-}
-
-body.dark-theme .profile-avatar-section {
-    background: var(--dark-bg);
-    border-right-color: var(--dark-border);
-}
-
-.avatar-upload-wrapper {
-    position: relative;
-    width: 140px;
-    height: 140px;
-    margin-bottom: 15px;
-}
-
-#editProfileAvatarPreview {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 4px solid white;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-}
-
-/* Оверлей для завантаження фото */
-.avatar-upload-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    border-radius: 50%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    opacity: 0;
-    cursor: pointer;
-    transition: opacity 0.3s ease;
-    border: 4px solid transparent;
-}
-
-.avatar-upload-wrapper:hover .avatar-upload-overlay {
-    opacity: 1;
-}
-
-.avatar-upload-overlay i {
-    font-size: 1.5rem;
-    margin-bottom: 5px;
-}
-
-.avatar-upload-overlay span {
-    font-size: 0.8rem;
-    font-weight: 600;
-}
-
-#editProfilePhoto {
-    display: none; /* Ховаємо стандартний інпут */
-}
-
-.avatar-hint {
-    font-size: 0.8rem;
-    color: var(--main-secondary-color);
-    text-align: center;
-}
-
-/* Секція полів (права) */
-.profile-fields-section {
-    padding: 30px;
-}
-
-.form-group.compact {
-    margin-bottom: 15px;
-}
-
-.form-label-sm {
-    display: block;
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--main-dark-color);
-    margin-bottom: 5px;
-}
-
-body.dark-theme .form-label-sm {
-    color: var(--dark-text-secondary);
-}
-
-.input-with-icon {
-    position: relative;
-}
-
-.input-with-icon i {
-    position: absolute;
-    left: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--main-secondary-color);
-    font-size: 0.9rem;
-}
-
-.input-with-icon input {
-    padding-left: 35px;
-}
-
-.form-row-split {
-    display: flex;
-    gap: 15px;
-}
-
-.form-row-split .form-group {
-    flex: 1;
-}
-
-/* Контейнер інтересів */
-.interests-container-styled {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    padding: 8px;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    background: #f8fafc;
-    min-height: 40px;
-    margin-bottom: 8px;
-}
-
-body.dark-theme .interests-container-styled {
-    background: var(--dark-input-bg);
-    border-color: var(--dark-border);
-}
-
-/* Міні-форма додавання інтересу */
-.add-interest-mini {
-    display: flex;
-    gap: 5px;
-}
-
-.add-interest-mini input {
-    flex: 1;
-    padding: 6px 10px;
-    font-size: 0.85rem;
-    border: 1px solid #e2e8f0;
-    border-radius: 6px;
-    background: transparent;
-    color: var(--main-dark-color);
-}
-
-body.dark-theme .add-interest-mini input {
-    border-color: var(--dark-border);
-    color: var(--dark-text-primary);
-}
-
-.btn-icon-only {
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--auth-accent-color);
-    color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background 0.2s;
-}
-
-.btn-icon-only:hover {
-    background: var(--main-primary-color);
-}
-
-.btn-block {
-    width: 100%;
-    padding: 12px;
-    border-radius: 8px;
-}
-
-@media (max-width: 650px) {
-    .edit-profile-grid {
-        grid-template-columns: 1fr;
-    }
-    .profile-avatar-section {
-        padding: 20px;
-        border-right: none;
-        border-bottom: 1px solid #e2e8f0;
-    }
-    .profile-fields-section {
-        padding: 20px;
     }
 }

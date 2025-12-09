@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Профіль користувача — TribeUp</title>
+    
+    <link rel="stylesheet" href="/styles/general_styles.css">
+    <link rel="stylesheet" href="/styles/header.css">
+    <link rel="stylesheet" href="/styles/buttons.css">
+    <link rel="stylesheet" href="/styles/cards_and_tags.css">
+    <link rel="stylesheet" href="/styles/dark_theme.css">
+    <link rel="stylesheet" href="/styles/toast.css">
+    <link rel="stylesheet" href="/styles/modals.css"> <link rel="stylesheet" href="/styles/user_page.css">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+</head>
+<body>
+    
+    <div id="header-placeholder"></div>
+
+    <main class="user-page-container container">
+        
+        <div class="user-cover"></div>
+
+        <div class="user-grid-layout">
+            
+            <aside class="user-sidebar">
+                <div class="user-card-main">
+                    <div class="avatar-container">
+                        <img id="otherUserAvatar" src="https://via.placeholder.com/150" alt="Avatar">
+                        </div>
+                    
+                    <h1 id="otherUserName">Завантаження...</h1>
+                    <p id="otherUserUsername" class="username-badge">@username</p>
+                    
+                    <div id="otherUserMeta" class="user-meta-info">
+                        </div>
+
+                    <div class="user-stats-bar">
+                        <div class="stat-item" id="otherUserFollowersBtn">
+                            <span class="stat-value" id="otherUserFollowersCount">0</span>
+                            <span class="stat-label">Підписники</span>
+                        </div>
+                        <div class="stat-divider"></div>
+                        <div class="stat-item" id="otherUserFollowingBtn">
+                            <span class="stat-value" id="otherUserFollowingCount">0</span>
+                            <span class="stat-label">Підписки</span>
+                        </div>
+                    </div>
+
+                    <div class="sidebar-actions">
+                        <button id="otherUserFollowBtn" class="btn btn-accent btn-block">
+                            <i class="fas fa-user-plus"></i> Підписатися
+                        </button>
+                        <button id="otherUserMessageBtn" class="btn btn-outline btn-block">
+                            <i class="fas fa-comment-alt"></i> Написати
+                        </button>
+                    </div>
+                </div>
+
+                <div class="user-interests-card">
+                    <h3>Інтереси</h3>
+                    <div id="otherUserInterests" class="interests-cloud"></div>
+                </div>
+            </aside>
+
+            <section class="user-content">
+                
+                <div class="content-header-card">
+                    <h2>Події користувача</h2>
+                    <p>Події, які організовує або відвідує цей користувач</p>
+                </div>
+
+                <div id="otherUserEventsList" class="user-events-grid">
+                    <div class="skeleton-card"></div>
+                    <div class="skeleton-card"></div>
+                </div>
+
+            </section>
+        </div>
+    </main>
+
+    <div class="modal" id="socialListModal">
+        <div class="modal-content small-modal">
+            <button class="modal-close" id="closeSocialListModal">×</button>
+            <h2 id="socialListTitle">Список</h2>
+            <div id="socialListContainer" class="social-list-scroll"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+    <script type="module" src="/scripts/pages/user_page.js"></script>
+</body>
+</html>

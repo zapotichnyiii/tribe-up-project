@@ -22,7 +22,6 @@ export function startUserPolling() {
 async function refreshUserCache() {
     try {
         const users = await utils.getUsers();
-        // Якщо дані змінилися, оновлюємо кеш і UI
         if (JSON.stringify(users.map(u => u.id)) !== JSON.stringify(allUsersCache.map(u => u.id))) {
             allUsersCache = users;
             const currentQuery = dom.userSearchInput?.value.trim();
@@ -44,16 +43,6 @@ export async function fetchMySocials() {
         const data = await res.json();
         
         myFollowingIds = data.following.map(u => u.id);
-        
-        // Оновлюємо лічильники на сторінці, якщо ми на profile.html або user.html
-        if (dom.myFollowersBtn) { // Це для profile.html
-            const countEl = document.getElementById('pageFollowersCount') || dom.myFollowersBtn.querySelector('b');
-            if(countEl) countEl.textContent = data.followers.length;
-        }
-        if (dom.myFollowingBtn) {
-            const countEl = document.getElementById('pageFollowingCount') || dom.myFollowingBtn.querySelector('b');
-            if(countEl) countEl.textContent = data.following.length;
-        }
     } catch (e) { console.error(e); }
 }
 
@@ -93,7 +82,6 @@ export async function toggleFollow(targetUserId, btnElement) {
 
             fetchMySocials();
             
-            // Якщо ми на сторінці юзера, оновлюємо його статистику
             const followersCountEl = document.getElementById('otherUserFollowersCount');
             if (followersCountEl) {
                 let current = parseInt(followersCountEl.textContent) || 0;
@@ -117,39 +105,37 @@ export async function renderPeople(customUsersList = null, isSearchResult = fals
     }
     
     const currentUser = utils.getCurrentUser();
-    if (!currentUser) {
-        dom.peopleHorizontalTrack.innerHTML = '<p style="padding: 20px;">Увійдіть, щоб бачити людей.</p>';
-        return;
-    }
-
+    
     if (allUsersCache.length === 0 && !customUsersList) {
         allUsersCache = await utils.getUsers();
     }
 
     let usersToRender = customUsersList || allUsersCache;
-    let filtered = usersToRender.filter(u => u.id !== currentUser.id);
+    if (currentUser) {
+        usersToRender = usersToRender.filter(u => u.id !== currentUser.id);
+    }
 
     if (!isSearchResult) {
         const cityQuery = dom.cityFilterInput?.value.toLowerCase().trim();
         if (cityQuery) {
-            filtered = filtered.filter(u => u.location.toLowerCase().includes(cityQuery));
+            usersToRender = usersToRender.filter(u => u.location.toLowerCase().includes(cityQuery));
         }
 
         if (selectedPeopleInterests.length > 0) {
-            filtered = filtered.filter(u => u.interests.some(i => selectedPeopleInterests.includes(i)));
+            usersToRender = usersToRender.filter(u => u.interests.some(i => selectedPeopleInterests.includes(i)));
         }
     }
 
-    filtered.sort((a, b) => b.id - a.id);
+    usersToRender.sort((a, b) => b.id - a.id);
 
     dom.peopleHorizontalTrack.innerHTML = '';
 
-    if (filtered.length === 0) {
+    if (usersToRender.length === 0) {
         dom.peopleHorizontalTrack.innerHTML = '<p style="padding: 20px; text-align: center; color: #888; width: 100%;">Нікого не знайдено.</p>';
         return;
     }
 
-    filtered.forEach(person => {
+    usersToRender.forEach(person => {
         const isFollowing = myFollowingIds.includes(person.id);
         const wrapper = document.createElement('div');
         wrapper.className = 'people-card-wrapper';
@@ -202,9 +188,7 @@ export async function renderPeopleInterestFilter() {
     }
     
     const currentUser = utils.getCurrentUser();
-    if (!currentUser) return;
-    
-    const otherUsers = allUsersCache.filter(u => u.id !== currentUser.id);
+    const otherUsers = currentUser ? allUsersCache.filter(u => u.id !== currentUser.id) : allUsersCache;
     const allInterests = [...new Set(otherUsers.flatMap(u => u.interests))].sort();
     
     if (dom.peopleInterestFilter) {
@@ -252,22 +236,19 @@ export function handleUserSearch(e) {
 // === НАВІГАЦІЯ (РЕДІРЕКТИ) ===
 
 export function openUserProfile() {
-    // Перехід на сторінку "Мій профіль"
     window.location.href = '/profile.html';
 }
 
 export function openOtherUserProfile(userId) {
     const currentUser = utils.getCurrentUser();
-    // Якщо клікнули на себе, йдемо в свій профіль
     if (currentUser && currentUser.id === userId) {
         window.location.href = '/profile.html';
     } else {
-        // Інакше йдемо на сторінку юзера
         window.location.href = `/user.html?id=${userId}`;
     }
 }
 
-// === СПИСКИ ПІДПИСНИКІВ (Залишаємо модалку, бо це зручно) ===
+// === СПИСКИ ПІДПИСНИКІВ ===
 export async function openSocialList(type, userId = null) {
     const targetId = userId || utils.getCurrentUser()?.id;
     if (!targetId) return;
@@ -308,7 +289,7 @@ export async function openSocialList(type, userId = null) {
             
             div.addEventListener('click', () => {
                 utils.closeModal(dom.socialListModal);
-                openOtherUserProfile(u.id); // Redirect
+                openOtherUserProfile(u.id);
             });
             dom.socialListContainer.appendChild(div);
         });

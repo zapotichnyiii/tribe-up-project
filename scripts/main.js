@@ -4,13 +4,12 @@ import * as ui from './ui.js';
 import * as auth from './auth.js';
 import * as events from './events.js';
 import * as user from './user.js';
-import * as chat from './chat.js'; // Тепер тут тільки функції редіректу
 
 // Підключення до Socket.IO
 const socket = io('http://localhost:5000');
 
 document.addEventListener('DOMContentLoaded', async () => {
-    // 1. Ініціалізація даних
+    // 1. Ініціалізація базових компонентів
     await utils.fetchGlobalInterests();
     
     events.initEventFilters();
@@ -25,7 +24,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (currentUser) {
         ui.showMainApp(currentUser);
         
-        // Оновлюємо дані користувача у сховищі
+        // Оновлюємо дані користувача (актуалізуємо аватар/ім'я)
         utils.getUsers().then(users => {
             const freshUser = users.find(u => u.id === currentUser.id);
             if (freshUser) {
@@ -38,9 +37,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         events.startEventPolling();
         user.startUserPolling();
         
+        // Завантаження соціальних зв'язків та сповіщень
         await user.fetchMySocials();
         setupNotifications(currentUser.id);
         
+        // Рендер контенту головної сторінки
         user.renderPeople();
         user.renderPeopleInterestFilter();
 
@@ -53,19 +54,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         utils.setupFormValidation(dom.registerForm, auth.registerValidations);
     }
 
-    // Валідація форм редагування (якщо вони використовуються в інших місцях або на цій сторінці)
-    // Якщо форми винесені на окремі сторінки, цей код тут можна прибрати, 
-    // але залишаємо для сумісності, якщо модалка "Створити подію" ще десь є.
-    // utils.setupFormValidation(dom.editProfileForm, user.editProfileValidations); // Видалено, бо це на profile.html
-    // utils.setupFormValidation(dom.editEventForm, events.editEventValidations);   // Видалено, бо це на event.html
-
     // --- ГЛОБАЛЬНІ СЛУХАЧІ ПОДІЙ ---
 
-    // Клік по тегам інтересів (пошук)
+    // Клік по тегам інтересів (глобальний пошук)
     document.body.addEventListener('click', (e) => {
         const tag = e.target.closest('.interest-tag');
         if (tag) {
-            const selectionContainer = e.target.closest('#registerForm, #createEventModal, #peopleInterestFilter');
+            // Ігноруємо кліки в контейнерах вибору (реєстрація, фільтри)
+            const selectionContainer = e.target.closest('#registerForm, #peopleInterestFilter');
             if (!selectionContainer) {
                 const interest = tag.dataset.interest || tag.textContent;
                 if (interest) {
@@ -84,39 +80,35 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
+    // Перемикання теми
     if (dom.themeToggle) dom.themeToggle.addEventListener('click', ui.toggleTheme);
     
-    // Авторизація
+    // Форми авторизації
     if (dom.loginFormInitial) dom.loginFormInitial.addEventListener('submit', auth.handleLoginSubmit);
     if (dom.registerForm) dom.registerForm.addEventListener('submit', auth.handleRegisterSubmit);
     if (dom.addCustomInterestBtn) dom.addCustomInterestBtn.addEventListener('click', auth.handleAddCustomInterest);
     if (dom.verifyBtn) dom.verifyBtn.addEventListener('click', auth.handleVerifySubmit);
     
-    // === НАВІГАЦІЯ (РЕДІРЕКТИ ЗАМІСТЬ МОДАЛОК) ===
+    // === НАВІГАЦІЯ (РЕДІРЕКТИ НА ОКРЕМІ СТОРІНКИ) ===
 
-    // 1. Профіль
+    // 1. Профіль (Клік по аватарці в хедері)
     if (dom.profileDisplay) {
         dom.profileDisplay.addEventListener('click', () => {
             window.location.href = '/profile.html';
         });
     }
-    // Кнопка виходу (якщо вона є в хедері або меню)
-    if (dom.profileLogoutBtn) {
-        dom.profileLogoutBtn.addEventListener('click', () => {
-            localStorage.removeItem('currentUser');
-            localStorage.removeItem('token');
-            window.location.href = '/';
-        });
-    }
 
-    // 2. Чат (Перехід на chat.html)
+    // 2. Чат (Клік по іконці повідомлень)
     if (dom.chatListBtn) {
         dom.chatListBtn.addEventListener('click', () => {
             window.location.href = '/chat.html';
         });
     }
 
-    // Кнопка скролу до подій
+    // 3. Кнопка "Створити подію" (на Hero секції) - вона має href, але можна додати логіку перевірки
+    // (Стандартний <a href="/create_event.html"> працює сам по собі)
+
+    // Кнопка "Знайти події" (скрол до секції)
     if (dom.searchEventsBtn) dom.searchEventsBtn.addEventListener('click', () => utils.scrollToSection('events'));
 
     // Перемикач Архів/Актуальні події
@@ -126,26 +118,28 @@ document.addEventListener('DOMContentLoaded', async () => {
             showingArchive = !showingArchive;
             dom.toggleArchiveBtn.innerHTML = showingArchive ? '<i class="fas fa-calendar-alt"></i> Актуальні' : '<i class="fas fa-history"></i> Архів';
             
-            const title = document.querySelector('.section-title-modern') || document.querySelector('.section-title');
-            if (title && title.childNodes[0]) {
-                title.childNodes[0].textContent = showingArchive ? 'Архів подій ' : 'Нові події ';
+            const title = document.querySelector('.section-title'); // Використовуємо стандартний селектор
+            if (title) {
+                // Якщо заголовок має текст, змінюємо його
+                const textNode = Array.from(title.childNodes).find(node => node.nodeType === 3 && node.textContent.trim().length > 0);
+                if(textNode) textNode.textContent = showingArchive ? 'Архів подій ' : 'Події ';
             }
             events.toggleArchiveMode(showingArchive);
         });
     }
 
-    // Пошук людей
+    // Пошук та фільтрація людей
     if (dom.userSearchInput) dom.userSearchInput.addEventListener('input', user.handleUserSearch);
     if (dom.cityFilterInput) dom.cityFilterInput.addEventListener('input', () => user.renderPeople());
     if (dom.peopleInterestFilter) dom.peopleInterestFilter.addEventListener('click', user.handlePeopleInterestClick);
 
-    // === ОБРОБКА КЛІКІВ У КАРУСЕЛЯХ ===
+    // === ОБРОБКА КЛІКІВ У КАРУСЕЛЯХ (Event Delegation) ===
 
     // 1. Карусель ЛЮДЕЙ
     if (dom.peopleHorizontalTrack) {
         dom.peopleHorizontalTrack.addEventListener('click', (e) => {
             const followBtn = e.target.closest('.follow-btn');
-            // Підписатися/Відписатися (залишається API виклик)
+            // Підписатися/Відписатися (залишається API виклик без переходу)
             if (followBtn) {
                 const card = e.target.closest('.people-card');
                 if (card) user.toggleFollow(parseInt(card.dataset.userId), followBtn);
@@ -153,7 +147,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             const messageBtn = e.target.closest('.message-btn');
-            // Написати -> Перехід в чат з цим юзером
+            // Написати -> Перехід на chat.html з ID користувача
             if (messageBtn) {
                 const card = e.target.closest('.people-card');
                 if (card) {
@@ -163,11 +157,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return;
             }
 
-            // Клік по картці -> Перехід на профіль юзера
+            // Клік по картці -> Перехід на user.html
             const card = e.target.closest('.people-card');
             if (card) {
                 const userId = parseInt(card.dataset.userId);
-                user.openOtherUserProfile(userId); // Ця функція тепер робить redirect
+                user.openOtherUserProfile(userId); // Ця функція в user.js тепер робить window.location.href
             }
         });
     }
@@ -181,6 +175,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const leaveBtn = e.target.closest('.leave-btn-v4'); 
             const creatorInfo = e.target.closest('.creator-info-v4');
             
+            // Дії кнопок (залишаються на сторінці)
             if (joinBtn) {
                 e.stopPropagation();
                 const eventId = parseInt(joinBtn.dataset.eventId);
@@ -190,11 +185,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const eventId = parseInt(leaveBtn.dataset.eventId);
                 await events.handleLeaveEvent({ eventId: eventId });
             } else if (creatorInfo) {
+                // Клік по автору -> Перехід на user.html
                 e.stopPropagation();
                 const userId = parseInt(creatorInfo.dataset.userId);
-                if (userId) user.openOtherUserProfile(userId); // Redirect
+                if (userId) user.openOtherUserProfile(userId); 
             } else if (card) {
-                // Клік по картці -> Перехід на сторінку події
+                // Клік по картці -> Перехід на event.html
                 const eventId = parseInt(card.dataset.eventId);
                 if (eventId) {
                     window.location.href = `/event.html?id=${eventId}`;
@@ -209,7 +205,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (dom.peopleScrollLeftBtn) dom.peopleScrollLeftBtn.addEventListener('click', () => dom.peopleHorizontalTrack.scrollBy({ left: 320, behavior: 'smooth' }));
     if (dom.peopleScrollRightBtn) dom.peopleScrollRightBtn.addEventListener('click', () => dom.peopleHorizontalTrack.scrollBy({ left: 320, behavior: 'smooth' }));
 
-    // Сповіщення
+    // Сповіщення (Dropdown)
     if (dom.notificationBtn) {
         dom.notificationBtn.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -223,7 +219,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         dom.markAllReadBtn.addEventListener('click', markAllNotificationsRead);
     }
 
-    // Закриття залишкових модалок (авторизація, пошук інтересів)
+    // Закриття залишкових технічних модалок (які не мають власних сторінок)
     const closeButtons = [
         dom.closeRegisterModal, dom.closeForgotPasswordModal,
         dom.closeInterestSearchModal, dom.closeSocialListModal
@@ -234,7 +230,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 });
 
-// --- ЛОГІКА СПОВІЩЕНЬ ---
+// --- ЛОГІКА СПОВІЩЕНЬ (SOCKETS) ---
 
 async function setupNotifications(userId) {
     socket.emit('join_notifications', { userId: userId });
@@ -246,17 +242,16 @@ async function setupNotifications(userId) {
         await addNotificationToUI(notif);
         updateBadgeCount(1);
         
+        // Якщо нова подія - оновлюємо список подій на головній
         if (notif.type === 'new_event') {
             events.refreshEventsCache();
         }
     });
 
     socket.on('chat_alert', (msg) => {
-        // Якщо ми не на сторінці чату, показуємо тост
-        if (!window.location.pathname.includes('chat.html')) {
-            utils.showToast(`Нове повідомлення від ${msg.senderName}`, 'info');
-            updateChatBadge(1);
-        }
+        // Показуємо тост про повідомлення, бо ми на головній сторінці (не в чаті)
+        utils.showToast(`Нове повідомлення від ${msg.senderName}`, 'info');
+        updateChatBadge(1);
     });
 }
 
@@ -294,12 +289,12 @@ async function addNotificationToUI(notif, prepend = true) {
     
     let iconHtml = '';
     
-    if (notif.type === 'follow' && notif.related_id) {
-        // Оптимізація: завантажуємо аватар тільки якщо треба, або заглушку
-        // Тут краще брати з кешу, але для простоти іконка
+    if (notif.type === 'follow') {
         iconHtml = `<div class="notif-icon-area icon-only"><i class="fas fa-user-plus"></i></div>`;
     } else if (notif.type === 'new_event') {
         iconHtml = `<div class="notif-icon-area icon-only" style="background: #e0f2fe; color: #0284c7;"><i class="fas fa-calendar-plus"></i></div>`;
+    } else if (notif.type === 'reminder') {
+        iconHtml = `<div class="notif-icon-area icon-only" style="background: #fef3c7; color: #d97706;"><i class="fas fa-clock"></i></div>`;
     } else {
         iconHtml = `<div class="notif-icon-area icon-only"><i class="fas fa-bell"></i></div>`;
     }

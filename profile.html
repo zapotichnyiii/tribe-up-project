@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мій профіль — TribeUp</title>
+    
+    <link rel="stylesheet" href="/styles/general_styles.css">
+    <link rel="stylesheet" href="/styles/header.css">
+    <link rel="stylesheet" href="/styles/buttons.css">
+    <link rel="stylesheet" href="/styles/cards_and_tags.css">
+    <link rel="stylesheet" href="/styles/dark_theme.css">
+    <link rel="stylesheet" href="/styles/toast.css">
+    <link rel="stylesheet" href="/styles/forms_and_filters.css">
+    <link rel="stylesheet" href="/styles/modals.css"> <link rel="stylesheet" href="/styles/profile_page.css">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+</head>
+<body>
+    
+    <div id="header-placeholder"></div>
+
+    <main class="profile-page-container container">
+        
+        <div class="profile-cover"></div>
+
+        <div class="profile-grid-layout">
+            
+            <aside class="profile-sidebar">
+                <div class="profile-card-main">
+                    <div class="avatar-container">
+                        <img id="pageProfileAvatar" src="https://via.placeholder.com/150" alt="Avatar">
+                        <button class="edit-avatar-btn" id="triggerAvatarUpload" title="Змінити фото">
+                            <i class="fas fa-camera"></i>
+                        </button>
+                        <input type="file" id="hiddenAvatarInput" accept="image/*" style="display: none;">
+                    </div>
+                    
+                    <h1 id="pageProfileName">Завантаження...</h1>
+                    <p id="pageProfileUsername" class="username-badge">@username</p>
+                    
+                    <div id="pageProfileMeta" class="profile-meta-info">
+                        </div>
+
+                    <div class="profile-stats-bar">
+                        <div class="stat-item" id="pageMyFollowersBtn">
+                            <span class="stat-value" id="pageFollowersCount">0</span>
+                            <span class="stat-label">Підписники</span>
+                        </div>
+                        <div class="stat-divider"></div>
+                        <div class="stat-item" id="pageMyFollowingBtn">
+                            <span class="stat-value" id="pageFollowingCount">0</span>
+                            <span class="stat-label">Підписки</span>
+                        </div>
+                    </div>
+
+                    <div class="sidebar-actions">
+                        <button id="pageLogoutBtn" class="btn btn-outline btn-logout">
+                            <i class="fas fa-sign-out-alt"></i> Вийти
+                        </button>
+                    </div>
+                </div>
+
+                <div class="profile-interests-card">
+                    <h3>Мої інтереси</h3>
+                    <div id="pageProfileInterests" class="interests-cloud"></div>
+                </div>
+            </aside>
+
+            <section class="profile-content">
+                
+                <div class="profile-tabs">
+                    <button class="tab-button active" data-tab="events">
+                        <i class="fas fa-calendar-alt"></i> Мої події
+                    </button>
+                    <button class="tab-button" data-tab="edit">
+                        <i class="fas fa-user-edit"></i> Редагувати
+                    </button>
+                    <button class="tab-button" data-tab="security">
+                        <i class="fas fa-shield-alt"></i> Безпека
+                    </button>
+                </div>
+
+                <div id="tab-events" class="tab-pane active">
+                    <div class="events-section-header">
+                        <h2>Події, які ви створили або відвідуєте</h2>
+                    </div>
+                    <div id="pageUserEventsList" class="profile-events-grid">
+                        <div class="empty-state-placeholder">
+                            <i class="far fa-calendar-times"></i>
+                            <p>Поки що немає подій</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="tab-edit" class="tab-pane">
+                    <div class="edit-form-card">
+                        <h2>Особиста інформація</h2>
+                        <form id="fullPageEditProfileForm">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">Ім'я</label>
+                                    <input type="text" id="editProfileName" class="form-control" placeholder="Ваше ім'я">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Нікнейм</label>
+                                    <div class="input-group-text">
+                                        <span>@</span>
+                                        <input type="text" id="editProfileUsername" class="form-control" placeholder="username">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">Вік</label>
+                                    <input type="number" id="editProfileAge" class="form-control" min="16" max="100">
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Місто</label>
+                                    <input type="text" id="editProfileLocation" class="form-control" placeholder="Ваше місто">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Ваші інтереси</label>
+                                <p class="form-hint">Оберіть те, що вам подобається, або додайте нове.</p>
+                                <div id="editProfileInterestsContainer" class="interests-selection-area"></div>
+                                
+                                <div class="add-interest-row">
+                                    <input type="text" id="editCustomInterestInput" class="form-control" placeholder="Додати свій інтерес...">
+                                    <button type="button" id="addEditCustomInterestBtn" class="btn btn-outline">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="form-actions-footer">
+                                <button type="submit" class="btn btn-accent">Зберегти зміни</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div id="tab-security" class="tab-pane">
+                    <div class="security-card">
+                        <h3>Зміна паролю</h3>
+                        <p style="color: var(--main-secondary-color); margin-bottom: 15px;">Функція зміни паролю поки в розробці.</p>
+                        <button class="btn btn-outline" disabled>Змінити пароль</button>
+                    </div>
+                </div>
+
+            </section>
+        </div>
+    </main>
+
+    <div class="modal" id="socialListModal">
+        <div class="modal-content small-modal">
+            <button class="modal-close" id="closeSocialListModal">×</button>
+            <h2 id="socialListTitle">Список</h2>
+            <div id="socialListContainer" class="social-list-scroll"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+    <script type="module" src="/scripts/pages/profile_page.js"></script>
+</body>
+</html>
