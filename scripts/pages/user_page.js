@@ -1,20 +1,17 @@
 import * as utils from '../utils.js';
-import * as userLib from '../user.js'; // Використовуємо спільну логіку (follow, lists)
+import * as userLib from '../user.js'; 
 import { initSharedComponents } from '../shared.js';
 
 const socket = io('http://localhost:5000');
 const urlParams = new URLSearchParams(window.location.search);
 const userId = parseInt(urlParams.get('id'));
 
-// Елементи DOM
 const els = {
-    // Header Info
     avatar: document.getElementById('otherUserAvatar'),
     name: document.getElementById('otherUserName'),
     username: document.getElementById('otherUserUsername'),
     meta: document.getElementById('otherUserMeta'),
     
-    // Stats & Buttons
     followersBtn: document.getElementById('otherUserFollowersBtn'),
     followersCount: document.getElementById('otherUserFollowersCount'),
     followingBtn: document.getElementById('otherUserFollowingBtn'),
@@ -23,10 +20,7 @@ const els = {
     followBtn: document.getElementById('otherUserFollowBtn'),
     messageBtn: document.getElementById('otherUserMessageBtn'),
     
-    // Interests
     interestsCloud: document.getElementById('otherUserInterests'),
-    
-    // Events
     eventsList: document.getElementById('otherUserEventsList')
 };
 
@@ -34,7 +28,6 @@ let currentUser = null;
 let targetUser = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
-    // 1. Ініціалізація
     await initSharedComponents(socket);
     currentUser = utils.getCurrentUser();
 
@@ -43,21 +36,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
 
-    // Якщо користувач відкрив свій власний профіль через /user.html?id=MY_ID
     if (currentUser && currentUser.id === userId) {
         window.location.href = '/profile.html';
         return;
     }
 
-    // 2. Завантаження даних
     await loadTargetUser();
     
-    // 3. Перевірка статусу підписки (оновлюємо мої підписки)
     if (currentUser) {
         await userLib.fetchMySocials();
         updateFollowButtonState();
     } else {
-        // Якщо не авторизований - ховаємо кнопку повідомлення або робимо неактивною
         els.messageBtn.style.display = 'none';
         els.followBtn.onclick = () => utils.showToast('Увійдіть, щоб підписатися', 'info');
     }
@@ -113,39 +102,74 @@ async function loadUserStats(id) {
     } catch(e) {}
 }
 
+// --- ОНОВЛЕНА ФУНКЦІЯ ЗАВАНТАЖЕННЯ ПОДІЙ ---
 async function loadUserEvents(id) {
-    els.eventsList.innerHTML = ''; 
-    // Видаляємо скелетони
+    els.eventsList.innerHTML = '<div style="text-align:center; padding:20px; color:#888;"><i class="fas fa-circle-notch fa-spin"></i></div>';
     
     try {
+        // 1. Всі події
         const allEvents = await utils.getEvents('active');
-        // Показуємо події, які створив користувач
-        const userEvents = allEvents.filter(e => e.creatorId === id);
+        
+        // 2. Події, де юзер є учасником (API дозволяє отримати для будь-якого ID)
+        const resJoined = await fetch(`http://localhost:5000/api/my-joined-events/${id}`);
+        const joinedIds = await resJoined.json();
+
+        // 3. Фільтруємо: або творець, або учасник
+        const userEvents = allEvents
+            .filter(e => e.creatorId === id || joinedIds.includes(e.eventId))
+            .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+        els.eventsList.innerHTML = '';
 
         if (userEvents.length === 0) {
             els.eventsList.innerHTML = `
                 <div class="empty-events-placeholder">
                     <i class="far fa-calendar-times" style="font-size:3rem; opacity:0.3; margin-bottom:10px;"></i>
-                    <p>Користувач поки не створив подій.</p>
+                    <p>Користувач поки не бере участі в подіях.</p>
                 </div>
             `;
             return;
         }
 
         userEvents.forEach(event => {
+            const isCreator = event.creatorId === id;
+            const dateObj = new Date(event.date);
+            
+            let catIcon = 'fa-calendar-alt';
+            if (event.category === 'sports') catIcon = 'fa-running';
+            else if (event.category === 'music') catIcon = 'fa-music';
+            else if (event.category === 'food') catIcon = 'fa-utensils';
+            else if (event.category === 'games') catIcon = 'fa-gamepad';
+
             const card = document.createElement('div');
-            card.className = 'event-card-horizontal';
-            card.style.minHeight = 'auto'; // Адаптація під грід
+            card.className = 'profile-event-card'; // Використовуємо той самий клас, що і в профілі
             
             card.innerHTML = `
-                <div class="card-content-v4" style="padding: 20px;">
-                    <h3 class="card-title-v4" style="font-size: 1.1rem;">${event.title}</h3>
-                    <div style="font-size: 0.85rem; color: var(--main-secondary-color); margin-bottom: 10px;">
-                        <i class="fas fa-calendar"></i> ${utils.formatEventDate(event.date)}
+                <div class="pec-header">
+                    <div class="pec-date">
+                        <span class="day">${dateObj.getDate()}</span>
+                        <span class="month">${dateObj.toLocaleDateString('uk-UA', { month: 'short' })}</span>
                     </div>
-                    <div style="font-size: 0.85rem;">
-                        <i class="fas fa-map-marker-alt" style="color:var(--auth-accent-color);"></i> ${event.location}
+                    ${isCreator 
+                        ? `<span class="role-badge organizer"><i class="fas fa-crown"></i> Організатор</span>` 
+                        : `<span class="role-badge participant"><i class="fas fa-check"></i> Учасник</span>`
+                    }
+                </div>
+                
+                <div class="pec-body">
+                    <div class="pec-category"><i class="fas ${catIcon}"></i> ${event.category}</div>
+                    <h3 class="pec-title">${event.title}</h3>
+                    <div class="pec-meta">
+                        <span><i class="far fa-clock"></i> ${dateObj.toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' })}</span>
+                        <span><i class="fas fa-map-marker-alt"></i> ${event.location}</span>
                     </div>
+                </div>
+
+                <div class="pec-footer">
+                    <div class="pec-users">
+                        <i class="fas fa-users"></i> ${event.currentParticipants}/${event.participants}
+                    </div>
+                    <span class="pec-arrow"><i class="fas fa-arrow-right"></i></span>
                 </div>
             `;
             
@@ -179,26 +203,20 @@ function updateFollowButtonState() {
 }
 
 function setupEventListeners() {
-    // Підписка
     els.followBtn.addEventListener('click', async () => {
         if (!currentUser) {
             utils.showToast('Увійдіть, щоб підписатися', 'info');
             return;
         }
-        
-        // Використовуємо функцію з user.js, яка оновлює API і масиви
         await userLib.toggleFollow(userId, els.followBtn);
-        // Додатково оновлюємо вигляд кнопки (хоча toggleFollow теж це робить, але для надійності)
         updateFollowButtonState();
     });
 
-    // Повідомлення -> Редірект на чат
     els.messageBtn.addEventListener('click', () => {
         if (!currentUser) return;
         window.location.href = `/chat.html?userId=${userId}`;
     });
 
-    // Списки (відкриваємо модалку через user.js)
     els.followersBtn.addEventListener('click', () => userLib.openSocialList('followers', userId));
     els.followingBtn.addEventListener('click', () => userLib.openSocialList('following', userId));
 }

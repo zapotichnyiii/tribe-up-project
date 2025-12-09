@@ -237,6 +237,175 @@
 
 .form-actions-footer { text-align: right; margin-top: 30px; }
 
+/* --- НОВІ КАРТКИ ПОДІЙ В ПРОФІЛІ --- */
+
+.profile-event-card {
+    background: var(--main-card-background);
+    border-radius: 20px;
+    border: 1px solid #e2e8f0;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    min-height: 200px;
+}
+
+/* Ефект наведення (підйом) */
+.profile-event-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+    border-color: var(--auth-accent-color);
+}
+
+/* Верхня частина (Дата і Бейдж) */
+.pec-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 15px;
+}
+
+.pec-date {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #f8fafc;
+    padding: 8px 12px;
+    border-radius: 12px;
+    line-height: 1;
+    border: 1px solid #e2e8f0;
+}
+
+.pec-date .day {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--main-dark-color);
+}
+
+.pec-date .month {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: var(--auth-accent-color);
+    font-weight: 700;
+    margin-top: 2px;
+}
+
+.role-badge {
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 6px 12px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.role-badge.organizer {
+    background: rgba(107, 33, 168, 0.1);
+    color: var(--auth-accent-color);
+}
+
+.role-badge.participant {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+}
+
+/* Тіло картки */
+.pec-body {
+    flex-grow: 1;
+}
+
+.pec-category {
+    font-size: 0.8rem;
+    color: var(--main-secondary-color);
+    margin-bottom: 5px;
+    text-transform: capitalize;
+}
+
+.pec-category i {
+    color: var(--auth-accent-color);
+    margin-right: 4px;
+}
+
+.pec-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: var(--main-dark-color);
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.pec-meta {
+    font-size: 0.85rem;
+    color: var(--main-secondary-color);
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.pec-meta span i {
+    width: 16px;
+    text-align: center;
+    margin-right: 5px;
+}
+
+/* Футер картки */
+.pec-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #f1f5f9;
+}
+
+.pec-users {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--main-secondary-color);
+}
+
+.pec-arrow {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #f8fafc;
+    color: var(--auth-accent-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+}
+
+.profile-event-card:hover .pec-arrow {
+    background: var(--auth-accent-color);
+    color: white;
+    transform: translateX(5px);
+}
+
+/* --- ТЕМНА ТЕМА --- */
+body.dark-theme .profile-event-card {
+    background: var(--dark-card-bg);
+    border-color: var(--dark-border);
+}
+
+body.dark-theme .pec-date {
+    background: var(--dark-input-bg);
+    border-color: var(--dark-border);
+}
+
+body.dark-theme .pec-date .day { color: var(--dark-text-primary); }
+body.dark-theme .pec-title { color: var(--dark-text-primary); }
+body.dark-theme .pec-footer { border-top-color: var(--dark-border); }
+body.dark-theme .pec-arrow { background: var(--dark-input-bg); }
+body.dark-theme .profile-event-card:hover .pec-arrow { background: var(--auth-accent-color); }
+
 /* Security Tab */
 .security-card {
     background: var(--main-card-background);

@@ -190,6 +190,150 @@ body.dark-theme .user-stats-bar { border-color: var(--dark-border); }
 body.dark-theme .stat-divider { background: var(--dark-border); }
 body.dark-theme .skeleton-card { background: #1e293b; }
 
+/* ... (ваші старі стилі для сайдбару залишаються) ... */
+
+/* --- НОВІ СТИЛІ КАРТОК ПОДІЙ (Копія з профілю) --- */
+
+.profile-event-card {
+    background: var(--main-card-background);
+    border-radius: 20px;
+    border: 1px solid #e2e8f0;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    min-height: 220px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+}
+
+.profile-event-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+    border-color: var(--auth-accent-color);
+}
+
+/* Header */
+.pec-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 15px;
+}
+
+.pec-date {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #f8fafc;
+    padding: 8px 12px;
+    border-radius: 12px;
+    line-height: 1;
+    border: 1px solid #e2e8f0;
+    min-width: 50px;
+}
+
+.pec-date .day { font-size: 1.3rem; font-weight: 800; color: var(--main-dark-color); }
+.pec-date .month { font-size: 0.75rem; text-transform: uppercase; color: var(--auth-accent-color); font-weight: 700; margin-top: 4px; }
+
+.role-badge {
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 6px 12px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.role-badge.organizer { background: rgba(107, 33, 168, 0.1); color: var(--auth-accent-color); }
+.role-badge.participant { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+
+/* Body */
+.pec-body { flex-grow: 1; }
+
+.pec-category {
+    font-size: 0.8rem;
+    color: var(--main-secondary-color);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+}
+.pec-category i { color: var(--auth-accent-color); margin-right: 5px; }
+
+.pec-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 15px;
+    color: var(--main-dark-color);
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.pec-meta {
+    font-size: 0.9rem;
+    color: var(--main-secondary-color);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.pec-meta span { display: flex; align-items: center; gap: 8px; }
+.pec-meta span i { width: 16px; text-align: center; color: var(--main-secondary-color); opacity: 0.7; }
+
+/* Footer */
+.pec-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #f1f5f9;
+}
+
+.pec-users {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--main-secondary-color);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.pec-arrow {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #f8fafc;
+    color: var(--auth-accent-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+}
+
+.profile-event-card:hover .pec-arrow {
+    background: var(--auth-accent-color);
+    color: white;
+    transform: translateX(5px);
+}
+
+/* Dark Theme */
+body.dark-theme .profile-event-card { background: var(--dark-card-bg); border-color: var(--dark-border); }
+body.dark-theme .pec-date { background: var(--dark-input-bg); border-color: var(--dark-border); }
+body.dark-theme .pec-date .day { color: var(--dark-text-primary); }
+body.dark-theme .pec-title { color: var(--dark-text-primary); }
+body.dark-theme .pec-footer { border-top-color: var(--dark-border); }
+body.dark-theme .pec-arrow { background: var(--dark-input-bg); }
+body.dark-theme .profile-event-card:hover .pec-arrow { background: var(--auth-accent-color); }
+
 /* Responsive */
 @media (max-width: 900px) {
     .user-grid-layout { grid-template-columns: 1fr; }

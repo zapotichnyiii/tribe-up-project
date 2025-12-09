@@ -26,6 +26,8 @@ app.config['MAIL_DEFAULT_SENDER'] = 'TribeUp Team <tvoja.poshta@gmail.com>'
 
 mail = Mail(app)
 
+online_users = {}
+
 DB_CONFIG = {
     'dbname': 'tribeup_db',
     'user': 'postgres',
@@ -143,7 +145,12 @@ threading.Thread(target=check_upcoming_events, daemon=True).start()
 
 @socketio.on('join_notifications')
 def on_join_notifications(data):
-    if data.get('userId'): join_room(f"user_{data['userId']}")
+    user_id = data.get('userId')
+    if user_id:
+        join_room(f"user_{user_id}")
+        if user_id not in online_users:
+            online_users[user_id] = set()
+        online_users[user_id].add(request.sid)
 
 @socketio.on('join')
 def on_join(data):
@@ -723,6 +730,53 @@ def reset_password():
         return jsonify({'error': str(e)}), 500
     finally:
         conn.close()
+
+@socketio.on('disconnect')
+def on_disconnect():
+    # Шукаємо, хто відключився, за його socket_id (request.sid)
+    disconnected_user_id = None
+    
+    for uid, sids in online_users.items():
+        if request.sid in sids:
+            sids.remove(request.sid)
+            if not sids: # Якщо закрив останню вкладку
+                disconnected_user_id = uid
+            break
+    
+    if disconnected_user_id:
+        # Видаляємо зі списку онлайн
+        del online_users[disconnected_user_id]
+        
+        # Оновлюємо час останнього візиту в БД
+        conn = get_db()
+        try:
+            cur = conn.cursor()
+            cur.execute("UPDATE users SET last_seen = NOW() WHERE id = %s", (disconnected_user_id,))
+            conn.commit()
+        except Exception as e:
+            print(f"Error updating last_seen: {e}")
+        finally:
+            conn.close()
+
+@app.route('/api/users/<int:user_id>/status', methods=['GET'])
+def get_user_status(user_id):
+    # 1. Перевіряємо, чи є він у списку онлайн (в оперативній пам'яті)
+    is_online = user_id in online_users
+    
+    last_seen = None
+    # 2. Якщо не онлайн, беремо час з БД
+    if not is_online:
+        conn = get_db()
+        try:
+            cur = conn.cursor(cursor_factory=RealDictCursor)
+            cur.execute("SELECT last_seen FROM users WHERE id = %s", (user_id,))
+            row = cur.fetchone()
+            if row and row['last_seen']:
+                last_seen = row['last_seen'].isoformat()
+        finally:
+            conn.close()
+            
+    return jsonify({'isOnline': is_online, 'lastSeen': last_seen})
 
 if __name__ == '__main__':
     socketio.run(app, debug=True, port=5000)

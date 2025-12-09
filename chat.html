@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="/styles/buttons.css">
     <link rel="stylesheet" href="/styles/dark_theme.css">
     <link rel="stylesheet" href="/styles/toast.css">
-    
+    <link rel="stylesheet" href="/styles/modals.css"> 
     <link rel="stylesheet" href="/styles/chat_page.css">
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
@@ -18,14 +18,20 @@
     <link rel="icon" href="/favicon.ico" type="image/x-icon">
 </head>
 <body class="chat-page-body">
-    
-    <div id="header-placeholder"></div>
+
+    <header style="display: none;"></header>
 
     <main class="chat-layout container">
         
         <aside class="chat-sidebar" id="chatSidebar">
             <div class="sidebar-header">
-                <h2>Повідомлення</h2>
+                <div class="sidebar-header-top">
+                    <a href="/" class="home-btn-integrated" title="На головну">
+                        <i class="fas fa-chevron-left"></i>
+                    </a>
+                    <h2>Повідомлення</h2>
+                </div>
+                
                 <div class="search-wrapper">
                     <i class="fas fa-search"></i>
                     <input type="text" id="chatSearchInput" placeholder="Пошук чатів...">
@@ -34,9 +40,7 @@
 
             <div class="chat-list" id="chatListContainer">
                 <div class="chat-list-loading">
-                    <div class="skeleton-item"></div>
-                    <div class="skeleton-item"></div>
-                    <div class="skeleton-item"></div>
+                    <div style="padding: 20px; text-align: center; color: gray;">Завантаження...</div>
                 </div>
             </div>
         </aside>
@@ -54,7 +58,6 @@
             </div>
 
             <div class="chat-active-view" id="chatActiveView" style="display: none;">
-                
                 <div class="chat-room-header">
                     <button class="back-to-list-btn" id="backToChatListBtn">
                         <i class="fas fa-arrow-left"></i>
@@ -62,19 +65,17 @@
                     <div class="chat-partner-info">
                         <div class="avatar-wrapper small">
                             <img id="currentChatAvatar" src="" alt="">
-                            </div>
+                        </div>
                         <div class="partner-text">
-                            <h3 id="currentChatName">Ім'я користувача</h3>
+                            <h3 id="currentChatName">User</h3>
                             <span class="partner-status" id="currentChatStatus">в мережі</span>
                         </div>
                     </div>
                     <div class="chat-actions">
-                        <button class="icon-btn" title="Інформація про профіль"><i class="fas fa-info-circle"></i></button>
-                    </div>
+                        </div>
                 </div>
 
-                <div class="messages-container" id="messagesArea">
-                    </div>
+                <div class="messages-container" id="messagesArea"></div>
 
                 <div class="chat-input-area">
                     <button class="attach-btn" title="Прикріпити файл"><i class="fas fa-paperclip"></i></button>
@@ -89,6 +90,14 @@
             </div>
         </section>
     </main>
+
+    <div id="socialListModal" class="modal">
+        <div class="modal-content small-modal">
+            <button class="modal-close" id="closeSocialListModal">×</button>
+            <h2 id="socialListTitle">Список</h2>
+            <div id="socialListContainer" class="social-list-scroll"></div>
+        </div>
+    </div>
 
     <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
     <script type="module" src="/scripts/pages/chat_page.js"></script>

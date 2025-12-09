@@ -1,6 +1,6 @@
 import * as utils from '../utils.js';
 import * as ui from '../ui.js';
-import * as userLib from '../user.js'; // Для спільних функцій, як fetchMySocials
+import * as userLib from '../user.js';
 import { initSharedComponents } from '../shared.js';
 
 const socket = io('http://localhost:5000');
@@ -38,7 +38,7 @@ const els = {
     customInterestInput: document.getElementById('editCustomInterestInput'),
     addInterestBtn: document.getElementById('addEditCustomInterestBtn'),
     
-    // Social buttons (for opening lists)
+    // Social buttons
     followersBtn: document.getElementById('pageMyFollowersBtn'),
     followingBtn: document.getElementById('pageMyFollowingBtn')
 };
@@ -54,13 +54,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
 
+    // --- ВАЖЛИВО: Завантажуємо список інтересів, щоб вони відобразилися в формі ---
+    await utils.fetchGlobalInterests();
+
     // 1. Заповнення даних
     renderProfileSidebar(currentUser);
     populateEditForm(currentUser);
     
     // 2. Завантаження динамічних даних
     loadUserEvents();
-    loadSocialStats(); // Оновлення підписників
+    loadSocialStats(); 
 
     // 3. Слухачі подій
     setupEventListeners();
@@ -108,13 +111,11 @@ function renderProfileSidebar(user) {
     els.name.textContent = user.name;
     els.username.textContent = `@${user.username}`;
     
-    // Meta: Age & Location
     els.meta.innerHTML = `
         <span><i class="fas fa-birthday-cake"></i> ${user.age} років</span>
         <span><i class="fas fa-map-marker-alt"></i> ${user.location}</span>
     `;
 
-    // Static interests cloud
     els.interestsCloud.innerHTML = user.interests.map(i => 
         `<span class="interest-tag selected" style="cursor:default">${i}</span>`
     ).join('');
@@ -126,7 +127,7 @@ function populateEditForm(user) {
     els.inputAge.value = user.age;
     els.inputLocation.value = user.location;
     
-    // Рендер інтересів для редагування (з можливістю видалення/вибору)
+    // Рендер інтересів для редагування
     ui.renderInterests(els.interestsContainer, user.interests, () => {});
 }
 
@@ -141,14 +142,23 @@ async function loadSocialStats() {
 }
 
 async function loadUserEvents() {
-    els.eventsList.innerHTML = '<p style="text-align:center; padding:20px; width:100%;">Завантаження подій...</p>';
+    els.eventsList.innerHTML = '<div style="text-align:center; padding:30px; color:#888;"><i class="fas fa-circle-notch fa-spin"></i> Завантаження подій...</div>';
     
     try {
         const allEvents = await utils.getEvents('active'); 
         const joinedEvents = await utils.getJoinedEvents();
         const myJoinedIds = joinedEvents[currentUser.id] || [];
 
-        const myEvents = allEvents.filter(e => e.creatorId === currentUser.id || myJoinedIds.includes(e.eventId));
+        // Фільтруємо і сортуємо
+        const myEvents = allEvents
+            .filter(e => e.creatorId === currentUser.id || myJoinedIds.includes(e.eventId))
+            .sort((a, b) => {
+                const aIsCreator = a.creatorId === currentUser.id;
+                const bIsCreator = b.creatorId === currentUser.id;
+                if (aIsCreator && !bIsCreator) return -1;
+                if (!aIsCreator && bIsCreator) return 1;
+                return new Date(a.date) - new Date(b.date);
+            });
         
         els.eventsList.innerHTML = '';
         
@@ -165,19 +175,44 @@ async function loadUserEvents() {
 
         myEvents.forEach(event => {
             const isCreator = event.creatorId === currentUser.id;
+            const dateObj = new Date(event.date);
+            
+            let catIcon = 'fa-calendar-alt';
+            if (event.category === 'sports') catIcon = 'fa-running';
+            else if (event.category === 'music') catIcon = 'fa-music';
+            else if (event.category === 'food') catIcon = 'fa-utensils';
+            else if (event.category === 'games') catIcon = 'fa-gamepad';
+            else if (event.category === 'arts') catIcon = 'fa-palette';
+
             const card = document.createElement('div');
-            card.className = 'event-card-horizontal'; 
-            card.style.minHeight = 'auto';
+            card.className = 'profile-event-card';
             
             card.innerHTML = `
-                <div class="card-content-v4" style="padding: 20px;">
-                    <h3 class="card-title-v4" style="font-size: 1.2rem;">${event.title}</h3>
-                    <div style="font-size: 0.9rem; color: var(--main-secondary-color); margin-bottom: 10px;">
-                        <i class="fas fa-calendar"></i> ${utils.formatEventDate(event.date)}
+                <div class="pec-header">
+                    <div class="pec-date">
+                        <span class="day">${dateObj.getDate()}</span>
+                        <span class="month">${dateObj.toLocaleDateString('uk-UA', { month: 'short' })}</span>
                     </div>
-                    <div style="font-size: 0.85rem; display:flex; gap:10px;">
-                        ${isCreator ? '<span style="color:#6b21a8; font-weight:600;">Ви організатор</span>' : '<span style="color:#10b981; font-weight:600;">Ви учасник</span>'}
+                    ${isCreator 
+                        ? `<span class="role-badge organizer"><i class="fas fa-crown"></i> Організатор</span>` 
+                        : `<span class="role-badge participant"><i class="fas fa-check"></i> Учасник</span>`
+                    }
+                </div>
+                
+                <div class="pec-body">
+                    <div class="pec-category"><i class="fas ${catIcon}"></i> ${event.category}</div>
+                    <h3 class="pec-title">${event.title}</h3>
+                    <div class="pec-meta">
+                        <span><i class="far fa-clock"></i> ${dateObj.toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' })}</span>
+                        <span><i class="fas fa-map-marker-alt"></i> ${event.location}</span>
                     </div>
+                </div>
+
+                <div class="pec-footer">
+                    <div class="pec-users">
+                        <i class="fas fa-users"></i> ${event.currentParticipants}/${event.participants}
+                    </div>
+                    <span class="pec-arrow"><i class="fas fa-arrow-right"></i></span>
                 </div>
             `;
             
@@ -215,12 +250,16 @@ function handleAddInterest() {
         
         utils.addGlobalInterest(val);
         
+        // Оновлюємо контейнер (щоб зберегти стан вже вибраних)
+        const container = els.interestsContainer;
+        // Додаємо новий тег вручну або перерендерюємо все
+        // Найпростіше: додати в DOM, бо ui.renderInterests перезапише все
         const span = document.createElement('span');
         span.className = 'interest-tag selected';
         span.dataset.interest = val;
         span.textContent = val;
         span.onclick = () => span.classList.toggle('selected');
-        els.interestsContainer.appendChild(span);
+        container.appendChild(span);
         
         els.customInterestInput.value = '';
     }
@@ -259,6 +298,7 @@ async function handleProfileUpdate(e) {
             utils.showToast('Профіль оновлено!', 'success');
             
             renderProfileSidebar(newUser);
+            // Оновлюємо хедер
             const headerName = document.getElementById('profileUsername');
             const headerAvatar = document.getElementById('profileAvatar');
             if(headerName) headerName.textContent = newUser.username;

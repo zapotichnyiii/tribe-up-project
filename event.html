@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="/styles/dark_theme.css">
     <link rel="stylesheet" href="/styles/toast.css">
     <link rel="stylesheet" href="/styles/forms_and_filters.css">
-    
+    <link rel="stylesheet" href="/styles/modals.css">
     <link rel="stylesheet" href="/styles/event_page.css">
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
@@ -22,7 +22,7 @@
 </head>
 <body>
     
-    <div id="header-placeholder"></div>
+    <header style="display: none;"></header>
 
     <main class="event-page-container container">
         
@@ -126,8 +126,7 @@
                 <div class="event-right-col">
                     
                     <div class="sidebar-card action-card">
-                        <div id="actionArea">
-                            </div>
+                        <div id="actionArea"></div>
                         <div class="spots-left" id="spotsLeftText">Залишилось місць: 5</div>
                     </div>
 
@@ -139,9 +138,8 @@
                     <div class="sidebar-card participants-card">
                         <div class="card-header-row">
                             <h4>Хто йде?</h4>
-                            </div>
-                        <div id="pageParticipantsList" class="participants-grid">
-                            </div>
+                        </div>
+                        <div id="pageParticipantsList" class="participants-grid"></div>
                     </div>
 
                 </div>
