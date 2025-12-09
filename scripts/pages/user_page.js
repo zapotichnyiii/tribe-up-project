@@ -2,7 +2,7 @@ import * as utils from '../utils.js';
 import * as userLib from '../user.js'; 
 import { initSharedComponents } from '../shared.js';
 
-const socket = io('API_URL');
+const socket = io(utils.API_URL);
 const urlParams = new URLSearchParams(window.location.search);
 const userId = parseInt(urlParams.get('id'));
 
@@ -95,7 +95,7 @@ function renderUserProfile(user) {
 
 async function loadUserStats(id) {
     try {
-        const res = await fetch(`API_URL/api/users/${id}/social`);
+        const res = await fetch(`${utils.API_URL}/api/users/${id}/social`);
         const data = await res.json();
         els.followersCount.textContent = data.followers.length;
         els.followingCount.textContent = data.following.length;
@@ -111,7 +111,7 @@ async function loadUserEvents(id) {
         const allEvents = await utils.getEvents('active');
         
         // 2. Події, де юзер є учасником (API дозволяє отримати для будь-якого ID)
-        const resJoined = await fetch(`API_URL/api/my-joined-events/${id}`);
+        const resJoined = await fetch(`${utils.API_URL}/api/my-joined-events/${id}`);
         const joinedIds = await resJoined.json();
 
         // 3. Фільтруємо: або творець, або учасник

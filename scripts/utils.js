@@ -1,7 +1,7 @@
 export let map;
 export function setMap(newMap) { map = newMap; }
 
-let API_URL;
+export let API_URL;
 
 // Перевіряємо, де відкритий сайт
 if (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost') {

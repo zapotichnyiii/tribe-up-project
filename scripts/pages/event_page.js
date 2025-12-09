@@ -2,7 +2,7 @@ import * as utils from '../utils.js';
 import * as ui from '../ui.js';
 import { initSharedComponents } from '../shared.js';
 
-const socket = io('API_URL');
+const socket = io(utils.API_URL);
 const urlParams = new URLSearchParams(window.location.search);
 const eventId = parseInt(urlParams.get('id'));
 
@@ -130,7 +130,8 @@ async function renderEventPage(event) {
 
 async function loadParticipants(id) {
     try {
-        const res = await fetch(`API_URL/api/events/${id}/participants`);
+        // ВИПРАВЛЕНО: Backticks і utils.API_URL
+        const res = await fetch(`${utils.API_URL}/api/events/${id}/participants`);
         const participants = await res.json();
         
         els.participantsList.innerHTML = '';
@@ -209,10 +210,10 @@ async function renderActionButtons(event, isFull) {
     }
 }
 
-// ... (решта функцій handleJoin, handleLeave, setupCreatorActions, initMap без змін) ...
 async function handleJoin(eventId) {
     try {
-        const res = await fetch('API_URL/api/events/join', {
+        // ВИПРАВЛЕНО: Backticks і utils.API_URL
+        const res = await fetch(`${utils.API_URL}/api/events/join`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
             body: JSON.stringify({ userId: currentUser.id, eventId })
@@ -228,7 +229,8 @@ async function handleJoin(eventId) {
 
 async function handleLeave(eventId) {
     try {
-        const res = await fetch('API_URL/api/events/leave', {
+        // ВИПРАВЛЕНО: Backticks і utils.API_URL
+        const res = await fetch(`${utils.API_URL}/api/events/leave`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
             body: JSON.stringify({ userId: currentUser.id, eventId })
@@ -263,7 +265,8 @@ function setupCreatorActions(event) {
     els.deleteBtn.onclick = async () => {
         if(confirm('Видалити цю подію? Це незворотньо.')) {
             try {
-                const res = await fetch(`API_URL/api/events/${event.eventId}`, {
+                // ВИПРАВЛЕНО: Backticks і utils.API_URL
+                const res = await fetch(`${utils.API_URL}/api/events/${event.eventId}`, {
                     method: 'DELETE',
                     headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
                 });
@@ -312,7 +315,8 @@ function initMap(location) {
 function setupChat() {
     if (!currentUser) return;
 
-    fetch(`API_URL/api/messages/event/${eventId}`)
+    // ВИПРАВЛЕНО: Backticks і utils.API_URL
+    fetch(`${utils.API_URL}/api/messages/event/${eventId}`)
         .then(res => res.json())
         .then(messages => {
             els.chatWidget.innerHTML = '';
@@ -417,7 +421,8 @@ if (editForm) {
         };
 
         try {
-            const res = await fetch(`API_URL/api/events/${editForm.dataset.eventId}`, {
+            // ВИПРАВЛЕНО: Backticks і utils.API_URL
+            const res = await fetch(`${utils.API_URL}/api/events/${editForm.dataset.eventId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
                 body: JSON.stringify(updatedData)
