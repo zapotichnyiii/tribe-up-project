@@ -3,8 +3,11 @@ export function setMap(newMap) { map = newMap; }
 
 export let API_URL;
 
-// Перевіряємо, де відкритий сайт
-if (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost') {
+// ВИПРАВЛЕНО: Більш надійна перевірка для локального запуску
+if (window.location.hostname === '127.0.0.1' || 
+    window.location.hostname === 'localhost' || 
+    window.location.protocol === 'file:') {
+    
     // Якщо ми вдома (Localhost) -> стукаємо на локальний сервер
     API_URL = 'http://127.0.0.1:5000';
     console.log('Режим розробки: підключено до Localhost');
@@ -21,7 +24,8 @@ export let globalCustomInterests = [];
 // Ця функція завантажить інтереси при старті
 export async function fetchGlobalInterests() {
     try {
-        const res = await fetch(`${API_URL}/interests`);
+        // ВИПРАВЛЕНО: Додано /api
+        const res = await fetch(`${API_URL}/api/interests`);
         const interests = await res.json();
         if (Array.isArray(interests)) {
             globalCustomInterests = interests;
@@ -42,7 +46,8 @@ export function addGlobalInterest(interest) {
 
 export async function getUsers() {
     try {
-        const res = await fetch(`${API_URL}/users`);
+        // ВИПРАВЛЕНО: Додано /api
+        const res = await fetch(`${API_URL}/api/users`);
         return await res.json();
     } catch (e) { return []; }
 }
@@ -53,7 +58,8 @@ export function getCurrentUser() {
 
 export async function getEvents(status = 'active') { 
     try {
-        const res = await fetch(`${API_URL}/events?status=${status}`);
+        // ВИПРАВЛЕНО: Додано /api
+        const res = await fetch(`${API_URL}/api/events?status=${status}`);
         if (!res.ok) {
             console.error(`Server error: ${res.status}`);
             return []; 
@@ -69,7 +75,8 @@ export async function getJoinedEvents() {
     const user = getCurrentUser();
     if (!user) return {};
     try {
-        const res = await fetch(`${API_URL}/my-joined-events/${user.id}`);
+        // ВИПРАВЛЕНО: Додано /api
+        const res = await fetch(`${API_URL}/api/my-joined-events/${user.id}`);
         const ids = await res.json();
         return { [user.id]: ids };
     } catch (e) { return {}; }
