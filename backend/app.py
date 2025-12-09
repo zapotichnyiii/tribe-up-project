@@ -1,3 +1,4 @@
+import os
 from flask import Flask, jsonify, request
 import psycopg2
 from flask_cors import CORS
@@ -28,16 +29,10 @@ mail = Mail(app)
 
 online_users = {}
 
-DB_CONFIG = {
-    'dbname': 'tribeup_db',
-    'user': 'postgres',
-    'password': 'qazwsxedcasd123', 
-    'host': 'localhost',
-    'port': 5432
-}
+DB_CONFIG = os.environ.get('DATABASE_URL')
 
 def get_db():
-    conn = psycopg2.connect(**DB_CONFIG)
+    conn = psycopg2.connect(DB_CONFIG)
     return conn
 
 def token_required(f):
@@ -779,4 +774,5 @@ def get_user_status(user_id):
     return jsonify({'isOnline': is_online, 'lastSeen': last_seen})
 
 if __name__ == '__main__':
-    socketio.run(app, debug=True, port=5000)
+    port = int(os.environ.get("PORT", 5000))
+    socketio.run(app, host='0.0.0.0', port=port)
