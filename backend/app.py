@@ -12,6 +12,7 @@ from flask_mail import Mail, Message
 import random
 import threading
 import time
+from threading import Thread # <-- ДОДАНО: Для асинхронної відправки пошти
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'super_secret_key_for_tribeup_123'
@@ -149,6 +150,15 @@ def check_upcoming_events():
         time.sleep(60)
 threading.Thread(target=check_upcoming_events, daemon=True).start()
 
+# --- НОВА ФУНКЦІЯ: АСИНХРОННА ВІДПРАВКА ПОШТИ ---
+def send_async_email(app, msg):
+    with app.app_context():
+        try:
+            mail.send(msg)
+        except Exception as e:
+            print(f"Mail Error in background: {e}") 
+# ------------------------------------------------
+
 @socketio.on('join_notifications')
 def on_join_notifications(data):
     user_id = data.get('userId')
@@ -244,15 +254,30 @@ def register():
         
         new_user = map_user(cur.fetchone())
         conn.commit()
+        
+        # --- ВИПРАВЛЕНО: АСИНХРОННА ВІДПРАВКА ПОШТИ В ОКРЕМОМУ ПОТОЦІ ---
         try:
             msg = Message("Ваш код підтвердження TribeUp", recipients=[new_user['email']])
             msg.body = f"Привіт, {new_user['name']}!\n\nТвій код підтвердження: {verification_code}\n\nВведи його на сайті, щоб завершити реєстрацію."
-            mail.send(msg)
+            
+            # Запускаємо відправку в окремому потоці
+            sender = Thread(target=send_async_email, args=(app, msg))
+            sender.start()
         except Exception as e:
-            print(f"Mail Error: {e}") 
+            # Ця помилка виникне, якщо, наприклад, не змогли створити об'єкт Message.
+            # Помилки відправки SMTP будуть у фоновому потоці.
+            print(f"Mail Setup Error: {e}") 
+        # -----------------------------------------------------------------
+            
         return jsonify({'userId': new_user['id'], 'message': 'Code sent'})
 
     except Exception as e:
+        # Перевірка на унікальність
+        if 'duplicate key value violates unique constraint' in str(e):
+            if 'username' in str(e):
+                return jsonify({'error': 'Користувач з таким нікнеймом вже існує'}), 400
+            elif 'email' in str(e):
+                 return jsonify({'error': 'Користувач з такою поштою вже існує'}), 400
         return jsonify({'error': str(e)}), 400
     finally:
         conn.close()
@@ -492,7 +517,6 @@ def leave_event():
         cur.execute("UPDATE events SET current_participants = current_participants - 1 WHERE id = %s", (data['eventId'],))
         conn.commit()
         return jsonify({'status': 'success'})
-    except Exception: return jsonify({'error': 'Error'}), 400
     finally: conn.close()
 
 @app.route('/api/users', methods=['GET'])
@@ -692,13 +716,16 @@ def forgot_password():
         cur.execute("UPDATE users SET verification_code = %s WHERE id = %s", (verification_code, user['id']))
         conn.commit()
         
+        # --- ВИПРАВЛЕНО: АСИНХРОННА ВІДПРАВКА ПОШТИ В ОКРЕМОМУ ПОТОЦІ ---
         try:
             msg = Message("Відновлення паролю TribeUp", recipients=[email])
             msg.body = f"Привіт, {user['name']}!\n\nТвій код для відновлення паролю: {verification_code}\n\nНікому не повідомляй цей код."
-            mail.send(msg)
+            sender = Thread(target=send_async_email, args=(app, msg))
+            sender.start()
         except Exception as e:
-            print(f"Mail Error: {e}")
-            return jsonify({'error': 'Не вдалося відправити лист'}), 500
+            print(f"Mail Setup Error: {e}")
+            return jsonify({'error': 'Не вдалося відправити лист (Помилка налаштування)'}), 500
+        # -----------------------------------------------------------------
             
         return jsonify({'message': 'Code sent', 'email': email})
 
