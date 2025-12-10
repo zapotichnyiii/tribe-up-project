@@ -12,7 +12,6 @@ from flask_mail import Mail, Message
 import random
 import threading
 import time
-from threading import Thread
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'super_secret_key_for_tribeup_123'
@@ -20,9 +19,9 @@ CORS(app)
 socketio = SocketIO(app, cors_allowed_origins="*")
 
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
-app.config['MAIL_PORT'] = 465             
-app.config['MAIL_USE_TLS'] = False         
-app.config['MAIL_USE_SSL'] = True          
+app.config['MAIL_PORT'] = 587        
+app.config['MAIL_USE_TLS'] = True         
+app.config['MAIL_USE_SSL'] = False          
 app.config['MAIL_USERNAME'] = 'tribeup.welcome@gmail.com'  
 app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')    
 app.config['MAIL_DEFAULT_SENDER'] = 'TribeUp Team <tribeup.welcome@gmail.com>'
