@@ -1,30 +1,15 @@
 export let map;
 export function setMap(newMap) { map = newMap; }
 
-export let API_URL;
+// Пряме підключення до локального бекенду
+export const API_URL = 'http://127.0.0.1:5000';
+console.log('Підключено до локального сервера: ' + API_URL);
 
-// ВИПРАВЛЕНО: Більш надійна перевірка для локального запуску
-if (window.location.hostname === '127.0.0.1' || 
-    window.location.hostname === 'localhost' || 
-    window.location.protocol === 'file:') {
-    
-    // Якщо ми вдома (Localhost) -> стукаємо на локальний сервер
-    API_URL = 'http://127.0.0.1:5000';
-    console.log('Режим розробки: підключено до Localhost');
-} else {
-    // Якщо ми в інтернеті -> стукаємо на Render
-    API_URL = 'https://tribe-up-backend.onrender.com';
-    console.log('Режим продакшн: підключено до Render');
-}
-
-
-// Тут тепер пусто, бо ми беремо з бази
+// --- Глобальні інтереси ---
 export let globalCustomInterests = [];
 
-// Ця функція завантажить інтереси при старті
 export async function fetchGlobalInterests() {
     try {
-        // ВИПРАВЛЕНО: Додано /api
         const res = await fetch(`${API_URL}/api/interests`);
         const interests = await res.json();
         if (Array.isArray(interests)) {
@@ -35,7 +20,6 @@ export async function fetchGlobalInterests() {
     }
 }
 
-// Більше не додаємо локально, бо це робить сервер при збереженні профілю/події
 export function addGlobalInterest(interest) {
     if (!globalCustomInterests.includes(interest)) {
         globalCustomInterests.push(interest);
@@ -46,7 +30,6 @@ export function addGlobalInterest(interest) {
 
 export async function getUsers() {
     try {
-        // ВИПРАВЛЕНО: Додано /api
         const res = await fetch(`${API_URL}/api/users`);
         return await res.json();
     } catch (e) { return []; }
@@ -58,7 +41,6 @@ export function getCurrentUser() {
 
 export async function getEvents(status = 'active') { 
     try {
-        // ВИПРАВЛЕНО: Додано /api
         const res = await fetch(`${API_URL}/api/events?status=${status}`);
         if (!res.ok) {
             console.error(`Server error: ${res.status}`);
@@ -75,7 +57,6 @@ export async function getJoinedEvents() {
     const user = getCurrentUser();
     if (!user) return {};
     try {
-        // ВИПРАВЛЕНО: Додано /api
         const res = await fetch(`${API_URL}/api/my-joined-events/${user.id}`);
         const ids = await res.json();
         return { [user.id]: ids };
@@ -86,7 +67,7 @@ export function saveUsers(users) {}
 export function saveEvents(events) {}
 export function saveJoinedEvents(joined) {}
 
-// UI Helpers (без змін)
+// UI Helpers
 export function showToast(message, type) {
     const toast = document.createElement('div');
     toast.className = `toast-notification toast-${type} show`;
