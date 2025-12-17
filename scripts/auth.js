@@ -39,9 +39,8 @@ export async function handleLoginSubmit(e) {
     const password = document.getElementById('loginPasswordInitial')?.value;
     
     try {
-        const response = await fetch(`${utils.API_URL}/api/auth/login`, {
+        const response = await utils.fetch(`/api/auth/login`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password })
         });
 
@@ -61,7 +60,7 @@ export async function handleLoginSubmit(e) {
                 }
                 utils.showToast('Введіть код підтвердження, який ми надіслали вам.', 'info');
             } else {
-                 utils.showToast(err.error || 'Помилка входу', 'error');
+                utils.showToast(err.error || 'Помилка входу', 'error');
             }
         }
     } catch (error) {
@@ -101,9 +100,8 @@ export async function handleRegisterSubmit(e) {
     };
 
     try {
-        const response = await fetch(`${utils.API_URL}/api/auth/register`, {
+        const response = await utils.fetch(`/api/auth/register`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(newUserPayload)
         });
 
@@ -138,9 +136,8 @@ export async function handleVerifySubmit() {
     }
 
     try {
-        const res = await fetch(`${utils.API_URL}/api/auth/verify`, {
+        const res = await utils.fetch(`/api/auth/verify`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ userId: pendingUserId, code: code })
         });
 
@@ -207,9 +204,8 @@ export function initForgotPassword() {
             if (!email || !email.includes('@')) return utils.showToast('Введіть коректну пошту', 'error');
 
             try {
-                const res = await fetch(`${utils.API_URL}/api/auth/forgot-password`, {
+                const res = await utils.fetch(`/api/auth/forgot-password`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email })
                 });
 
@@ -238,9 +234,8 @@ export function initForgotPassword() {
             if (newPassword.length < 6) return utils.showToast('Пароль занадто короткий', 'error');
 
             try {
-                const res = await fetch(`${utils.API_URL}/api/auth/reset-password`, {
+                const res = await utils.fetch(`/api/auth/reset-password`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email, code, newPassword })
                 });
 

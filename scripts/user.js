@@ -39,7 +39,7 @@ export async function fetchMySocials() {
     const user = utils.getCurrentUser();
     if (!user) return;
     try {
-        const res = await fetch(`${utils.API_URL}/api/users/${user.id}/social`);
+        const res = await utils.fetch(`/api/users/${user.id}/social`);
         const data = await res.json();
         
         myFollowingIds = data.following.map(u => u.id);
@@ -55,9 +55,8 @@ export async function toggleFollow(targetUserId, btnElement) {
     const endpoint = isFollowing ? 'unfollow' : 'follow';
     
     try {
-        const res = await fetch(`${utils.API_URL}/api/users/${targetUserId}/${endpoint}`, {
+        const res = await utils.fetch(`$/api/users/${targetUserId}/${endpoint}`, {
             method: 'POST',
-            headers: getAuthHeaders(),
             body: JSON.stringify({ followerId: user.id })
         });
 
@@ -259,7 +258,7 @@ export async function openSocialList(type, userId = null) {
     utils.openModal(dom.socialListModal);
     
     try {
-        const res = await fetch(`${utils.API_URL}/api/users/${targetId}/social`);
+        const res = await utils.fetch(`/api/users/${targetId}/social`);
         const data = await res.json();
         const list = type === 'followers' ? data.followers : data.following;
         

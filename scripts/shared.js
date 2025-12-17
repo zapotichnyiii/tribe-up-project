@@ -126,8 +126,6 @@ async function setupNotifications(userId) {
     });
 
     socket.on('chat_alert', (msg) => {
-        // Показуємо тост про повідомлення, ТІЛЬКИ якщо ми НЕ на сторінці чату
-        // Або якщо ми на сторінці чату, але в іншому діалозі (це вже обробляє chat_page.js, тут глобальна перевірка)
         if (!window.location.pathname.includes('chat.html')) {
             utils.showToast(`Нове повідомлення від ${msg.senderName}`, 'info');
             updateChatBadge(1);
@@ -137,9 +135,7 @@ async function setupNotifications(userId) {
 
 async function loadNotifications(userId) {
     try {
-        const res = await fetch(`${utils.API_URL}/api/notifications/${userId}`, {
-            headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-        });
+        const res = await utils.fetch(`/api/notifications/${userId}`);
         const notifs = await res.json();
         
         if(!dom.notificationList) return;
@@ -204,17 +200,15 @@ async function addNotificationToUI(notif, prepend = true) {
 }
 
 async function markNotificationRead(id) {
-    await fetch(`${utils.API_URL}/api/notifications/read`, {
+    await utils.fetch(`$/api/notifications/read`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
         body: JSON.stringify({ id: id })
     });
 }
 
 async function markAllNotificationsRead(userId) {
-    await fetch(`${utils.API_URL}/api/notifications/read`, {
+    await utils.fetch(`/api/notifications/read`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
         body: JSON.stringify({ userId: userId })
     });
     document.querySelectorAll('.notif-item.unread').forEach(el => el.classList.remove('unread'));

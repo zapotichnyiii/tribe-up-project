@@ -227,9 +227,8 @@ export async function handleJoinEvent(data) {
         return false;
     }
     try {
-        const res = await fetch(`${utils.API_URL}/api/events/join`, {
+        const res = await utils.fetch(`/api/events/join`, {
             method: 'POST',
-            headers: getAuthHeaders(),
             body: JSON.stringify({ userId: user.id, eventId: data.eventId })
         });
         if (res.ok) {
@@ -247,9 +246,8 @@ export async function handleLeaveEvent(data) {
     const user = utils.getCurrentUser();
     if (!user) return;
     try {
-        const res = await fetch(`${utils.API_URL}/api/events/leave`, {
+        const res = await utils.fetch(`/api/events/leave`, {
             method: 'POST',
-            headers: getAuthHeaders(),
             body: JSON.stringify({ userId: user.id, eventId: data.eventId })
         });
         if (res.ok) {

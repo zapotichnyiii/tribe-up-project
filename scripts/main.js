@@ -260,9 +260,7 @@ async function loadNotifications(userId) {
     if(!userId) return;
 
     try {
-        const res = await fetch(`${utils.API_URL}/api/notifications/${userId}`, {
-            headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-        });
+        const res = await utils.fetch(`/api/notifications/${userId}`);
         const notifs = await res.json();
         
         const unreadCount = notifs.filter(n => !n.is_read).length;
@@ -336,12 +334,8 @@ async function addNotificationToUI(notif, prepend = true) {
 }
 
 async function markNotificationRead(id) {
-    await fetch(`${utils.API_URL}/api/notifications/read`, {
+    await utils.fetch(`/api/notifications/read`, {
         method: 'POST',
-        headers: { 
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}` 
-        },
         body: JSON.stringify({ id: id })
     });
 }
@@ -350,12 +344,8 @@ async function markAllNotificationsRead() {
     const user = utils.getCurrentUser();
     if(!user) return;
     
-    await fetch(`${utils.API_URL}/api/notifications/read`, {
+    await utils.fetch(`/api/notifications/read`, {
         method: 'POST',
-        headers: { 
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}` 
-        },
         body: JSON.stringify({ userId: user.id })
     });
     

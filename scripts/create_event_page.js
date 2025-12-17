@@ -234,12 +234,8 @@ async function handleFormSubmit(e) {
     };
 
     try {
-        const res = await fetch(`${utils.API_URL}/api/events`, {
+        const res = await utils.fetch(`/api/events`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            },
             body: JSON.stringify(newEvent)
         });
 
