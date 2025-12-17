@@ -135,7 +135,7 @@ async function setupNotifications(userId) {
 
 async function loadNotifications(userId) {
     try {
-        const res = await utils.fetch(`/api/notifications/${userId}`);
+        const res = await utils.fetch(`/api/notifications/${userId}/`);
         const notifs = await res.json();
         
         if(!dom.notificationList) return;
@@ -200,14 +200,14 @@ async function addNotificationToUI(notif, prepend = true) {
 }
 
 async function markNotificationRead(id) {
-    await utils.fetch(`$/api/notifications/read`, {
+    await utils.fetch(`$/api/notifications/read/`, {
         method: 'POST',
         body: JSON.stringify({ id: id })
     });
 }
 
 async function markAllNotificationsRead(userId) {
-    await utils.fetch(`/api/notifications/read`, {
+    await utils.fetch(`/api/notifications/read/`, {
         method: 'POST',
         body: JSON.stringify({ userId: userId })
     });

@@ -234,7 +234,7 @@ async function handleFormSubmit(e) {
     };
 
     try {
-        const res = await utils.fetch(`/api/events`, {
+        const res = await utils.fetch(`/api/events/`, {
             method: 'POST',
             body: JSON.stringify(newEvent)
         });

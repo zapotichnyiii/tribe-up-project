@@ -227,7 +227,7 @@ export async function handleJoinEvent(data) {
         return false;
     }
     try {
-        const res = await utils.fetch(`/api/events/join`, {
+        const res = await utils.fetch(`/api/events/join/`, {
             method: 'POST',
             body: JSON.stringify({ userId: user.id, eventId: data.eventId })
         });
@@ -246,7 +246,7 @@ export async function handleLeaveEvent(data) {
     const user = utils.getCurrentUser();
     if (!user) return;
     try {
-        const res = await utils.fetch(`/api/events/leave`, {
+        const res = await utils.fetch(`/api/events/leave/`, {
             method: 'POST',
             body: JSON.stringify({ userId: user.id, eventId: data.eventId })
         });

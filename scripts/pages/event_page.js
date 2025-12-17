@@ -130,8 +130,7 @@ async function renderEventPage(event) {
 
 async function loadParticipants(id) {
     try {
-        // ВИПРАВЛЕНО: Backticks і utils.API_URL
-        const res = await fetch(`${utils.API_URL}/api/events/${id}/participants`);
+        const res = await utils.fetch(`/api/events/${id}/participants/`);
         const participants = await res.json();
         
         els.participantsList.innerHTML = '';
@@ -212,8 +211,7 @@ async function renderActionButtons(event, isFull) {
 
 async function handleJoin(eventId) {
     try {
-        // ВИПРАВЛЕНО: Backticks і utils.API_URL
-        const res = await fetch(`${utils.API_URL}/api/events/join`, {
+        const res = await utils.fetch(`/api/events/join/`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
             body: JSON.stringify({ userId: currentUser.id, eventId })
@@ -229,8 +227,7 @@ async function handleJoin(eventId) {
 
 async function handleLeave(eventId) {
     try {
-        // ВИПРАВЛЕНО: Backticks і utils.API_URL
-        const res = await fetch(`${utils.API_URL}/api/events/leave`, {
+        const res = await utils.fetch(`/api/events/leave/`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
             body: JSON.stringify({ userId: currentUser.id, eventId })
@@ -265,8 +262,7 @@ function setupCreatorActions(event) {
     els.deleteBtn.onclick = async () => {
         if(confirm('Видалити цю подію? Це незворотньо.')) {
             try {
-                // ВИПРАВЛЕНО: Backticks і utils.API_URL
-                const res = await fetch(`${utils.API_URL}/api/events/${event.eventId}`, {
+                const res = await utils.fetch(`/api/events/${event.eventId}/`, {
                     method: 'DELETE',
                     headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
                 });
@@ -311,12 +307,9 @@ function initMap(location) {
         });
 }
 
-// --- ЧАТ З МИТТЄВИМ ВІДОБРАЖЕННЯМ ---
 function setupChat() {
     if (!currentUser) return;
-
-    // ВИПРАВЛЕНО: Backticks і utils.API_URL
-    fetch(`${utils.API_URL}/api/messages/event/${eventId}`)
+    utils.fetch(`/api/messages/event/${eventId}/`)
         .then(res => res.json())
         .then(messages => {
             els.chatWidget.innerHTML = '';
@@ -330,7 +323,6 @@ function setupChat() {
     socket.emit('join', { room: `event_${eventId}` });
 
     socket.on('receive_message', (msg) => {
-        // Якщо це моє повідомлення, яке я щойно відправив - ігноруємо, щоб не було дублікату
         if (msg.senderId == currentUser.id) return;
 
         const placeholder = els.chatWidget.querySelector('.chat-placeholder');
@@ -421,8 +413,7 @@ if (editForm) {
         };
 
         try {
-            // ВИПРАВЛЕНО: Backticks і utils.API_URL
-            const res = await fetch(`${utils.API_URL}/api/events/${editForm.dataset.eventId}`, {
+            const res = await utils.fetch(`/api/events/${editForm.dataset.eventId}/`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` },
                 body: JSON.stringify(updatedData)

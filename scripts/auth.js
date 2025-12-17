@@ -39,7 +39,7 @@ export async function handleLoginSubmit(e) {
     const password = document.getElementById('loginPasswordInitial')?.value;
     
     try {
-        const response = await utils.fetch(`/api/auth/login`, {
+        const response = await utils.fetch(`/api/auth/login/`, {
             method: 'POST',
             body: JSON.stringify({ email, password })
         });
@@ -100,7 +100,7 @@ export async function handleRegisterSubmit(e) {
     };
 
     try {
-        const response = await utils.fetch(`/api/auth/register`, {
+        const response = await utils.fetch(`/api/auth/register/`, {
             method: 'POST',
             body: JSON.stringify(newUserPayload)
         });
@@ -136,7 +136,7 @@ export async function handleVerifySubmit() {
     }
 
     try {
-        const res = await utils.fetch(`/api/auth/verify`, {
+        const res = await utils.fetch(`/api/auth/verify/`, {
             method: 'POST',
             body: JSON.stringify({ userId: pendingUserId, code: code })
         });
@@ -204,7 +204,7 @@ export function initForgotPassword() {
             if (!email || !email.includes('@')) return utils.showToast('Введіть коректну пошту', 'error');
 
             try {
-                const res = await utils.fetch(`/api/auth/forgot-password`, {
+                const res = await utils.fetch(`/api/auth/forgot-password/`, {
                     method: 'POST',
                     body: JSON.stringify({ email })
                 });
@@ -234,7 +234,7 @@ export function initForgotPassword() {
             if (newPassword.length < 6) return utils.showToast('Пароль занадто короткий', 'error');
 
             try {
-                const res = await utils.fetch(`/api/auth/reset-password`, {
+                const res = await utils.fetch(`/api/auth/reset-password/`, {
                     method: 'POST',
                     body: JSON.stringify({ email, code, newPassword })
                 });

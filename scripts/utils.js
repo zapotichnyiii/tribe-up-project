@@ -1,10 +1,8 @@
 export let map;
 export function setMap(newMap) { map = newMap; }
 
-// Пряме підключення до локального бекенду
 export const API_URL = 'http://localhost:8000';
 
-// --- Глобальні інтереси ---
 export let globalCustomInterests = [];
 
 export async function apiFetch(endpoint, options = {}) {
@@ -88,7 +86,6 @@ export function saveUsers(users) {}
 export function saveEvents(events) {}
 export function saveJoinedEvents(joined) {}
 
-// UI Helpers
 export function showToast(message, type) {
     const toast = document.createElement('div');
     toast.className = `toast-notification toast-${type} show`;

@@ -95,26 +95,21 @@ function renderUserProfile(user) {
 
 async function loadUserStats(id) {
     try {
-        const res = await fetch(`${utils.API_URL}/api/users/${id}/social`);
+        const res = await utils.fetch(`/api/users/${id}/social/`);
         const data = await res.json();
         els.followersCount.textContent = data.followers.length;
         els.followingCount.textContent = data.following.length;
     } catch(e) {}
 }
 
-// --- ОНОВЛЕНА ФУНКЦІЯ ЗАВАНТАЖЕННЯ ПОДІЙ ---
 async function loadUserEvents(id) {
     els.eventsList.innerHTML = '<div style="text-align:center; padding:20px; color:#888;"><i class="fas fa-circle-notch fa-spin"></i></div>';
     
     try {
-        // 1. Всі події
         const allEvents = await utils.getEvents('active');
-        
-        // 2. Події, де юзер є учасником (API дозволяє отримати для будь-якого ID)
-        const resJoined = await fetch(`${utils.API_URL}/api/my-joined-events/${id}`);
+        const resJoined = await utils.fetch(`/api/my-joined-events/${id}/`);
         const joinedIds = await resJoined.json();
 
-        // 3. Фільтруємо: або творець, або учасник
         const userEvents = allEvents
             .filter(e => e.creatorId === id || joinedIds.includes(e.eventId))
             .sort((a, b) => new Date(a.date) - new Date(b.date));
@@ -142,7 +137,7 @@ async function loadUserEvents(id) {
             else if (event.category === 'games') catIcon = 'fa-gamepad';
 
             const card = document.createElement('div');
-            card.className = 'profile-event-card'; // Використовуємо той самий клас, що і в профілі
+            card.className = 'profile-event-card';
             
             card.innerHTML = `
                 <div class="pec-header">
