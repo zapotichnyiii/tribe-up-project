@@ -2,11 +2,32 @@ export let map;
 export function setMap(newMap) { map = newMap; }
 
 // Пряме підключення до локального бекенду
-export const API_URL = 'http://127.0.0.1:5000';
-console.log('Підключено до локального сервера: ' + API_URL);
+export const API_URL = 'http://localhost:8000';
 
 // --- Глобальні інтереси ---
 export let globalCustomInterests = [];
+
+export async function apiFetch(endpoint, options = {}) {
+    const token = localStorage.getItem('token');
+    const headers = {
+        'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+        ...options.headers
+    };
+
+    const response = await fetch(`${API_URL}${endpoint}`, {
+        ...options,
+        headers
+    });
+
+    if (response.status === 401 && !endpoint.includes('/auth/login')) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('currentUser');
+        location.reload();
+    }
+
+    return response;
+}
 
 export async function fetchGlobalInterests() {
     try {

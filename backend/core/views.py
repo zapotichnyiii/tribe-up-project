@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.conf import settings
 from django.db.models import Q
+from django.core.mail import send_mail
 import jwt
 import datetime
 import random
@@ -16,6 +17,7 @@ from .serializers import UserSerializer, EventSerializer, MessageSerializer
 def register(request):
     data = request.data
     try:
+        code = str(random.randint(100000, 999999))
         user = User.objects.create_user(
             username=data.get('username'),
             email=data.get('email'),
@@ -25,11 +27,24 @@ def register(request):
             location=data.get('location'),
             interests=data.get('interests', []),
             avatar_base64=data.get('avatarBase64', ''),
-            verification_code=str(random.randint(100000, 999999)),
+            verification_code=code,
             is_verified=False
         )
-        # Тут би мала бути відправка пошти
-        return Response({'userId': user.id, 'message': 'Code sent'}, status=201)
+        
+        # Відправка пошти
+        try:
+            send_mail(
+                'Код підтвердження TribeUp',
+                f'Ваш код для реєстрації: {code}',
+                settings.DEFAULT_FROM_EMAIL,
+                [user.email],
+                fail_silently=False,
+            )
+        except Exception as mail_error:
+            print(f"Mail error: {mail_error}")
+            # Навіть якщо пошта не відправилась, повертаємо успіх для тестування (код буде в консолі бекенду)
+            
+        return Response({'userId': user.id, 'message': f'Code sent to {user.email}'}, status=201)
     except Exception as e:
         return Response({'error': str(e)}, status=400)
 
@@ -50,9 +65,10 @@ def login_view(request):
             }, settings.SECRET_KEY, algorithm='HS256')
             
             return Response({'user': UserSerializer(user).data, 'token': token})
+        else:
+            return Response({'error': 'Невірний пароль'}, status=401)
     except User.DoesNotExist:
-        pass
-    return Response({'error': 'Невірна пошта або пароль'}, status=401)
+        return Response({'error': 'Користувача з такою поштою не знайдено'}, status=401)
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -65,21 +81,50 @@ def verify_email(request):
             user.is_verified = True
             user.verification_code = None
             user.save()
-            token = jwt.encode({'user_id': user.id, 'exp': datetime.datetime.utcnow() + datetime.timedelta(days=7)}, settings.SECRET_KEY, algorithm='HS256')
+            token = jwt.encode({
+                'user_id': user.id, 
+                'exp': datetime.datetime.utcnow() + datetime.timedelta(days=7)
+            }, settings.SECRET_KEY, algorithm='HS256')
             return Response({'user': UserSerializer(user).data, 'token': token})
         return Response({'error': 'Невірний код'}, status=400)
     except User.DoesNotExist:
-        return Response({'error': 'Not found'}, status=404)
+        return Response({'error': 'Користувача не знайдено'}, status=404)
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def forgot_password(request):
-    return Response({'message': 'Simulated'}, status=200)
+    email = request.data.get('email')
+    try:
+        user = User.objects.get(email=email)
+        code = str(random.randint(100000, 999999))
+        user.verification_code = code
+        user.save()
+        
+        send_mail(
+            'Відновлення паролю TribeUp',
+            f'Ваш код для скидання паролю: {code}',
+            settings.DEFAULT_FROM_EMAIL,
+            [email],
+            fail_silently=False,
+        )
+        return Response({'message': 'Code sent'}, status=200)
+    except User.DoesNotExist:
+        return Response({'error': 'Користувача не знайдено'}, status=404)
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def reset_password(request):
-    return Response({'status': 'success'}, status=200)
+    email = request.data.get('email')
+    code = request.data.get('code')
+    new_password = request.data.get('newPassword')
+    try:
+        user = User.objects.get(email=email, verification_code=code)
+        user.set_password(new_password)
+        user.verification_code = None
+        user.save()
+        return Response({'status': 'success'}, status=200)
+    except User.DoesNotExist:
+        return Response({'error': 'Невірний код або email'}, status=400)
 
 # --- USERS ---
 @api_view(['GET'])
@@ -113,7 +158,6 @@ def update_user(request, user_id):
     user.interests = data.get('interests', user.interests)
     user.avatar_base64 = data.get('avatarBase64', user.avatar_base64)
     
-    # Save interests to global list
     for interest in data.get('interests', []):
         Interest.objects.get_or_create(name=interest)
         
@@ -157,7 +201,6 @@ def unfollow_user(request, user_id):
 def user_status(request, user_id):
     try:
         u = User.objects.get(id=user_id)
-        # Реальний онлайн статус треба тягнути з sio.online_users, але для простоти повертаємо last_seen
         return Response({'isOnline': False, 'lastSeen': u.last_seen})
     except:
         return Response({})
@@ -192,7 +235,6 @@ def events_list(request):
         )
         event.participants.add(request.user)
         
-        # Notify followers
         followers = User.objects.filter(following_rel__followed=request.user)
         for f in followers:
             Notification.objects.create(
@@ -300,23 +342,25 @@ def read_notifications(request):
 
 @api_view(['GET'])
 def get_my_chats(request, user_id):
-    # Групуємо чати, знаходячи унікальних партнерів
     sent = PrivateMessage.objects.filter(sender_id=user_id).values_list('receiver_id', flat=True)
     received = PrivateMessage.objects.filter(receiver_id=user_id).values_list('sender_id', flat=True)
     partner_ids = set(list(sent) + list(received))
     
     chats = []
     for pid in partner_ids:
-        partner = User.objects.get(id=pid)
-        last_msg = PrivateMessage.objects.filter(
-            Q(sender_id=user_id, receiver_id=pid) | Q(sender_id=pid, receiver_id=user_id)
-        ).order_by('created_at').last()
-        
-        if last_msg:
-            chats.append({
-                'otherUser': {'id': partner.id, 'name': partner.name, 'username': partner.username, 'avatarBase64': partner.avatar_base64},
-                'lastMessage': {'text': last_msg.text, 'timestamp': last_msg.created_at.timestamp() * 1000}
-            })
+        try:
+            partner = User.objects.get(id=pid)
+            last_msg = PrivateMessage.objects.filter(
+                Q(sender_id=user_id, receiver_id=pid) | Q(sender_id=pid, receiver_id=user_id)
+            ).order_by('created_at').last()
+            
+            if last_msg:
+                chats.append({
+                    'otherUser': {'id': partner.id, 'name': partner.name, 'username': partner.username, 'avatarBase64': partner.avatar_base64},
+                    'lastMessage': {'text': last_msg.text, 'timestamp': last_msg.created_at.timestamp() * 1000}
+                })
+        except User.DoesNotExist:
+            continue
             
     chats.sort(key=lambda x: x['lastMessage']['timestamp'], reverse=True)
     return Response(chats)

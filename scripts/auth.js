@@ -48,16 +48,13 @@ export async function handleLoginSubmit(e) {
         if (response.ok) {
             const data = await response.json();
             localStorage.setItem('currentUser', JSON.stringify(data.user));
-            localStorage.setItem('token', data.token);
+            localStorage.setItem('token', data.token); // Це JWT токен
             location.reload();
         } else {
             const err = await response.json();
-            
-            // ЗМІНА: ЛОГІКА ПОВТОРНОГО ПІДТВЕРДЖЕННЯ ЧЕРЕЗ ФОРМУ ВХОДУ
             if (err.userId && err.error && err.error.includes('Пошта не підтверджена')) {
                 pendingUserId = err.userId;
                 utils.openModal(dom.verifyModal);
-                
                 if (dom.verifyCodeInput) {
                     dom.verifyCodeInput.value = '';
                     dom.verifyCodeInput.focus();
@@ -72,7 +69,7 @@ export async function handleLoginSubmit(e) {
     }
 }
 
-// --- РЕЄСТРАЦІЯ (Крок 1) ---
+// --- РЕЄСТРАЦІЯ ---
 export async function handleRegisterSubmit(e) {
     e.preventDefault();
     const isValid = registerValidations.every(({ inputId, errorId, validationFn, errorMessage }) => 
@@ -81,7 +78,7 @@ export async function handleRegisterSubmit(e) {
     if (!isValid) { utils.showToast('Заповніть усі поля коректно', 'error'); return; }
 
     const consentCheckbox = document.getElementById('registerConsent');
-    if (!consentCheckbox.checked) { utils.showToast('Погодьтеся на обробку даних', 'error'); return; }
+    if (!consentCheckbox || !consentCheckbox.checked) { utils.showToast('Погодьтеся на обробку даних', 'error'); return; }
 
     const selectedInterests = Array.from(dom.registerInterestsContainer?.querySelectorAll('.interest-tag.selected') || []).map(tag => tag.dataset.interest);
     if (selectedInterests.length < 1) { utils.showToast('Виберіть інтерес', 'error'); return; }
@@ -113,15 +110,12 @@ export async function handleRegisterSubmit(e) {
         if (response.ok) {
             const data = await response.json();
             pendingUserId = data.userId;
-            
             utils.closeModal(dom.registerModal);
             utils.openModal(dom.verifyModal);
-            
             if (dom.verifyCodeInput) {
                 dom.verifyCodeInput.value = '';
                 dom.verifyCodeInput.focus();
             }
-            
             utils.showToast('Код надіслано на пошту!', 'info');
         } else {
             const err = await response.json();
@@ -132,7 +126,7 @@ export async function handleRegisterSubmit(e) {
     }
 }
 
-// --- ПІДТВЕРДЖЕННЯ КОДУ (Крок 2) ---
+// --- ПІДТВЕРДЖЕННЯ КОДУ ---
 export async function handleVerifySubmit() {
     const code = dom.verifyCodeInput.value.trim();
     if (code.length !== 6) {
@@ -154,14 +148,13 @@ export async function handleVerifySubmit() {
             const data = await res.json();
             localStorage.setItem('currentUser', JSON.stringify(data.user));
             localStorage.setItem('token', data.token);
-            
             utils.closeModal(dom.verifyModal);
             utils.showToast('Акаунт підтверджено!', 'success');
-            
             setTimeout(() => location.reload(), 1000);
         } else {
+            const err = await res.json();
             if (dom.verifyError) {
-                dom.verifyError.textContent = "Невірний код";
+                dom.verifyError.textContent = err.error || "Невірний код";
                 dom.verifyError.style.display = 'block';
             }
         }
@@ -172,17 +165,11 @@ export async function handleVerifySubmit() {
 
 export function handleAddCustomInterest() {
     const interest = dom.customInterestInput.value.trim();
-    
-    if (!interest) {
-        return utils.showToast('Введіть назву інтересу', 'error');
-    }
-    if (interest.length > 20) {
-        return utils.showToast('Занадто довга назва', 'error');
-    }
+    if (!interest) return utils.showToast('Введіть назву інтересу', 'error');
+    if (interest.length > 20) return utils.showToast('Занадто довга назва', 'error');
 
     if (utils.addGlobalInterest(interest)) {
         ui.updateAllInterestContainers();
-        
         setTimeout(() => {
             const tags = dom.registerInterestsContainer.querySelectorAll('.interest-tag');
             tags.forEach(tag => {
@@ -192,35 +179,21 @@ export function handleAddCustomInterest() {
                 }
             });
         }, 50);
-
         dom.customInterestInput.value = '';
         utils.showToast('Інтерес додано!', 'success');
     } else {
         utils.showToast('Такий інтерес вже є', 'info');
-        const tags = dom.registerInterestsContainer.querySelectorAll('.interest-tag');
-        tags.forEach(tag => {
-            if (tag.dataset.interest === interest) {
-                tag.classList.add('selected');
-                tag.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-            }
-        });
     }
 }
 
 // --- ВІДНОВЛЕННЯ ПАРОЛЮ ---
-
 export function initForgotPassword() {
-    // Відкриття модалки
     if (dom.forgotPasswordLink) {
         dom.forgotPasswordLink.addEventListener('click', (e) => {
             e.preventDefault();
             utils.openModal(dom.forgotPasswordModal);
-            // Скидаємо стан до кроку 1
             if(dom.forgotStep1) dom.forgotStep1.style.display = 'block';
             if(dom.forgotStep2) dom.forgotStep2.style.display = 'none';
-            if(dom.forgotEmailInput) dom.forgotEmailInput.value = '';
-            if(dom.forgotCodeInput) dom.forgotCodeInput.value = '';
-            if(dom.forgotNewPassword) dom.forgotNewPassword.value = '';
         });
     }
 
@@ -228,14 +201,10 @@ export function initForgotPassword() {
         dom.closeForgotPasswordModal.addEventListener('click', () => utils.closeModal(dom.forgotPasswordModal));
     }
 
-    // Крок 1: Відправка коду
     if (dom.sendResetCodeBtn) {
         dom.sendResetCodeBtn.addEventListener('click', async () => {
             const email = dom.forgotEmailInput.value.trim();
-            if (!email || !email.includes('@')) {
-                utils.showToast('Введіть коректну пошту', 'error');
-                return;
-            }
+            if (!email || !email.includes('@')) return utils.showToast('Введіть коректну пошту', 'error');
 
             try {
                 const res = await fetch(`${utils.API_URL}/api/auth/forgot-password`, {
@@ -259,7 +228,6 @@ export function initForgotPassword() {
         });
     }
 
-    // Крок 2: Зміна паролю
     if (dom.confirmResetBtn) {
         dom.confirmResetBtn.addEventListener('click', async () => {
             const email = dom.forgotEmailDisplay.textContent;
@@ -279,7 +247,6 @@ export function initForgotPassword() {
                 if (res.ok) {
                     utils.showToast('Пароль успішно змінено!', 'success');
                     utils.closeModal(dom.forgotPasswordModal);
-                    // Перемикаємо на таб входу, якщо ми були деінде
                     document.querySelector('.tab-btn[data-tab="login"]')?.click();
                 } else {
                     const err = await res.json();
