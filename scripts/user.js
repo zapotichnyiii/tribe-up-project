@@ -146,7 +146,7 @@ export async function renderPeople(customUsersList = null, isSearchResult = fals
             <div class="people-card" data-user-id="${person.id}">
                 <div>
                     <div class="people-card-header">
-                        <img src="${person.avatarBase64 || 'https://via.placeholder.com/60'}" alt="${person.name}">
+                        <img src="${utils.getUserAvatar(person)}" alt="${person.name}">
                         <div>
                             <h3>${person.username}</h3>
                             <p style="font-size: 0.8em; color: var(--main-secondary-color);">${person.name}, ${person.age} років</p>

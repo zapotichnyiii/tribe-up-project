@@ -146,3 +146,13 @@ export function setupFormValidation(form, fields) {
         }
     });
 }
+
+export function getUserAvatar(user) {
+    if (user && (user.avatarBase64 || user.avatar_base64)) {
+        return user.avatarBase64 || user.avatar_base64;
+    }
+
+    const seed = user ? (user.name || user.username || 'User') : 'User';
+
+    return `https://ui-avatars.com/api/?name=${encodeURIComponent(seed)}&background=random&color=fff&size=128`;
+}

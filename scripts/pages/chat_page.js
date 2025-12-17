@@ -73,7 +73,7 @@ function renderChatList(chats) {
         return `
         <div class="chat-item ${isActive}" data-user-id="${c.otherUser.id}">
             <div class="avatar-wrapper">
-                <img src="${c.otherUser.avatarBase64 || 'https://via.placeholder.com/50'}" alt="${c.otherUser.username}">
+                <img src="${utils.getUserAvatar(c.otherUser)}" alt="${c.otherUser.username}">
             </div>
             <div class="chat-item-content">
                 <div class="chat-item-top">
@@ -118,7 +118,7 @@ async function openChatWithUser(userId) {
     if (!partner) return;
 
     els.partnerName.textContent = partner.username;
-    els.partnerAvatar.src = partner.avatarBase64 || 'https://via.placeholder.com/50';
+    els.partnerAvatar.src = utils.getUserAvatar(user);
     els.emptyState.style.display = 'none';
     els.activeView.style.display = 'flex';
 

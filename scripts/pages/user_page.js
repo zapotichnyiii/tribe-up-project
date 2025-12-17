@@ -75,7 +75,7 @@ async function loadTargetUser() {
 }
 
 function renderUserProfile(user) {
-    els.avatar.src = user.avatarBase64 || 'https://via.placeholder.com/150';
+    els.avatar.src = utils.getUserAvatar(user);
     els.name.textContent = user.name;
     els.username.textContent = `@${user.username}`;
     

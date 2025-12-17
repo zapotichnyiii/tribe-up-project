@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 """Django's command-line utility for administrative tasks."""
 import os
-print("!!! PYTHON ЗАПУСТИВ ЦЕЙ ФАЙЛ !!!")
 import sys
 
 def main():

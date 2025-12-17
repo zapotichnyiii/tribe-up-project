@@ -57,7 +57,7 @@ ASGI_APPLICATION = 'tribeup_project.asgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'tribeup_django_db', 
+        'NAME': 'tribeupdjango_db', 
         'USER': 'postgres',
         'PASSWORD': 'qazwsxedcasd123', 
         'HOST': 'localhost',

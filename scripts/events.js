@@ -164,7 +164,7 @@ export function renderEventsLocal() {
 
         const creator = usersCache.get(event.creatorId);
         const creatorName = creator ? creator.username : 'Невідомий';
-        const creatorAvatar = creator?.avatarBase64 || 'https://via.placeholder.com/24';
+        const creatorAvatar = utils.getUserAvatar(creator);
         const interestsHtml = event.interests.map(i => `<span class="interest-tag selected">${i}</span>`).join('');
         
         let buttonHtml = '';

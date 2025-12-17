@@ -1,11 +1,5 @@
 import socketio
-import os
-import django
 import asyncio
-
-# Налаштування оточення для доступу до ORM
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'tribeup_project.settings')
-django.setup()
 
 from core.models import User, Event, EventMessage, PrivateMessage
 

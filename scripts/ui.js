@@ -65,7 +65,7 @@ export function showMainApp(user) {
         dom.mainApp.style.display = 'block';
     }
     if (dom.profileUsername) dom.profileUsername.textContent = user.username;
-    if (dom.profileAvatar) dom.profileAvatar.src = user.avatarBase64 || 'https://via.placeholder.com/48';
+    if (dom.profileAvatar) dom.profileAvatar.src = utils.getUserAvatar(user);
     if (dom.profileDisplay) dom.profileDisplay.style.display = 'flex';
 }
 
